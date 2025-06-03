@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   Search,
   Bell,
@@ -19,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Form from "next/form";
 
 interface NavbarProps {
   onLeftSidebarToggle?: () => void;
@@ -29,11 +27,9 @@ export default function Navbar({
   onLeftSidebarToggle,
   onRightSidebarToggle,
 }: NavbarProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
-    <nav className='top-0 right-0 left-0 z-50 fixed bg-white shadow-sm border-gray-200 border-b'>
-      <div className='flex justify-between items-center px-4 py-3'>
+    <nav className='top-0 right-0 left-0 z-50 fixed bg-background/80 backdrop-blur-md border-b border-b-white'>
+      <div className='flex justify-between items-center mx-auto px-4 py-3 container'>
         {/* Left Section - Logo and Mobile Menu */}
         <div className='flex items-center gap-4'>
           {/* Mobile Menu Button - Left Sidebar */}
@@ -52,38 +48,32 @@ export default function Navbar({
               <span className='font-bold text-white text-sm'>CS</span>
             </div>
             <h1 className='hidden sm:block font-bold text-navy text-xl'>
-              CodeSuccess
+              CodeSuccesx
             </h1>
           </div>
         </div>
 
         {/* Center Section - Search (Desktop) */}
-        <div className='hidden md:flex flex-1 mx-8 max-w-md'>
+        <Form action='/search' className='hidden md:flex flex-1 mx-8 max-w-md'>
           <div className='relative w-full'>
             <Search className='top-1/2 left-3 absolute w-4 h-4 text-gray-400 -translate-y-1/2 transform' />
             <Input
               type='text'
+              name='term'
               placeholder='Search posts, people, or topics...'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               className='bg-gray-50 focus:bg-white pl-10 border-gray-200'
             />
           </div>
-        </div>
+        </Form>
 
         {/* Right Section - Actions and Profile */}
         <div className='flex items-center gap-2'>
-          {/* Search Button (Mobile) */}
-          <Button variant='ghost' size='icon' className='md:hidden'>
-            <Search className='w-5 h-5' />
-          </Button>
-
           {/* Desktop Navigation Icons */}
           <div className='hidden md:flex items-center gap-1'>
             {/* Messages */}
             <Button variant='ghost' size='icon' className='relative'>
               <MessageSquare className='w-5 h-5' />
-              <span className='-top-1 -right-1 absolute flex justify-center items-center bg-coral rounded-full w-4 h-4 text-white text-xs'>
+              <span className='-top-1 -right-1 absolute flex justify-center items-center bg-amber-600 rounded-full w-4 h-4 text-white text-xs'>
                 3
               </span>
             </Button>
@@ -91,7 +81,7 @@ export default function Navbar({
             {/* Notifications */}
             <Button variant='ghost' size='icon' className='relative'>
               <Bell className='w-5 h-5' />
-              <span className='-top-1 -right-1 absolute flex justify-center items-center bg-coral rounded-full w-4 h-4 text-white text-xs'>
+              <span className='-top-1 -right-1 absolute flex justify-center items-center bg-amber-600 rounded-full w-4 h-4 text-white text-xs'>
                 5
               </span>
             </Button>
@@ -159,18 +149,17 @@ export default function Navbar({
       </div>
 
       {/* Mobile Search Bar */}
-      <div className='md:hidden px-4 pb-3'>
+      <Form action='/search' className='md:hidden px-4 pb-3'>
         <div className='relative'>
           <Search className='top-1/2 left-3 absolute w-4 h-4 text-gray-400 -translate-y-1/2 transform' />
           <Input
             type='text'
+            name='term'
             placeholder='Search...'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
             className='bg-gray-50 pl-10 border-gray-200'
           />
         </div>
-      </div>
+      </Form>
     </nav>
   );
 }

@@ -30,7 +30,7 @@ const posts = [
       initials: "SJ",
     },
     content:
-      "Just completed my first coding challenge on CodeSuccess! The community support here is amazing. #CodeNewbie #LearningToCode",
+      "Just completed my first coding challenge on CodeSuccesx! The community support here is amazing. #CodeNewbie #LearningToCode",
     image: "/WhatsApp Image 2025-05-21 at 18.42.02_95109c88 (1).png",
     timestamp: "2 hours ago",
     likes: 24,
@@ -70,7 +70,7 @@ const posts = [
   {
     id: 4,
     author: {
-      name: "CodeSuccess Team",
+      name: "CodeSuccesx Team",
       avatar: "/hussein-xodie-xtiGJzxb5zo-unsplash.jpg",
       initials: "CS",
     },

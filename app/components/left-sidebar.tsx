@@ -1,58 +1,20 @@
-"use client";
-
 import type React from "react";
 
-import { useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  User,
-  MessageSquare,
-  BookOpen,
-  Heart,
-  Sparkles,
-} from "lucide-react";
+import { User, MessageSquare, BookOpen, Heart, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ExpandableSection } from "./ExpandableSection";
+import { getCourses } from "@/sanity/lib/courses/getCourses";
+import CourseLink from "./courseLink";
 
-interface ExpandableSectionProps {
-  title: string;
-  children: React.ReactNode;
-  icon?: React.ReactNode;
+interface course {
+  course?: any; // Adjust type as needed
 }
 
-const ExpandableSection = ({
-  title,
-  children,
-  icon,
-}: ExpandableSectionProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default async function LeftSidebar({ course }: LeftSidebarProps) {
+  const courses = await getCourses();
 
-  return (
-    <div className='border-gray-200 border-b last:border-b-0'>
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className='flex justify-between items-center hover:bg-teal-50 p-4 w-full text-left transition-colors'
-      >
-        <div className='flex items-center gap-3'>
-          {icon}
-          <span className='font-medium'>{title}</span>
-        </div>
-        {isExpanded ? (
-          <ChevronUp className='w-5 h-5 text-gray-500' />
-        ) : (
-          <ChevronDown className='w-5 h-5 text-gray-500' />
-        )}
-      </button>
-      {isExpanded && (
-        <div className='space-y-2 p-4 pt-0 pl-11 text-sm animate-slideDown'>
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
+  console.log("Courses fetched for left sidebar:", courses);
 
-export default function LeftSidebar() {
   return (
     <div className='bg-white h-full'>
       {/* User Profile */}
@@ -114,9 +76,16 @@ export default function LeftSidebar() {
         </ExpandableSection>
 
         <ExpandableSection
-          title='Start CodeSuccess'
+          title='Start CodeSuccesx'
           icon={<Sparkles className='w-5 h-5 text-coral' />}
         >
+          {courses.map((course) => (
+            <CourseLink
+              key={course._id}
+              course={course}
+              href={`/courses/${course.slug}`}
+            />
+          ))}
           <a href='#' className='block py-2 hover:text-coral transition-colors'>
             Success Reimagined
           </a>
