@@ -57,7 +57,7 @@ const Courses = async ({ params }: CourseProps) => {
               />
 
               {module.studySessions && module.studySessions.length > 0 ? (
-                module.studySessions.map((session, index) => (
+                module.studySessions.map((session) => (
                   <div
                     key={session._key}
                     className='flex flex-col justify-center items-center shadow mt-4 p-4 border rounded'
@@ -69,7 +69,7 @@ const Courses = async ({ params }: CourseProps) => {
                       <ul className='ml-5 italic'>
                         {session.quotes?.map((quote, qIndex) => (
                           <li key={qIndex}>
-                            "{quote.text} – {quote.author}"
+                            &quot;{quote.text} – {quote.author}&quot;
                           </li>
                         ))}
                       </ul>

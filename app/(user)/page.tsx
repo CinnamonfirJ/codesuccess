@@ -4,17 +4,19 @@ import { Inter } from "next/font/google";
 import LeftSidebar from "../components/left-sidebar";
 import RightSidebar from "../components/right-sidebar";
 import Feed from "../components/feed";
+import { getCourses } from "@/sanity/lib/courses/getCourses";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+export default async function Home() {
+  const courses = await getCourses();
   return (
     <main className={`container mx-auto bg-background ${inter.className}`}>
       {/* Desktop Layout */}
       <div className='flex md:flex-row flex-col'>
         {/* Left Sidebar - Hidden on mobile */}
         <div className='hidden md:block top-0 sticky border-gray-200 border-r md:w-1/4 lg:w-1/5 h-screen overflow-y-auto'>
-          <LeftSidebar />
+          <LeftSidebar courses={courses} />
         </div>
 
         {/* Main Content */}
