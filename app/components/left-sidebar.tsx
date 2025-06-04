@@ -1,17 +1,20 @@
+"use client";
+
 import type React from "react";
 
 import { User, MessageSquare, BookOpen, Heart, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ExpandableSection } from "./ExpandableSection";
-import { getCourses } from "@/sanity/lib/courses/getCourses";
+// import { getCourses } from "@/sanity/lib/courses/getCourses";
 import CourseLink from "./courseLink";
+import { GetCoursesQueryResult } from "@/sanity.types";
 
-interface course {
-  course?: any; // Adjust type as needed
+interface LeftSidebarProps {
+  courses: GetCoursesQueryResult; // courses could be undefined or null initially
 }
 
-export default async function LeftSidebar({ course }: LeftSidebarProps) {
-  const courses = await getCourses();
+export default function LeftSidebar({ courses }: LeftSidebarProps) {
+  // const courses = await getCourses();
 
   console.log("Courses fetched for left sidebar:", courses);
 
@@ -79,13 +82,17 @@ export default async function LeftSidebar({ course }: LeftSidebarProps) {
           title='Start CodeSuccesx'
           icon={<Sparkles className='w-5 h-5 text-coral' />}
         >
-          {courses.map((course) => (
-            <CourseLink
-              key={course._id}
-              course={course}
-              href={`/courses/${course.slug}`}
-            />
-          ))}
+          {courses && courses.length > 0 ? (
+            courses.map((course) => (
+              <CourseLink
+                key={course._id}
+                course={course}
+                href={`/courses/${course.slug}`}
+              />
+            ))
+          ) : (
+            <p className='p-2 text-gray-500'>No courses available</p>
+          )}
           <a href='#' className='block py-2 hover:text-coral transition-colors'>
             Success Reimagined
           </a>

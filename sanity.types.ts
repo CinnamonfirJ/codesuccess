@@ -316,7 +316,7 @@ export type AllSanitySchemaTypes = ReflectionQuestion | TakeawayJournalingPrompt
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: sanity/lib/courses/getCourses.ts
 // Variable: getCoursesQuery
-// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "modules": modules->{...},        "studySessions": studySessions[]->{...},        }
+// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "description": description.current,        "modules": modules[]->{...},        "studySessions": studySessions[]->{...},        }
 export type GetCoursesQueryResult = Array<{
   _id: string;
   _type: "course";
@@ -325,8 +325,46 @@ export type GetCoursesQueryResult = Array<{
   _rev: string;
   title?: string;
   slug: string | null;
-  description?: string;
-  modules: null;
+  description: null;
+  modules: Array<{
+    _id: string;
+    _type: "module";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    title?: string;
+    slug?: Slug;
+    description?: string;
+    studySessions?: Array<{
+      _key: string;
+    } & StudySession>;
+  }> | null;
+  studySessions: null;
+}>;
+
+// Source: sanity/lib/courses/getCoursesBySlug.ts
+// Variable: getCoursesBySlugQuery
+// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "description": description.current,        "modules": modules[]->{...,        "studySessions": studySessions[]->{...}},        "studySessions": studySessions[]->{...},        }
+export type GetCoursesBySlugQueryResult = Array<{
+  _id: string;
+  _type: "course";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug: string | null;
+  description: null;
+  modules: Array<{
+    _id: string;
+    _type: "module";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    title?: string;
+    slug?: Slug;
+    description?: string;
+    studySessions: Array<null> | null;
+  }> | null;
   studySessions: null;
 }>;
 
@@ -334,6 +372,7 @@ export type GetCoursesQueryResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"modules\": modules->{...},\n        \"studySessions\": studySessions[]->{...},\n        }": GetCoursesQueryResult;
+    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...},\n        \"studySessions\": studySessions[]->{...},\n        }": GetCoursesQueryResult;
+    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...,\n        \"studySessions\": studySessions[]->{...}},\n        \"studySessions\": studySessions[]->{...},\n        }": GetCoursesBySlugQueryResult;
   }
 }

@@ -4,7 +4,7 @@ import { defineType, defineField } from "sanity";
 export const studySessionSchema = defineType({
   name: "studySession",
   title: "Study Session",
-  type: "object",
+  type: "document",
   fields: [
     defineField({
       name: "title",

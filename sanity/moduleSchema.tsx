@@ -31,7 +31,7 @@ export const moduleSchema = defineType({
       name: "studySessions",
       title: "Study Sessions",
       type: "array",
-      of: [{ type: "studySession" }], // Use an inline object for study sessions
+      of: [{ type: "studySession" }],
     }),
   ],
 });

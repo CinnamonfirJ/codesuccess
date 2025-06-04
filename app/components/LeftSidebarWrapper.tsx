@@ -4,5 +4,6 @@ import LeftSidebar from "./left-sidebar";
 
 export default async function LeftSidebarWrapper() {
   const courses = await getCourses();
-  return <LeftSidebar courses={courses} />;
+  console.log("Courses fetched for left sidebar:", courses);
+  return <LeftSidebar courses={courses ?? []} />;
 }
