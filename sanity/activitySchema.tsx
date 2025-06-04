@@ -20,7 +20,7 @@ export const activitySchema = defineType({
     }),
     defineField({
       name: "reflectionPrompt",
-      title: "Reflection Prompt",
+      title: "Reflection Prompt Question For Activity",
       type: "text",
     }),
   ],

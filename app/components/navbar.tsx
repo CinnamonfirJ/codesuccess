@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Form from "next/form";
+import Link from "next/link";
 
 interface NavbarProps {
   onLeftSidebarToggle?: () => void;
@@ -113,14 +114,18 @@ export default function Navbar({
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className='mr-2 w-4 h-4' />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className='mr-2 w-4 h-4' />
-                <span>Settings</span>
-              </DropdownMenuItem>
+              <Link href='/profile/me'>
+                <DropdownMenuItem>
+                  <User className='mr-2 w-4 h-4' />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link href='/profile/me'>
+                <DropdownMenuItem>
+                  <Settings className='mr-2 w-4 h-4' />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem className='md:hidden'>
                 <MessageSquare className='mr-2 w-4 h-4' />
                 <span>Messages</span>
