@@ -1,0 +1,10 @@
+Django>=4.2
+djangorestframework
+psycopg2-binary
+django-cors-headers
+djangorestframework-simplejwt
+django-environ
+Pillow
+markdown
+ffmpeg-python
+django-filter
