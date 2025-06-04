@@ -191,3 +191,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Tailwind v4 custom theme */
+@theme {
+  --color-primary: #03a9f4;
+  --color-secondary: #8bc34a;
+  --color-accent: #ffc107;
+}
