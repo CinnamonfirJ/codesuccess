@@ -41,20 +41,20 @@ class DeletePostView(generics.DestroyAPIView):
 
 
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
+    post = Post.objects.all()
     serializer_class = PostSerializer
+
     permission_classes = [IsAuthenticated]
-    def post_detail(request, pk):
-        post = Post.objects.get(pk=pk)
-        if request.method == 'GET':
-            if not request.user.is_authenticated or request.user != post.author:
-                return Response({"detail": "You do not have permission to view this post."}, status=403)
-        
 
 
-    def get_queryset(self):
-        return self.queryset.filter(author=self.request.user)
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            serializer.save(author=self.request.user)
+        else:
+            raise serializer.ValidationError(serializer.errors)
 
+
+  
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
