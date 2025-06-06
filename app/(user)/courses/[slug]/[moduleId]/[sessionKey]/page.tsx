@@ -1,22 +1,18 @@
-// app/courses/[slug]/[moduleId]/[sessionKey]/page.tsx
-
 import { getCoursesBySlug } from "@/sanity/lib/courses/getCoursesBySlug"; // Or a new function to get a single session
 import { PortableText } from "next-sanity";
 import Link from "next/link"; // For a back button
 
 interface StudySessionPageProps {
-  params: {
+  params: Promise<{
     slug: string;
     moduleId: string;
     sessionKey: string;
-  };
+  }>;
 }
 
 const StudySessionPage = async ({ params }: StudySessionPageProps) => {
-  const { slug, moduleId, sessionKey } = params;
+  const { slug, moduleId, sessionKey } = await params;
 
-  // Fetch the course data. You might want to optimize this to fetch only the necessary session data
-  // if your Sanity query can support it for individual sessions.
   const courses = await getCoursesBySlug(slug);
 
   if (!courses || courses.length === 0) {
@@ -96,8 +92,8 @@ const StudySessionPage = async ({ params }: StudySessionPageProps) => {
           <PortableText value={session.rolePlay.title} />
           <p className='text-gray-700 text-sm'>
             <strong>Scenario:</strong>{" "}
-            <PortableText value={session.rolePlay.scenario} />
           </p>
+          <PortableText value={session.rolePlay.scenario} />
           <ul className='space-y-1 pl-5 text-gray-700 list-disc'>
             {session.rolePlay.instructions?.map((i: any, idx: number) => (
               <li key={idx}>
