@@ -23,8 +23,8 @@ const StudySessionPage = async ({ params }: StudySessionPageProps) => {
     return <div>Error: Course not found</div>;
   }
 
-  const course = courses[0];
-  const myModule = course.modules.find((m: any) => m._id === moduleId);
+  // const course = courses[0];
+  const myModule = courses.modules.find((m: any) => m._id === moduleId);
 
   if (!module) {
     return <div>Error: Module not found</div>;
