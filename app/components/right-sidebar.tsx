@@ -68,7 +68,7 @@ const fadeInUp = {
 };
 
 interface RightSidebarProps {
-  onNavigate: (path: string) => void;
+  onNavigate?: (path: string) => void;
 }
 
 export default function RightSidebar({ onNavigate }: RightSidebarProps) {
@@ -204,7 +204,7 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
                 <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-yellow-50 p-3 rounded-lg transition-colors'
-                  onClick={() => onNavigate(`/`)}
+                  onClick={() => onNavigate?.(`/`)}
                 >
                   <div className='bg-yellow-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-yellow-600'>

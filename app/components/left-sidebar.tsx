@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
-  onNavigate: (path: string) => void;
+  onNavigate?: (path: string) => void;
 }
 
 const fadeInUp = {
@@ -186,7 +186,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     <CourseLink
                       key={course._id}
                       course={course}
-                      onClick={() => onNavigate(`/courses/${course.slug}`)}
+                      onClick={() => onNavigate?.(`/courses/${course.slug}`)}
                       href={`/courses/${course.slug}`}
                     />
                   ))
