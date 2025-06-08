@@ -67,7 +67,11 @@ const fadeInUp = {
   transition: { duration: 0.6 },
 };
 
-export default function RightSidebar() {
+interface RightSidebarProps {
+  onNavigate: (path: string) => void;
+}
+
+export default function RightSidebar({ onNavigate }: RightSidebarProps) {
   return (
     <motion.div
       className='space-y-6'
@@ -200,6 +204,7 @@ export default function RightSidebar() {
                 <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-yellow-50 p-3 rounded-lg transition-colors'
+                  onClick={() => onNavigate(`/`)}
                 >
                   <div className='bg-yellow-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-yellow-600'>

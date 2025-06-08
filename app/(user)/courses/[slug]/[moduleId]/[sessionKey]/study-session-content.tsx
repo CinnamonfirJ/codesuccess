@@ -407,20 +407,20 @@ export default function StudySessionContent({
                   className='hover:bg-emerald-50 border-emerald-500 text-emerald-600'
                 >
                   <ArrowLeft className='mr-2 w-4 h-4' />
-                  Previous Session
+                  <span className='hidden md:flex'>Previous Session</span>
                 </Button>
               </Link>
             )}
           </div>
 
+          <Link href={`/courses/${slug}`}>
+            <Button variant='outline'>Back to Course</Button>
+          </Link>
           <div className='flex items-center gap-4'>
-            <Link href={`/courses/${slug}`}>
-              <Button variant='outline'>Back to Course</Button>
-            </Link>
             {nextSession && (
               <Link href={`/courses/${slug}/${moduleId}/${nextSession._key}`}>
                 <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
-                  Next Session
+                  <span className='hidden md:flex'>Next Session</span>
                   <ArrowRight className='ml-2 w-4 h-4' />
                 </Button>
               </Link>

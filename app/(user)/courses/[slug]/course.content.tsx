@@ -53,7 +53,7 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
   if (!course || Object.keys(course).length === 0) {
     return (
       <div className='flex justify-center items-center bg-gradient-to-br from-red-50 to-orange-50 min-h-screen'>
-        <Card className='mx-4 w-full max-w-md'>
+        <Card className='mx-4 max-w-md'>
           <CardContent className='p-2 md:p-8 text-center'>
             <div className='flex justify-center items-center bg-red-100 mx-auto mb-4 rounded-full w-16 h-16'>
               <BookOpen className='w-8 h-8 text-red-500' />
@@ -102,7 +102,7 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
 
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
-      <div className='mx-auto px-6 py-8 max-w-7xl'>
+      <div className='mx-auto mt-10 px-2 md:px-6 py-8 md:max-w-7xl'>
         {/* Header Section */}
         <motion.div
           className='mb-8'

@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
+  onNavigate: (path: string) => void;
 }
 
 const fadeInUp = {
@@ -24,7 +25,7 @@ const fadeInUp = {
   transition: { duration: 0.6 },
 };
 
-export default function LeftSidebar({ courses }: LeftSidebarProps) {
+export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
   return (
     <motion.div
       className='space-y-6'
@@ -185,6 +186,7 @@ export default function LeftSidebar({ courses }: LeftSidebarProps) {
                     <CourseLink
                       key={course._id}
                       course={course}
+                      onClick={() => onNavigate(`/courses/${course.slug}`)}
                       href={`/courses/${course.slug}`}
                     />
                   ))
