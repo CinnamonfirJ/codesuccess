@@ -1,6 +1,9 @@
-import { getCoursesBySlug } from "@/sanity/lib/courses/getCoursesBySlug"; // Or a new function to get a single session
-import { PortableText } from "next-sanity";
-import Link from "next/link"; // For a back button
+import { getCoursesBySlug } from "@/sanity/lib/courses/getCoursesBySlug";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, BookOpen } from "lucide-react";
+import StudySessionContent from "./study-session-content";
 
 interface StudySessionPageProps {
   params: Promise<{
@@ -10,129 +13,108 @@ interface StudySessionPageProps {
   }>;
 }
 
-const StudySessionPage = async ({ params }: StudySessionPageProps) => {
+export default async function StudySessionPage({
+  params,
+}: StudySessionPageProps) {
   const { slug, moduleId, sessionKey } = await params;
 
   const courses = await getCoursesBySlug(slug);
 
-  if (!courses || courses.length === 0) {
-    return <div>Error: Course not found</div>;
+  if (!courses || Object.keys(courses).length === 0) {
+    return (
+      <div className='flex justify-center items-center bg-gradient-to-br from-red-50 to-orange-50 min-h-screen'>
+        <Card className='mx-4 w-full max-w-md'>
+          <CardContent className='p-8 text-center'>
+            <div className='flex justify-center items-center bg-red-100 mx-auto mb-4 rounded-full w-16 h-16'>
+              <BookOpen className='w-8 h-8 text-red-500' />
+            </div>
+            <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+              Course Not Found
+            </h2>
+            <p className='mb-6 text-gray-600'>
+              The course you&apos;re looking for doesn&apos;t exist or has been
+              removed.
+            </p>
+            <Link href='/profile/me'>
+              <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
+                <ArrowLeft className='mr-2 w-4 h-4' />
+                Back to Courses
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  // const course = courses[0];
-  const myModule = courses.modules.find((m: any) => m._id === moduleId);
+  const myModule = courses.modules?.find((m: any) => m._id === moduleId);
 
-  if (!module) {
-    return <div>Error: Module not found</div>;
+  if (!myModule) {
+    return (
+      <div className='flex justify-center items-center bg-gradient-to-br from-orange-50 to-red-50 min-h-screen'>
+        <Card className='mx-4 w-full max-w-md'>
+          <CardContent className='p-8 text-center'>
+            <div className='flex justify-center items-center bg-orange-100 mx-auto mb-4 rounded-full w-16 h-16'>
+              <BookOpen className='w-8 h-8 text-orange-500' />
+            </div>
+            <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+              Module Not Found
+            </h2>
+            <p className='mb-6 text-gray-600'>
+              The module you&apos;re looking for doesn&apos;t exist in this
+              course.
+            </p>
+            <Link href={`/courses/${slug}`}>
+              <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
+                <ArrowLeft className='mr-2 w-4 h-4' />
+                Back to Course
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  const session = myModule.studySessions.find(
+  const session = myModule.studySessions?.find(
     (s: any) => s._key === sessionKey
   );
 
   if (!session) {
-    return <div>Error: Study session not found</div>;
+    return (
+      <div className='flex justify-center items-center bg-gradient-to-br from-yellow-50 to-orange-50 min-h-screen'>
+        <Card className='mx-4 w-full max-w-md'>
+          <CardContent className='p-8 text-center'>
+            <div className='flex justify-center items-center bg-yellow-100 mx-auto mb-4 rounded-full w-16 h-16'>
+              <BookOpen className='w-8 h-8 text-yellow-500' />
+            </div>
+            <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+              Session Not Found
+            </h2>
+            <p className='mb-6 text-gray-600'>
+              The study session you&apos;re looking for doesn&apos;t exist in
+              this module.
+            </p>
+            <Link href={`/courses/${slug}`}>
+              <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
+                <ArrowLeft className='mr-2 w-4 h-4' />
+                Back to Course
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className='space-y-8 bg-white shadow-lg mx-auto mt-8 p-6 rounded-lg max-w-4xl'>
-      <Link
-        href={`/courses/${slug}`}
-        className='block mb-4 text-blue-600 hover:underline'
-      >
-        &larr; Back to Course Overview
-      </Link>
-
-      <h2 className='mb-6 font-extrabold text-gray-800 text-3xl text-center'>
-        {session.title}
-      </h2>
-
-      {/* Quotes */}
-      {session.quotes?.length > 0 && (
-        <div className='bg-gray-100 p-4 rounded text-gray-700 text-center italic'>
-          <h4 className='mb-2 font-semibold text-lg'>Quotes:</h4>
-          <ul className='space-y-2'>
-            {session.quotes.map((quote: any, idx: number) => (
-              <li key={idx}>
-                &quot;{quote.text} – {quote.author}&quot;
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Content */}
-      <div className='max-w-none text-gray-800 prose'>
-        <h3 className='mb-3 font-semibold text-2xl'>Content</h3>
-        <PortableText value={session.content} />
-      </div>
-
-      {/* Activity */}
-      {session.activity && (
-        <div className='space-y-2 bg-blue-50 p-4 rounded'>
-          <h3 className='font-semibold text-blue-900 text-xl'>Activity</h3>
-          <PortableText value={session.activity.title} />
-          <ul className='space-y-1 pl-5 text-gray-700 list-disc'>
-            {session.activity.instructions?.map((i: any, idx: number) => (
-              <li key={idx}>
-                <PortableText value={i} />
-              </li>
-            ))}
-          </ul>
-          <p className='text-gray-700 text-sm'>
-            <strong>Reflection:</strong> {session.activity.reflectionPrompt}
-          </p>
-        </div>
-      )}
-
-      {/* Role Play */}
-      {session.rolePlay && (
-        <div className='space-y-2 bg-green-50 p-4 rounded'>
-          <h3 className='font-semibold text-green-900 text-xl'>Role Play</h3>
-          <PortableText value={session.rolePlay.title} />
-          <p className='text-gray-700 text-sm'>
-            <strong>Scenario:</strong>{" "}
-          </p>
-          <PortableText value={session.rolePlay.scenario} />
-          <ul className='space-y-1 pl-5 text-gray-700 list-disc'>
-            {session.rolePlay.instructions?.map((i: any, idx: number) => (
-              <li key={idx}>
-                <PortableText value={i} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Summary */}
-      {session.summaryBox?.content?.length > 0 && (
-        <div className='space-y-2 bg-yellow-50 p-4 rounded'>
-          <h3 className='font-semibold text-yellow-800 text-xl'>Summary</h3>
-          <ul className='space-y-1 pl-5 text-gray-700 list-disc'>
-            {session.summaryBox.content.map((summary: any, idx: number) => (
-              <li key={idx}>
-                <PortableText value={summary} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Journaling Prompts */}
-      {session.takeawayJournalingPrompts?.length > 0 && (
-        <div className='space-y-2 bg-purple-50 p-4 rounded'>
-          <h3 className='font-semibold text-purple-800 text-xl'>
-            Journaling Prompts
-          </h3>
-          <ul className='space-y-1 pl-5 text-gray-700 list-disc'>
-            {session.takeawayJournalingPrompts.map((p: any, idx: number) => (
-              <li key={idx}>{p.prompt}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+    <StudySessionContent
+      session={session}
+      module={myModule}
+      course={courses}
+      slug={slug}
+      moduleId={moduleId}
+      sessionKey={sessionKey}
+    />
   );
-};
-
-export default StudySessionPage;
+}

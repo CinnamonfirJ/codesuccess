@@ -1,6 +1,3 @@
-// import { Menu, User } from "lucide-react";
-// import { Inter } from "next/font/google";
-
 import LeftSidebar from "../../../components/left-sidebar";
 import RightSidebar from "../../../components/right-sidebar";
 import Feed from "../../../components/feed";

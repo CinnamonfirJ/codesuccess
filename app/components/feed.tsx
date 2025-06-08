@@ -8,6 +8,12 @@ import {
   MoreHorizontal,
   Play,
   Pause,
+  ImageIcon,
+  Target,
+  Sparkles,
+  Send,
+  Bookmark,
+  TrendingUp,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,8 +23,10 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 // Mock data for posts
 const posts = [
@@ -28,14 +36,17 @@ const posts = [
       name: "Sarah Johnson",
       avatar: "/premium_photo-1726082023241-9ae4066c5286.jpeg",
       initials: "SJ",
+      verified: true,
     },
     content:
-      "Just completed my first coding challenge on CodeSuccesx! The community support here is amazing. #CodeNewbie #LearningToCode",
+      "Just completed my first coding challenge on CodeSuccesx! The community support here is amazing. Feeling motivated to tackle the next one! 🚀 #CodeNewbie #LearningToCode",
     image: "/WhatsApp Image 2025-05-21 at 18.42.02_95109c88 (1).png",
     timestamp: "2 hours ago",
     likes: 24,
     comments: 5,
     shares: 2,
+    isLiked: false,
+    tags: ["coding", "achievement"],
   },
   {
     id: 2,
@@ -43,15 +54,18 @@ const posts = [
       name: "Daily Affirmations",
       avatar: "/placeholder.svg?height=40&width=40",
       initials: "DA",
+      verified: true,
     },
     content:
-      "Today's affirmation: I am capable of learning new skills and growing every day. My journey is unique, and I celebrate my progress.",
+      "Today's affirmation: I am capable of learning new skills and growing every day. My journey is unique, and I celebrate my progress. 🌟",
     timestamp: "4 hours ago",
     isAffirmation: true,
     audioUrl: "#",
     likes: 56,
     comments: 12,
     shares: 8,
+    isLiked: true,
+    tags: ["affirmation", "mindset"],
   },
   {
     id: 3,
@@ -59,13 +73,16 @@ const posts = [
       name: "Michael Chen",
       avatar: "/placeholder.svg?height=40&width=40",
       initials: "MC",
+      verified: false,
     },
     content:
-      "Excited to share that I've been accepted into the mentorship program! Looking forward to learning from industry professionals and growing my skills. #Mentorship #Growth",
+      "Excited to share that I've been accepted into the mentorship program! Looking forward to learning from industry professionals and growing my skills. This is just the beginning! 💪 #Mentorship #Growth",
     timestamp: "Yesterday",
     likes: 89,
     comments: 15,
     shares: 7,
+    isLiked: false,
+    tags: ["mentorship", "growth"],
   },
   {
     id: 4,
@@ -73,6 +90,7 @@ const posts = [
       name: "CodeSuccesx Team",
       avatar: "/hussein-xodie-xtiGJzxb5zo-unsplash.jpg",
       initials: "CS",
+      verified: true,
     },
     content:
       "New challenge alert! 📸 Join our 30-day photography challenge starting next week. Capture themed shots, improve your skills, and stand a chance to win exciting prizes! Register now in the Challenges section.",
@@ -81,6 +99,8 @@ const posts = [
     likes: 132,
     comments: 28,
     shares: 45,
+    isLiked: true,
+    tags: ["challenge", "photography"],
   },
 ];
 
@@ -88,150 +108,300 @@ const AudioAffirmation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className='flex items-center bg-teal-50 my-3 p-4 rounded-lg'>
+    <motion.div
+      className='flex items-center bg-gradient-to-r from-emerald-50 to-blue-50 my-4 p-4 border border-emerald-200 rounded-xl'
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <Button
         variant='outline'
         size='icon'
-        className='bg-teal hover:bg-teal-600 mr-4 rounded-full w-10 h-10 text-white'
+        className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-lg mr-4 border-0 rounded-full w-12 h-12 text-white'
         onClick={() => setIsPlaying(!isPlaying)}
       >
         {isPlaying ? (
-          <Pause className='w-4 h-4' />
+          <Pause className='w-5 h-5' />
         ) : (
-          <Play className='w-4 h-4' />
+          <Play className='w-5 h-5' />
         )}
       </Button>
       <div className='flex-1'>
-        <div className='bg-gray-200 rounded-full h-2'>
-          <div className='bg-teal rounded-full w-1/3 h-2'></div>
+        <div className='bg-gray-200 mb-2 rounded-full h-2'>
+          <motion.div
+            className='bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full h-2'
+            initial={{ width: "0%" }}
+            animate={{ width: isPlaying ? "33%" : "33%" }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
-        <div className='flex justify-between mt-1 text-gray-500 text-xs'>
+        <div className='flex justify-between text-gray-600 text-xs'>
           <span>0:45</span>
+          <span className='font-medium'>Daily Affirmation</span>
           <span>2:30</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 },
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
 export default function Feed() {
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set([2, 4]));
+
+  const toggleLike = (postId: number) => {
+    setLikedPosts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
   return (
-    <div className='mx-auto p-4 max-w-2xl'>
+    <div className='space-y-6 mx-auto max-w-2xl'>
       {/* Create Post */}
-      <Card className='mb-6'>
-        <CardHeader className='pb-3'>
-          <div className='flex items-center gap-4'>
-            <Avatar>
-              <AvatarImage
-                src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
-                alt='User'
-              />
-              <AvatarFallback className='bg-teal-100 text-teal-800'>
-                JD
-              </AvatarFallback>
-            </Avatar>
-            <div className='flex-1 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition-colors cursor-pointer'>
-              <input
-                type='text'
-                placeholder='Share something positive...'
-                className='outline-none w-full'
-              />
-              {/* <p className="text-gray-500">Share something positive...</p> */}
+      <motion.div variants={fadeInUp} initial='initial' animate='animate'>
+        <Card className='bg-white shadow-lg border-0 overflow-hidden'>
+          <CardHeader className='pb-3'>
+            <div className='flex items-center gap-4'>
+              <Avatar className='border-2 border-emerald-200'>
+                <AvatarImage
+                  src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
+                  alt='User'
+                />
+                <AvatarFallback className='bg-emerald-100 font-bold text-emerald-800'>
+                  JD
+                </AvatarFallback>
+              </Avatar>
+              <div className='flex-1 bg-gradient-to-r from-gray-50 hover:from-gray-100 to-gray-100 hover:to-gray-200 px-6 py-3 border border-gray-200 rounded-full transition-all cursor-pointer'>
+                <input
+                  type='text'
+                  placeholder='Share something positive with the community...'
+                  className='bg-transparent outline-none w-full text-gray-700 placeholder-gray-500'
+                />
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardFooter className='flex justify-between pt-0'>
-          <Button variant='ghost' size='sm' className='text-gray-500'>
-            Photo
-          </Button>
-          <Button variant='ghost' size='sm' className='text-gray-500'>
-            Goal
-          </Button>
-          <Button variant='ghost' size='sm' className='text-gray-500'>
-            Affirmation
-          </Button>
-        </CardFooter>
-      </Card>
+          </CardHeader>
+          <CardFooter className='flex md:flex-row flex-col justify-between items-start md:items-center px-2 md:px-6 pt-0 pb-4 w-full'>
+            <div className='flex justify-between px-2 md:px-6'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='hover:bg-emerald-50 text-gray-600 hover:text-emerald-600'
+              >
+                <ImageIcon className='mr-2 w-4 h-4' />
+                Photo
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='hover:bg-blue-50 text-gray-600 hover:text-blue-600'
+              >
+                <Target className='mr-2 w-4 h-4' />
+                Goal
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='hover:bg-purple-50 text-gray-600 hover:text-purple-600'
+              >
+                <Sparkles className='mr-2 w-4 h-4' />
+                Affirmation
+              </Button>
+            </div>
+            <div className='mt-2 md:mt-0 w-full'>
+              <Button
+                size='sm'
+                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 text-white'
+              >
+                <Send className='mr-2 w-4 h-4' />
+                Post
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      </motion.div>
 
       {/* Posts Feed */}
-      <div className='space-y-6'>
-        {posts.map((post) => (
-          <Card key={post.id} className='overflow-hidden'>
-            <CardHeader className='pb-3'>
-              <div className='flex justify-between items-center'>
-                <div className='flex items-center gap-3'>
-                  <Avatar>
-                    <AvatarImage
-                      src={post.author.avatar || "/placeholder.svg"}
-                      alt={post.author.name}
-                    />
-                    <AvatarFallback className='bg-teal-100 text-teal-800'>
-                      {post.author.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className='font-medium'>{post.author.name}</p>
-                    <p className='text-gray-500 text-xs'>{post.timestamp}</p>
+      <motion.div
+        className='space-y-6'
+        variants={staggerContainer}
+        initial='initial'
+        animate='animate'
+      >
+        {posts.map((post) => {
+          const isLiked = likedPosts.has(post.id);
+          return (
+            <motion.div key={post.id} variants={fadeInUp}>
+              <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
+                <CardHeader className='pb-3'>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex items-center gap-3'>
+                      <Avatar className='border-2 border-gray-200'>
+                        <AvatarImage
+                          src={post.author.avatar || "/placeholder.svg"}
+                          alt={post.author.name}
+                        />
+                        <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
+                          {post.author.initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className='flex items-center gap-2'>
+                          <p className='font-semibold text-gray-900'>
+                            {post.author.name}
+                          </p>
+                          {post.author.verified && (
+                            <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
+                              <span className='text-white text-xs'>✓</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className='text-gray-500 text-sm'>
+                          {post.timestamp}
+                        </p>
+                      </div>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='hover:bg-gray-100 rounded-full'
+                      >
+                        <Bookmark className='w-4 h-4' />
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='hover:bg-gray-100 rounded-full'
+                      >
+                        <MoreHorizontal className='w-5 h-5' />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <Button variant='ghost' size='icon' className='rounded-full'>
-                  <MoreHorizontal className='w-5 h-5' />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className='pb-3'>
-              <p
-                className={
-                  post.isAffirmation
-                    ? "text-lg font-medium text-navy italic"
-                    : ""
-                }
-              >
-                {post.content}
-              </p>
+                </CardHeader>
 
-              {post.isAffirmation && <AudioAffirmation />}
+                <CardContent className='pb-3'>
+                  <p
+                    className={`leading-relaxed ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
+                  >
+                    {post.content}
+                  </p>
 
-              {post.image && (
-                <div className='mt-3 rounded-lg overflow-hidden'>
-                  <Image
-                    src={post.image || "/placeholder.svg"}
-                    alt='Post content'
-                    className='w-full h-auto object-cover'
-                    width={600}
-                    height={400}
-                  />
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className='pt-0'>
-              <div className='w-full'>
-                <div className='flex justify-between items-center mb-2 text-gray-500 text-sm'>
-                  <span>{post.likes} likes</span>
-                  <span>
-                    {post.comments} comments • {post.shares} shares
-                  </span>
-                </div>
-                <Separator />
-                <div className='flex justify-between pt-2'>
-                  <Button variant='ghost' size='sm' className='flex-1 gap-1'>
-                    <Heart className='w-4 h-4' />
-                    Like
-                  </Button>
-                  <Button variant='ghost' size='sm' className='flex-1 gap-1'>
-                    <MessageSquare className='w-4 h-4' />
-                    Comment
-                  </Button>
-                  <Button variant='ghost' size='sm' className='flex-1 gap-1'>
-                    <Share2 className='w-4 h-4' />
-                    Share
-                  </Button>
-                </div>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+                  {post.tags && (
+                    <div className='flex flex-wrap gap-2 mt-3'>
+                      {post.tags.map((tag, idx) => (
+                        <Badge
+                          key={idx}
+                          variant='outline'
+                          className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
+                        >
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {post.isAffirmation && <AudioAffirmation />}
+
+                  {post.image && (
+                    <motion.div
+                      className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Image
+                        src={post.image || "/placeholder.svg"}
+                        alt='Post content'
+                        className='w-full h-auto object-cover'
+                        width={600}
+                        height={400}
+                      />
+                    </motion.div>
+                  )}
+                </CardContent>
+
+                <CardFooter className='pt-0'>
+                  <div className='w-full'>
+                    <div className='flex justify-between items-center mb-3 text-gray-500 text-sm'>
+                      <div className='flex items-center gap-4'>
+                        <span className='flex items-center gap-1'>
+                          <Heart className='w-4 h-4 text-red-500' />
+                          {post.likes +
+                            (isLiked && !post.isLiked
+                              ? 1
+                              : isLiked || post.isLiked
+                                ? 0
+                                : 0)}{" "}
+                          likes
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <TrendingUp className='w-4 h-4' />
+                          Trending
+                        </span>
+                      </div>
+                      <span>
+                        {post.comments} comments • {post.shares} shares
+                      </span>
+                    </div>
+                    <Separator className='mb-3' />
+                    <div className='flex justify-between'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className={`flex-1 gap-2 transition-colors ${
+                          isLiked
+                            ? "text-red-500 hover:text-red-600 hover:bg-red-50"
+                            : "text-gray-600 hover:text-red-500 hover:bg-red-50"
+                        }`}
+                        onClick={() => toggleLike(post.id)}
+                      >
+                        <Heart
+                          className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+                        />
+                        {isLiked ? "Liked" : "Like"}
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
+                      >
+                        <MessageSquare className='w-4 h-4' />
+                        Comment
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='flex-1 gap-2 hover:bg-emerald-50 text-gray-600 hover:text-emerald-500'
+                      >
+                        <Share2 className='w-4 h-4' />
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          );
+        })}
+      </motion.div>
     </div>
   );
 }
