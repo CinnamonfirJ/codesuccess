@@ -64,10 +64,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               <div className='font-bold text-blue-600 text-lg'>89%</div>
               <div className='text-gray-600 text-xs'>Progress</div>
             </div>
-            <div>
+            {/* <div>
               <div className='font-bold text-purple-600 text-lg'>156</div>
               <div className='text-gray-600 text-xs'>Points</div>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>

@@ -383,7 +383,7 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            <div className='flex justify-center items-center gap-6 text-emerald-100'>
+            <div className='place-content-center gap-6 grid grid-cols-1 md:grid-cols-3 text-emerald-100'>
               <div className='flex items-center gap-2'>
                 <CheckCircle className='w-5 h-5' />
                 <span>Free to start</span>
