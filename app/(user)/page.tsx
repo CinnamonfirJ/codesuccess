@@ -326,7 +326,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <p className='mb-6 text-gray-700 text-lg leading-relaxed'>
-                      &#34;{testimonial.content}&qout;
+                      &#34;{testimonial.content}&#34;
                     </p>
                     <div className='flex items-center'>
                       <div className='flex justify-center items-center bg-gradient-to-r from-emerald-400 to-blue-400 mr-4 rounded-full w-12 h-12 font-bold text-white text-lg'>
