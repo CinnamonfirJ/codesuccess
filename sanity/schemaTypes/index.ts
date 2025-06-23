@@ -8,6 +8,8 @@ import { takeawayJournalingPromptSchema } from "../journalingSchema";
 import { reflectionQuestionSchema } from "../reflectionQuestionsSchema";
 import { activitySchema } from "../activitySchema";
 import { rolePlaySchema } from "../rolePlaySchema";
+import { readingListSchema } from "../readingListSchema";
+import { heroSpotlightSchema } from "../heroSpotlightSchema";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -20,5 +22,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     summaryBoxSchema,
     takeawayJournalingPromptSchema,
     reflectionQuestionSchema,
+    readingListSchema,
+    heroSpotlightSchema,
   ],
 };

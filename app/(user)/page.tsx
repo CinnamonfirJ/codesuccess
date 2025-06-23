@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -86,13 +87,15 @@ export default function LandingPage() {
             transition={{ delay: 0.7, duration: 0.8 }}
           >
             <motion.div {...scaleOnHover}>
-              <Button
-                size='lg'
-                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-xl px-8 py-4 font-semibold text-white text-lg'
-              >
-                Start Your Journey Free
-                <ArrowRight className='ml-2 w-5 h-5' />
-              </Button>
+              <Link href='/homepage'>
+                <Button
+                  size='lg'
+                  className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-xl px-8 py-4 font-semibold text-white text-lg'
+                >
+                  Start Your Journey Free
+                  <ArrowRight className='ml-2 w-5 h-5' />
+                </Button>
+              </Link>
             </motion.div>
             <motion.div {...scaleOnHover}>
               <Button

@@ -33,6 +33,5 @@ export const courseSchema = defineType({
       type: "array",
       of: [{ type: "reference", to: [{ type: "module" }] }],
     }),
-    // Add other course-level fields as needed (e.g., instructors, duration)
   ],
 });

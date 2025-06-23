@@ -13,6 +13,31 @@
  */
 
 // Source: schema.json
+export type ReadingList = {
+  _id: string;
+  _type: "readingList";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  bookTitle?: string;
+  description?: string;
+  image?: {
+    asset?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+    };
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  alt?: Slug;
+  linkUrl?: string;
+  category?: "fiction" | "non-fiction" | "self help" | "technology" | "business" | "growth" | "spiritual";
+};
+
 export type ReflectionQuestion = {
   _type: "reflectionQuestion";
   question?: string;
@@ -30,7 +55,11 @@ export type Quote = {
 };
 
 export type StudySession = {
+  _id: string;
   _type: "studySession";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
   title?: string;
   quotes?: Array<{
     _key: string;
@@ -172,8 +201,12 @@ export type Module = {
   slug?: Slug;
   description?: string;
   studySessions?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
     _key: string;
-  } & StudySession>;
+    [internalGroqTypeReferenceTo]?: "studySession";
+  }>;
 };
 
 export type Course = {
@@ -312,11 +345,11 @@ export type SanityAssetSourceData = {
   url?: string;
 };
 
-export type AllSanitySchemaTypes = ReflectionQuestion | TakeawayJournalingPrompt | Quote | StudySession | SummaryBox | RolePlay | Activity | Module | Course | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | Slug | SanityAssetSourceData;
+export type AllSanitySchemaTypes = ReadingList | ReflectionQuestion | TakeawayJournalingPrompt | Quote | StudySession | SummaryBox | RolePlay | Activity | Module | Course | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | Slug | SanityAssetSourceData;
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: sanity/lib/courses/getCourses.ts
 // Variable: getCoursesQuery
-// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "description": description.current,        "modules": modules[]->{...},        "studySessions": studySessions[]->{...},        }
+// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "description": description.current,        "modules": modules[]->{...},        "studySession": studySession[]->{...},        }
 export type GetCoursesQueryResult = Array<{
   _id: string;
   _type: "course";
@@ -336,43 +369,80 @@ export type GetCoursesQueryResult = Array<{
     slug?: Slug;
     description?: string;
     studySessions?: Array<{
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
       _key: string;
-    } & StudySession>;
+      [internalGroqTypeReferenceTo]?: "studySession";
+    }>;
   }> | null;
-  studySessions: null;
+  studySession: null;
 }>;
 
 // Source: sanity/lib/courses/getCoursesBySlug.ts
-// Variable: getCoursesBySlugQuery
-// Query: *[_type == "course"] {        ...,        "slug": slug.current,        "description": description.current,        "modules": modules[]->{...,        "studySessions": studySessions[]->{...}},        "studySessions": studySessions[]->{...},        }
-export type GetCoursesBySlugQueryResult = Array<{
+// Variable: getCourseByExactSlugQuery
+// Query: *[_type == "course" && slug.current == $slug][0]{      _id,      title,      "slug": slug.current,      description,      modules[]-> {        ..., // Keep other fields from the module document        _id,        _key,        title,        description,     studySessions[]{  _id,  _key,  title,  content,  activity { _id, title, instructions, reflectionPrompt },  rolePlay { _id, title, scenario, instructions },  summaryBox { _id, content },  takeawayJournalingPrompts[] { _id, prompt },  quotes[] { _id, text, author }  }  }    }
+export type GetCourseByExactSlugQueryResult = {
   _id: string;
-  _type: "course";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
+  title: string | null;
   slug: string | null;
-  description: null;
+  description: string | null;
   modules: Array<{
     _id: string;
     _type: "module";
     _createdAt: string;
     _updatedAt: string;
     _rev: string;
-    title?: string;
+    title: string | null;
     slug?: Slug;
-    description?: string;
-    studySessions: Array<null> | null;
+    description: string | null;
+    studySessions: Array<{
+      _id: null;
+      _key: string;
+      title: null;
+      content: null;
+      activity: null;
+      rolePlay: null;
+      summaryBox: null;
+      takeawayJournalingPrompts: null;
+      quotes: null;
+    }> | null;
+    _key: null;
   }> | null;
-  studySessions: null;
+} | null;
+
+// Source: sanity/lib/readingList/getReadindList.ts
+// Variable: getReadingListQuery
+// Query: *[_type == "readingList"] {    _id,    bookTitle,    description,    image {      asset -> {        url      }    },    alt,    linkUrl,    category,    _createdAt  }
+export type GetReadingListQueryResult = Array<{
+  _id: string;
+  bookTitle: string | null;
+  description: string | null;
+  image: {
+    asset: {
+      url: string | null;
+    } | null;
+  } | null;
+  alt: Slug | null;
+  linkUrl: string | null;
+  category: "business" | "fiction" | "growth" | "non-fiction" | "self help" | "spiritual" | "technology" | null;
+  _createdAt: string;
+}>;
+
+// Source: sanity/lib/readingList/getReadingListCategories.ts
+// Variable: getCategoriesQuery
+// Query: *[_type == "readingList" && defined(category)] {    category  }
+export type GetCategoriesQueryResult = Array<{
+  category: "business" | "fiction" | "growth" | "non-fiction" | "self help" | "spiritual" | "technology" | null;
 }>;
 
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...},\n        \"studySessions\": studySessions[]->{...},\n        }": GetCoursesQueryResult;
-    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...,\n        \"studySessions\": studySessions[]->{...}},\n        \"studySessions\": studySessions[]->{...},\n        }": GetCoursesBySlugQueryResult;
+    "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...},\n        \"studySession\": studySession[]->{...},\n        }": GetCoursesQueryResult;
+    "*[_type == \"course\" && slug.current == $slug][0]{\n      _id,\n      title,\n      \"slug\": slug.current,\n      description,\n      modules[]-> {\n        ..., // Keep other fields from the module document\n        _id,\n        _key,\n        title,\n        description,\n     studySessions[]{\n  _id,\n  _key,\n  title,\n  content,\n  activity { _id, title, instructions, reflectionPrompt },\n  rolePlay { _id, title, scenario, instructions },\n  summaryBox { _id, content },\n  takeawayJournalingPrompts[] { _id, prompt },\n  quotes[] { _id, text, author }\n  }\n  }\n    }": GetCourseByExactSlugQueryResult;
+    "*[_type == \"readingList\"] {\n    _id,\n    bookTitle,\n    description,\n    image {\n      asset -> {\n        url\n      }\n    },\n    alt,\n    linkUrl,\n    category,\n    _createdAt\n  }\n": GetReadingListQueryResult;
+    "*[_type == \"readingList\" && defined(category)] {\n    category\n  }": GetCategoriesQueryResult;
   }
 }

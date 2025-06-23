@@ -13,6 +13,7 @@ import { ExpandableSection } from "./ExpandableSection";
 import CourseLink from "./courseLink";
 import type { GetCoursesQueryResult } from "@/sanity.types";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
@@ -251,33 +252,15 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
-                <a
-                  href='#'
+                <Link
+                  href='/reading-list'
                   className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
                 >
-                  <div className='bg-indigo-400 rounded-full w-2 h-2'></div>
+                  <div className='bg-indigo-400 rounded-full w-2 h-2' />
                   <span className='text-gray-700 group-hover:text-indigo-600'>
-                    Recommended Books
+                    View All Reading Lists
                   </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-indigo-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-indigo-600'>
-                    Browse by Category
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-indigo-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-indigo-600'>
-                    Book of the Month
-                  </span>
-                </a>
+                </Link>
               </div>
             </ExpandableSection>
           </div>
