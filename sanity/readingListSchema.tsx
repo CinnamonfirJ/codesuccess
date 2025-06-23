@@ -49,7 +49,7 @@ export const readingListSchema = defineType({
         list: [
           { title: "Fiction", value: "fiction" },
           { title: "Non-fiction", value: "non-fiction" },
-          { title: "Self-help", value: "self help" },
+          { title: "Self-help", value: "self-help" },
           { title: "Technology", value: "technology" },
           { title: "Business", value: "business" },
           { title: "Personal Growth", value: "growth" },

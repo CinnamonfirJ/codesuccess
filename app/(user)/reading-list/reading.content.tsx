@@ -27,9 +27,12 @@ import ReadingListItem from "@/app/components/readingListLink";
 const categories = [
   { label: "All", value: "all" },
   { label: "Fiction", value: "fiction" },
-  { label: "Non-Fiction", value: "non-fiction" },
-  { label: "Science", value: "science" },
-  { label: "History", value: "history" },
+  { label: "Non-fiction", value: "non-fiction" },
+  { label: "Self-help", value: "self-help" },
+  { label: "Technology", value: "technology" },
+  { label: "Business", value: "business" },
+  { label: "Personal Growth", value: "growth" },
+  { label: "Spiritual", value: "spiritual" },
 ];
 
 const staggerContainer = {
@@ -272,11 +275,11 @@ export default function ReadingListClient({
               {searchQuery && (
                 <span>
                   {" "}
-                  for &34;
+                  for &apos;
                   <span className='font-semibold text-blue-600'>
                     {searchQuery}
                   </span>
-                  &34;
+                  &apos;
                 </span>
               )}
             </p>
