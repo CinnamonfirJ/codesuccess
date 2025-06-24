@@ -15,7 +15,7 @@ export const readingListSchema = defineType({
       name: "description",
       title: "Description",
       type: "text",
-      description: "Optional description of the book or why it’s recommended",
+      description: "Optional description of the book or why it's recommended",
     }),
     defineField({
       name: "image",
@@ -42,22 +42,36 @@ export const readingListSchema = defineType({
       description: "A link to purchase, preview, or read the book online",
     }),
     defineField({
-      name: "category",
-      title: "Category",
-      type: "string",
-      options: {
-        list: [
-          { title: "Fiction", value: "fiction" },
-          { title: "Non-fiction", value: "non-fiction" },
-          { title: "Self-help", value: "self-help" },
-          { title: "Technology", value: "technology" },
-          { title: "Business", value: "business" },
-          { title: "Personal Growth", value: "growth" },
-          { title: "Spiritual", value: "spiritual" },
-        ],
-        layout: "dropdown",
-      },
-      validation: (Rule) => Rule.required(),
+      name: "categories",
+      title: "Categories",
+      type: "array",
+      of: [
+        {
+          type: "string",
+          options: {
+            list: [
+              { title: "Mindset", value: "mindset" },
+              { title: "Motivation", value: "motivation" },
+              { title: "Purpose Discovery", value: "purpose-discovery" },
+              { title: "Financial Literacy", value: "financial-literacy" },
+              {
+                title: "Communication",
+                value: "communication",
+              },
+              {
+                title: "Confidence",
+                value: "confidence",
+              },
+              {
+                title: "Emotional Intelligence",
+                value: "emotional-intelligence",
+              },
+            ],
+          },
+        },
+      ],
+      description: "Select one or more categories for this book",
+      validation: (Rule) => Rule.required().min(1).max(5),
     }),
   ],
 });

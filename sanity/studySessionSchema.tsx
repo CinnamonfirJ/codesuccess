@@ -18,15 +18,60 @@ export const studySessionSchema = defineType({
       type: "array",
       of: [{ type: "quote" }], // Reference the quote object type
     }),
+    // Replace the generic content field with structured sections
     defineField({
-      name: "content",
-      title: "Text/Reading/Content",
+      name: "conceptDefinition",
+      title: "Concept Definition and Explanations",
       type: "array",
       of: [
         { type: "block" }, // Sanity's portable text for rich content
         { type: "image" }, // Allow images within the content
-        // Add other custom content types if needed (e.g., code blocks, embeds)
       ],
+      description:
+        "Define and explain the core concepts being taught in this session",
+    }),
+    defineField({
+      name: "whyItMatters",
+      title: "Why it Matters",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "Explain the importance and relevance of this concept",
+    }),
+    defineField({
+      name: "whatThisMeansForYou",
+      title: "What this means for You",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "Personal application and direct impact on the learner",
+    }),
+    defineField({
+      name: "commonMisconceptions",
+      title: "Common Misconceptions",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "Address common myths or misunderstandings about this topic",
+    }),
+    defineField({
+      name: "realLifeExample",
+      title: "Real-life Example",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "Concrete examples that illustrate the concept in action",
+    }),
+    defineField({
+      name: "whyTimeToActIsNow",
+      title: "Why the Time to act is Now",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "Create urgency and motivation for immediate action",
+    }),
+    defineField({
+      name: "openLetterToYou",
+      title: "Open Letter to You",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description:
+        "Personal, direct message to inspire and motivate the learner",
     }),
     defineField({
       name: "activity",

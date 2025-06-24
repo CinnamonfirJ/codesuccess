@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Clock,
   CheckCircle2,
   Quote,
@@ -18,7 +17,12 @@ import {
   PenTool,
   Target,
   PlayCircle,
-  //   Bookmark,
+  Brain,
+  User,
+  AlertTriangle,
+  Clock3,
+  Mail,
+  BookOpen,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -46,11 +50,6 @@ const staggerContainer = {
   },
 };
 
-// const scaleOnHover = {
-//   whileHover: { scale: 1.02 },
-//   whileTap: { scale: 0.98 },
-// };
-
 export default function StudySessionContent({
   session,
   module,
@@ -60,7 +59,6 @@ export default function StudySessionContent({
   sessionKey,
 }: StudySessionContentProps) {
   const [isCompleted, setIsCompleted] = useState(false);
-  //   const [readingProgress, setReadingProgress] = useState(0);
 
   // Find current session index and navigation
   const currentSessionIndex =
@@ -68,15 +66,118 @@ export default function StudySessionContent({
   const nextSession = module.studySessions?.[currentSessionIndex + 1];
   const prevSession = module.studySessions?.[currentSessionIndex - 1];
 
+  // Check if we have new structured content or old content
+  const hasStructuredContent =
+    session.conceptDefinition ||
+    session.whyItMatters ||
+    session.whatThisMeansForYou ||
+    session.commonMisconceptions ||
+    session.realLifeExample ||
+    session.whyTimeToActIsNow ||
+    session.openLetterToYou;
+
+  const hasLegacyContent = session.content && session.content.length > 0;
+
   // Calculate estimated reading time
-  const estimatedTime = Math.max(
-    5,
-    Math.ceil((session.content?.length || 0) / 200)
-  );
+  const calculateReadingTime = () => {
+    if (hasStructuredContent) {
+      const sections = [
+        session.conceptDefinition,
+        session.whyItMatters,
+        session.whatThisMeansForYou,
+        session.commonMisconceptions,
+        session.realLifeExample,
+        session.whyTimeToActIsNow,
+        session.openLetterToYou,
+      ];
+      const totalLength = sections.reduce(
+        (acc, section) => acc + (section?.length || 0),
+        0
+      );
+      return Math.max(10, Math.ceil(totalLength / 150));
+    } else if (hasLegacyContent) {
+      return Math.max(5, Math.ceil((session.content?.length || 0) / 200));
+    }
+    return 5;
+  };
+
+  const estimatedTime = calculateReadingTime();
 
   const handleMarkComplete = () => {
     setIsCompleted(!isCompleted);
   };
+
+  // Content sections configuration for new structured content
+  const contentSections = [
+    {
+      key: "conceptDefinition",
+      title: "Concept Definition and Explanations",
+      icon: Brain,
+      content: session.conceptDefinition,
+      gradient: "from-blue-500 to-indigo-500",
+      bgGradient: "from-blue-50 to-indigo-50",
+      borderColor: "border-blue-200",
+    },
+    {
+      key: "whyItMatters",
+      title: "Why it Matters",
+      icon: Target,
+      content: session.whyItMatters,
+      gradient: "from-emerald-500 to-green-500",
+      bgGradient: "from-emerald-50 to-green-50",
+      borderColor: "border-emerald-200",
+    },
+    {
+      key: "whatThisMeansForYou",
+      title: "What this means for You",
+      icon: User,
+      content: session.whatThisMeansForYou,
+      gradient: "from-purple-500 to-pink-500",
+      bgGradient: "from-purple-50 to-pink-50",
+      borderColor: "border-purple-200",
+    },
+    {
+      key: "commonMisconceptions",
+      title: "Common Misconceptions",
+      icon: AlertTriangle,
+      content: session.commonMisconceptions,
+      gradient: "from-orange-500 to-red-500",
+      bgGradient: "from-orange-50 to-red-50",
+      borderColor: "border-orange-200",
+    },
+    {
+      key: "realLifeExample",
+      title: "Real-life Example",
+      icon: Lightbulb,
+      content: session.realLifeExample,
+      gradient: "from-yellow-500 to-orange-500",
+      bgGradient: "from-yellow-50 to-orange-50",
+      borderColor: "border-yellow-200",
+    },
+    {
+      key: "whyTimeToActIsNow",
+      title: "Why the Time to Act is Now",
+      icon: Clock3,
+      content: session.whyTimeToActIsNow,
+      gradient: "from-red-500 to-pink-500",
+      bgGradient: "from-red-50 to-pink-50",
+      borderColor: "border-red-200",
+    },
+    {
+      key: "openLetterToYou",
+      title: "Open Letter to You",
+      icon: Mail,
+      content: session.openLetterToYou,
+      gradient: "from-indigo-500 to-purple-500",
+      bgGradient: "from-indigo-50 to-purple-50",
+      borderColor: "border-indigo-200",
+    },
+  ];
+
+  // Debug: Log session data to console
+  console.log("Session data:", session);
+  console.log("Has structured content:", hasStructuredContent);
+  console.log("Has legacy content:", hasLegacyContent);
 
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
@@ -140,12 +241,12 @@ export default function StudySessionContent({
                     </div>
                     <div className='flex items-center gap-2'>
                       <Target className='w-4 h-4' />
-                      <span>Learning Session</span>
+                      <span>
+                        {hasStructuredContent
+                          ? "Structured Learning"
+                          : "Learning Session"}
+                      </span>
                     </div>
-                    {/* <div className='flex items-center gap-2'>
-                      <Bookmark className='w-4 h-4' />
-                      <span>Save Progress</span>
-                    </div> */}
                   </div>
                 </div>
               </div>
@@ -196,22 +297,78 @@ export default function StudySessionContent({
             </motion.div>
           )}
 
-          {/* Main Content */}
-          <motion.div variants={fadeInUp}>
-            <Card className='bg-white shadow-lg border-0'>
-              <CardContent className='p-2 md:p-8'>
-                <div className='flex items-center gap-3 mb-6'>
-                  <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl w-10 h-10'>
-                    <BookOpen className='w-5 h-5 text-white' />
+          {/* Structured Content Sections (New Format) */}
+          {hasStructuredContent &&
+            contentSections.map((section) => {
+              if (!section.content || section.content.length === 0) return null;
+
+              return (
+                <motion.div key={section.key} variants={fadeInUp}>
+                  <Card
+                    className={`bg-gradient-to-br ${section.bgGradient} shadow-lg ${section.borderColor}`}
+                  >
+                    <CardContent className='p-2 md:p-8'>
+                      <div className='flex items-center gap-3 mb-6'>
+                        <div
+                          className={`flex justify-center items-center bg-gradient-to-r ${section.gradient} rounded-xl w-10 h-10`}
+                        >
+                          <section.icon className='w-5 h-5 text-white' />
+                        </div>
+                        <h3 className='font-bold text-gray-900 text-lg md:text-2xl'>
+                          {section.title}
+                        </h3>
+                      </div>
+                      <div className='bg-white/70 p-6 border border-gray-100 rounded-xl'>
+                        <div className='max-w-none text-gray-800 leading-relaxed prose prose-lg'>
+                          <PortableText value={section.content} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+
+          {/* Legacy Content Section (Old Format) */}
+          {!hasStructuredContent && hasLegacyContent && (
+            <motion.div variants={fadeInUp}>
+              <Card className='bg-white shadow-lg border-0'>
+                <CardContent className='p-2 md:p-8'>
+                  <div className='flex items-center gap-3 mb-6'>
+                    <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl w-10 h-10'>
+                      <BookOpen className='w-5 h-5 text-white' />
+                    </div>
+                    <h3 className='font-bold text-gray-900 text-2xl'>
+                      Content
+                    </h3>
                   </div>
-                  <h3 className='font-bold text-gray-900 text-2xl'>Content</h3>
-                </div>
-                <div className='max-w-none text-gray-800 leading-relaxed prose prose-lg'>
-                  <PortableText value={session.content} />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  <div className='max-w-none text-gray-800 leading-relaxed prose prose-lg'>
+                    <PortableText value={session.content} />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* No Content Warning */}
+          {!hasStructuredContent && !hasLegacyContent && (
+            <motion.div variants={fadeInUp}>
+              <Card className='bg-yellow-50 shadow-lg border-yellow-200'>
+                <CardContent className='p-8 text-center'>
+                  <div className='flex justify-center items-center bg-yellow-100 mx-auto mb-4 rounded-full w-16 h-16'>
+                    <BookOpen className='w-8 h-8 text-yellow-600' />
+                  </div>
+                  <h3 className='mb-2 font-semibold text-yellow-800 text-xl'>
+                    Content Coming Soon
+                  </h3>
+                  <p className='text-yellow-700'>
+                    This study session is being prepared. Please check back
+                    later for the complete content.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Activity Section */}
           {session.activity && (

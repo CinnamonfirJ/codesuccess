@@ -1,5 +1,3 @@
-// src/sanity/lib/courses/getCoursesBySlug.ts
-
 import { sanityFetch } from "../live";
 import { defineQuery } from "groq";
 
@@ -16,18 +14,25 @@ export async function getCoursesBySlug(slug: string) {
         _key,
         title,
         description,
-     studySessions[]{
-  _id,
-  _key,
-  title,
-  content,
-  activity { _id, title, instructions, reflectionPrompt },
-  rolePlay { _id, title, scenario, instructions },
-  summaryBox { _id, content },
-  takeawayJournalingPrompts[] { _id, prompt },
-  quotes[] { _id, text, author }
-  }
-  }
+        studySessions[]{
+          _id,
+          _key,
+          title,
+          conceptDefinition,
+          whyItMatters,
+          whatThisMeansForYou,
+          commonMisconceptions,
+          realLifeExample,
+          whyTimeToActIsNow,
+          openLetterToYou,
+          content,
+          activity { _id, title, instructions, reflectionPrompt },
+          rolePlay { _id, title, scenario, instructions },
+          summaryBox { _id, content },
+          takeawayJournalingPrompts[] { _id, prompt },
+          quotes[] { _id, text, author }
+        }
+      }
     }`
   );
 

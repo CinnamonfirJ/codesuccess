@@ -21,18 +21,35 @@ import {
   Filter,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import type { GetReadingListQueryResult } from "@/sanity.types";
-import ReadingListItem from "@/app/components/readingListLink";
+import ReadingListItem from "@/app/components/reading-list-item";
+
+// Define the book type with categories array
+interface BookWithCategories {
+  _id: string;
+  bookTitle?: string;
+  description?: string;
+  image?: {
+    asset?: {
+      url?: string;
+    };
+  };
+  alt?: {
+    current?: string;
+  };
+  linkUrl?: string;
+  categories?: string[];
+  _createdAt?: string;
+}
 
 const categories = [
   { label: "All", value: "all" },
-  { label: "Fiction", value: "fiction" },
-  { label: "Non-fiction", value: "non-fiction" },
-  { label: "Self-help", value: "self-help" },
-  { label: "Technology", value: "technology" },
-  { label: "Business", value: "business" },
-  { label: "Personal Growth", value: "growth" },
-  { label: "Spiritual", value: "spiritual" },
+  { label: "Mindset", value: "mindset" },
+  { label: "Motivation", value: "motivation" },
+  { label: "Purpose Discovery", value: "purpose-discovery" },
+  { label: "Financial Literacy", value: "financial-literacy" },
+  { label: "Communication", value: "communication" },
+  { label: "Confidence", value: "confidence" },
+  { label: "Emotional Intelligence", value: "emotional-intelligence" },
 ];
 
 const staggerContainer = {
@@ -51,7 +68,7 @@ const fadeInUp = {
 };
 
 interface ReadingListClientProps {
-  initialBooks: GetReadingListQueryResult;
+  initialBooks: BookWithCategories[];
   error?: string;
 }
 
@@ -60,11 +77,9 @@ export default function ReadingListClient({
   error,
 }: ReadingListClientProps) {
   // Ensure we always have an array, even if the data structure is unexpected
-  const [books] = useState<GetReadingListQueryResult>(
+  const [books] = useState<BookWithCategories[]>(
     Array.isArray(initialBooks) ? initialBooks : []
   );
-
-  console.log(books);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -78,14 +93,20 @@ export default function ReadingListClient({
     }
 
     return books.filter((book) => {
+      // Handle multiple categories - check if any of the book's categories match the selected category
       const matchesCategory =
-        selectedCategory === "all" || book.category === selectedCategory;
+        selectedCategory === "all" ||
+        (book.categories &&
+          Array.isArray(book.categories) &&
+          book.categories.includes(selectedCategory));
+
       const matchesSearch =
         searchQuery === "" ||
         (book.bookTitle &&
           book.bookTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (book.description &&
           book.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
       return matchesCategory && matchesSearch;
     });
   }, [books, selectedCategory, searchQuery]);
@@ -93,7 +114,14 @@ export default function ReadingListClient({
   const getCategoryCount = (category: string) => {
     if (!Array.isArray(books)) return 0;
     if (category === "all") return books.length;
-    return books.filter((book) => book.category === category).length;
+
+    // Count books that have this category in their categories array
+    return books.filter(
+      (book) =>
+        book.categories &&
+        Array.isArray(book.categories) &&
+        book.categories.includes(category)
+    ).length;
   };
 
   // Show loading state if no books and no error
