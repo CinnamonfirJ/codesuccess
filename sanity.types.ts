@@ -913,21 +913,6 @@ export type GetCourseByExactSlugQueryResult = {
   }> | null;
 } | null;
 
-// Source: sanity/lib/heroSpotlight/getHeroSpotlight.tsx
-// Variable: getHeroSpotlightQuery
-// Query: *[_type == "heroSpotlight"] {    _id,    _createdAt,    _updatedAt,    name,    "imageUrl": image.asset->url,    description,    areaOfExcellence,    adversities,    overcomingChallenges  }
-export type GetHeroSpotlightQueryResult = Array<{
-  _id: string;
-  _createdAt: string;
-  _updatedAt: string;
-  name: string | null;
-  imageUrl: string | null;
-  description: string | null;
-  areaOfExcellence: string | null;
-  adversities: Array<string> | null;
-  overcomingChallenges: string | null;
-}>;
-
 // Source: sanity/lib/readingList/getReadindList.ts
 // Variable: getReadingListQuery
 // Query: *[_type == "readingList"] | order(_createdAt desc) {    _id,    bookTitle,    description,    image {      asset -> {        url      }    },    alt,    linkUrl,    categories,    _createdAt  }
@@ -952,7 +937,6 @@ declare module "@sanity/client" {
   interface SanityQueries {
     "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...},\n        \"studySession\": studySession[]->{...},\n        }": GetCoursesQueryResult;
     "*[_type == \"course\" && slug.current == $slug][0]{\n      _id,\n      title,\n      \"slug\": slug.current,\n      description,\n      modules[]-> {\n        _id,\n        _key,\n        title,\n        description,\n        studySessions[]{\n          _key,\n          \"session\": @-> {\n            _id,\n            title,\n            // New structured content fields\n            conceptDefinition,\n            whyItMatters,\n            whatThisMeansForYou,\n            commonMisconceptions,\n            realLifeExample,\n            whyTimeToActIsNow,\n            openLetterToYou,\n            // Keep the old content field for backward compatibility\n            content,\n            activity {\n              _id,\n              title,\n              instructions,\n              reflectionPrompt\n            },\n            rolePlay {\n              _id,\n              title,\n              scenario,\n              instructions,\n              variation,\n              reflectionPrompt\n            },\n            summaryBox {\n              _id,\n              content\n            },\n            takeawayJournalingPrompts[] {\n              _id,\n              prompt\n            },\n            quotes[] {\n              _id,\n              text,\n              author\n            }\n          }\n        }\n      }\n    }": GetCourseByExactSlugQueryResult;
-    "*[_type == \"heroSpotlight\"] {\n    _id,\n    _createdAt,\n    _updatedAt,\n    name,\n    \"imageUrl\": image.asset->url,\n    description,\n    areaOfExcellence,\n    adversities,\n    overcomingChallenges\n  }": GetHeroSpotlightQueryResult;
     "\n  *[_type == \"readingList\"] | order(_createdAt desc) {\n    _id,\n    bookTitle,\n    description,\n    image {\n      asset -> {\n        url\n      }\n    },\n    alt,\n    linkUrl,\n    categories,\n    _createdAt\n  }\n": GetReadingListQueryResult;
   }
 }

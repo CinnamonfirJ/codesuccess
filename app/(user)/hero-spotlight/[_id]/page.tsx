@@ -4,12 +4,12 @@ import { getHeroById } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
 
 interface HeroDetailPageProps {
   params: {
-    id: string;
+    _id: string;
   };
 }
 
 export default async function HeroDetailPage({ params }: HeroDetailPageProps) {
-  const hero = await getHeroById(params.id);
+  const hero = await getHeroById(params._id);
 
   if (!hero) {
     notFound();
