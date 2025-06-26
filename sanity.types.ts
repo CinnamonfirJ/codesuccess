@@ -586,7 +586,7 @@ export type GetCoursesQueryResult = Array<{
 
 // Source: sanity/lib/courses/getCoursesBySlug.ts
 // Variable: getCourseByExactSlugQuery
-// Query: *[_type == "course" && slug.current == $slug][0]{      _id,      title,      "slug": slug.current,      description,      modules[]-> {        ..., // Keep other fields from the module document        _id,        _key,        title,        description,        studySessions[]{          _id,          _key,          title,          conceptDefinition,          whyItMatters,          whatThisMeansForYou,          commonMisconceptions,          realLifeExample,          whyTimeToActIsNow,          openLetterToYou,          activity { _id, title, instructions, reflectionPrompt },          rolePlay { _id, title, scenario, instructions },          summaryBox { _id, content },          takeawayJournalingPrompts[] { _id, prompt },          quotes[] { _id, text, author }        }      }    }
+// Query: *[_type == "course" && slug.current == $slug][0]{      _id,      title,      "slug": slug.current,      description,      modules[]-> {        _id,        _key,        title,        description,        studySessions[]{          _key,          "session": @-> {            _id,            title,            // New structured content fields            conceptDefinition,            whyItMatters,            whatThisMeansForYou,            commonMisconceptions,            realLifeExample,            whyTimeToActIsNow,            openLetterToYou,            // Keep the old content field for backward compatibility            content,            activity {              _id,              title,              instructions,              reflectionPrompt            },            rolePlay {              _id,              title,              scenario,              instructions,              variation,              reflectionPrompt            },            summaryBox {              _id,              content            },            takeawayJournalingPrompts[] {              _id,              prompt            },            quotes[] {              _id,              text,              author            }          }        }      }    }
 export type GetCourseByExactSlugQueryResult = {
   _id: string;
   title: string | null;
@@ -594,33 +594,339 @@ export type GetCourseByExactSlugQueryResult = {
   description: string | null;
   modules: Array<{
     _id: string;
-    _type: "module";
-    _createdAt: string;
-    _updatedAt: string;
-    _rev: string;
+    _key: null;
     title: string | null;
-    slug?: Slug;
     description: string | null;
     studySessions: Array<{
-      _id: null;
       _key: string;
-      title: null;
-      conceptDefinition: null;
-      whyItMatters: null;
-      whatThisMeansForYou: null;
-      commonMisconceptions: null;
-      realLifeExample: null;
-      whyTimeToActIsNow: null;
-      openLetterToYou: null;
-      activity: null;
-      rolePlay: null;
-      summaryBox: null;
-      takeawayJournalingPrompts: null;
-      quotes: null;
+      session: {
+        _id: string;
+        title: string | null;
+        conceptDefinition: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        whyItMatters: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        whatThisMeansForYou: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        commonMisconceptions: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        realLifeExample: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        whyTimeToActIsNow: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        openLetterToYou: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        } | {
+          asset?: {
+            _ref: string;
+            _type: "reference";
+            _weak?: boolean;
+            [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+          };
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+          _key: string;
+        }> | null;
+        content: null;
+        activity: {
+          _id: null;
+          title: string | null;
+          instructions: Array<{
+            children?: Array<{
+              marks?: Array<string>;
+              text?: string;
+              _type: "span";
+              _key: string;
+            }>;
+            style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+            listItem?: "bullet" | "number";
+            markDefs?: Array<{
+              href?: string;
+              _type: "link";
+              _key: string;
+            }>;
+            level?: number;
+            _type: "block";
+            _key: string;
+          }> | null;
+          reflectionPrompt: string | null;
+        } | null;
+        rolePlay: {
+          _id: null;
+          title: string | null;
+          scenario: string | null;
+          instructions: Array<{
+            children?: Array<{
+              marks?: Array<string>;
+              text?: string;
+              _type: "span";
+              _key: string;
+            }>;
+            style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+            listItem?: "bullet" | "number";
+            markDefs?: Array<{
+              href?: string;
+              _type: "link";
+              _key: string;
+            }>;
+            level?: number;
+            _type: "block";
+            _key: string;
+          }> | null;
+          variation: Array<{
+            children?: Array<{
+              marks?: Array<string>;
+              text?: string;
+              _type: "span";
+              _key: string;
+            }>;
+            style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+            listItem?: "bullet" | "number";
+            markDefs?: Array<{
+              href?: string;
+              _type: "link";
+              _key: string;
+            }>;
+            level?: number;
+            _type: "block";
+            _key: string;
+          }> | null;
+          reflectionPrompt: string | null;
+        } | null;
+        summaryBox: {
+          _id: null;
+          content: Array<{
+            children?: Array<{
+              marks?: Array<string>;
+              text?: string;
+              _type: "span";
+              _key: string;
+            }>;
+            style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+            listItem?: "bullet" | "number";
+            markDefs?: Array<{
+              href?: string;
+              _type: "link";
+              _key: string;
+            }>;
+            level?: number;
+            _type: "block";
+            _key: string;
+          }> | null;
+        } | null;
+        takeawayJournalingPrompts: Array<{
+          _id: null;
+          prompt: string | null;
+        }> | null;
+        quotes: Array<{
+          _id: null;
+          text: string | null;
+          author: string | null;
+        }> | null;
+      };
     }> | null;
-    _key: null;
   }> | null;
 } | null;
+
+// Source: sanity/lib/heroSpotlight/getHeroSpotlight.tsx
+// Variable: getHeroSpotlightQuery
+// Query: *[_type == "heroSpotlight"] {    _id,    _createdAt,    _updatedAt,    name,    "imageUrl": image.asset->url,    description,    areaOfExcellence,    adversities,    overcomingChallenges  }
+export type GetHeroSpotlightQueryResult = Array<{
+  _id: string;
+  _createdAt: string;
+  _updatedAt: string;
+  name: string | null;
+  imageUrl: string | null;
+  description: string | null;
+  areaOfExcellence: string | null;
+  adversities: Array<string> | null;
+  overcomingChallenges: string | null;
+}>;
 
 // Source: sanity/lib/readingList/getReadindList.ts
 // Variable: getReadingListQuery
@@ -645,7 +951,8 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     "*[_type == \"course\"] {\n        ...,\n        \"slug\": slug.current,\n        \"description\": description.current,\n        \"modules\": modules[]->{...},\n        \"studySession\": studySession[]->{...},\n        }": GetCoursesQueryResult;
-    "*[_type == \"course\" && slug.current == $slug][0]{\n      _id,\n      title,\n      \"slug\": slug.current,\n      description,\n      modules[]-> {\n        ..., // Keep other fields from the module document\n        _id,\n        _key,\n        title,\n        description,\n        studySessions[]{\n          _id,\n          _key,\n          title,\n          conceptDefinition,\n          whyItMatters,\n          whatThisMeansForYou,\n          commonMisconceptions,\n          realLifeExample,\n          whyTimeToActIsNow,\n          openLetterToYou,\n          activity { _id, title, instructions, reflectionPrompt },\n          rolePlay { _id, title, scenario, instructions },\n          summaryBox { _id, content },\n          takeawayJournalingPrompts[] { _id, prompt },\n          quotes[] { _id, text, author }\n        }\n      }\n    }": GetCourseByExactSlugQueryResult;
+    "*[_type == \"course\" && slug.current == $slug][0]{\n      _id,\n      title,\n      \"slug\": slug.current,\n      description,\n      modules[]-> {\n        _id,\n        _key,\n        title,\n        description,\n        studySessions[]{\n          _key,\n          \"session\": @-> {\n            _id,\n            title,\n            // New structured content fields\n            conceptDefinition,\n            whyItMatters,\n            whatThisMeansForYou,\n            commonMisconceptions,\n            realLifeExample,\n            whyTimeToActIsNow,\n            openLetterToYou,\n            // Keep the old content field for backward compatibility\n            content,\n            activity {\n              _id,\n              title,\n              instructions,\n              reflectionPrompt\n            },\n            rolePlay {\n              _id,\n              title,\n              scenario,\n              instructions,\n              variation,\n              reflectionPrompt\n            },\n            summaryBox {\n              _id,\n              content\n            },\n            takeawayJournalingPrompts[] {\n              _id,\n              prompt\n            },\n            quotes[] {\n              _id,\n              text,\n              author\n            }\n          }\n        }\n      }\n    }": GetCourseByExactSlugQueryResult;
+    "*[_type == \"heroSpotlight\"] {\n    _id,\n    _createdAt,\n    _updatedAt,\n    name,\n    \"imageUrl\": image.asset->url,\n    description,\n    areaOfExcellence,\n    adversities,\n    overcomingChallenges\n  }": GetHeroSpotlightQueryResult;
     "\n  *[_type == \"readingList\"] | order(_createdAt desc) {\n    _id,\n    bookTitle,\n    description,\n    image {\n      asset -> {\n        url\n      }\n    },\n    alt,\n    linkUrl,\n    categories,\n    _createdAt\n  }\n": GetReadingListQueryResult;
   }
 }

@@ -23,6 +23,7 @@ import {
   Clock3,
   Mail,
   BookOpen,
+  AlertCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -66,46 +67,112 @@ export default function StudySessionContent({
   const nextSession = module.studySessions?.[currentSessionIndex + 1];
   const prevSession = module.studySessions?.[currentSessionIndex - 1];
 
+  // Debug: Log all the data
+  console.log("Session data:", session);
+  console.log("Module data:", module);
+  console.log("Course data:", course);
+  console.log("All sessions:", module.studySessions);
+
+  // Check if session data is properly loaded
+  const isSessionEmpty =
+    !session ||
+    Object.values(session).every(
+      (value) => value === null || value === undefined
+    );
+
   // Check if we have new structured content or old content
   const hasStructuredContent =
-    session.conceptDefinition ||
-    session.whyItMatters ||
-    session.whatThisMeansForYou ||
-    session.commonMisconceptions ||
-    session.realLifeExample ||
-    session.whyTimeToActIsNow ||
-    session.openLetterToYou;
+    session?.conceptDefinition ||
+    session?.whyItMatters ||
+    session?.whatThisMeansForYou ||
+    session?.commonMisconceptions ||
+    session?.realLifeExample ||
+    session?.whyTimeToActIsNow ||
+    session?.openLetterToYou;
 
-  const hasLegacyContent = session.content && session.content.length > 0;
-
-  // Calculate estimated reading time
-  const calculateReadingTime = () => {
-    if (hasStructuredContent) {
-      const sections = [
-        session.conceptDefinition,
-        session.whyItMatters,
-        session.whatThisMeansForYou,
-        session.commonMisconceptions,
-        session.realLifeExample,
-        session.whyTimeToActIsNow,
-        session.openLetterToYou,
-      ];
-      const totalLength = sections.reduce(
-        (acc, section) => acc + (section?.length || 0),
-        0
-      );
-      return Math.max(10, Math.ceil(totalLength / 150));
-    } else if (hasLegacyContent) {
-      return Math.max(5, Math.ceil((session.content?.length || 0) / 200));
-    }
-    return 5;
-  };
-
-  const estimatedTime = calculateReadingTime();
+  const hasLegacyContent = session?.content && session.content.length > 0;
 
   const handleMarkComplete = () => {
     setIsCompleted(!isCompleted);
   };
+
+  // If session is completely empty, show data issue warning
+  if (isSessionEmpty || !session?.title) {
+    return (
+      <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
+        <div className='mx-auto mt-10 px-2 md:px-6 py-8 md:max-w-5xl'>
+          {/* Header Navigation */}
+          <motion.div
+            className='mb-8'
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Link
+              href={`/courses/${slug}`}
+              className='group inline-flex items-center mb-6 font-medium text-emerald-600 hover:text-emerald-700 transition-colors'
+            >
+              <ArrowLeft className='mr-2 w-4 h-4 transition-transform group-hover:-translate-x-1' />
+              Back to Course
+            </Link>
+
+            {/* Data Issue Warning */}
+            <Card className='bg-red-50 shadow-lg border-red-200'>
+              <CardContent className='p-8 text-center'>
+                <div className='flex justify-center items-center bg-red-100 mx-auto mb-4 rounded-full w-16 h-16'>
+                  <AlertCircle className='w-8 h-8 text-red-600' />
+                </div>
+                <h3 className='mb-4 font-semibold text-red-800 text-xl'>
+                  Session Data Issue
+                </h3>
+                <div className='bg-white mb-4 p-4 rounded-lg text-left'>
+                  <p className='mb-2 text-red-700'>
+                    <strong>Session Key:</strong> {sessionKey}
+                  </p>
+                  <p className='mb-2 text-red-700'>
+                    <strong>Module ID:</strong> {moduleId}
+                  </p>
+                  <p className='mb-2 text-red-700'>
+                    <strong>Issue:</strong> Session data is not properly
+                    configured in Sanity CMS
+                  </p>
+                </div>
+                <div className='space-y-2 text-red-700 text-sm'>
+                  <p>
+                    <strong>Possible solutions:</strong>
+                  </p>
+                  <ul className='space-y-1 text-left'>
+                    <li>
+                      • Check if the study session exists in Sanity Studio
+                    </li>
+                    <li>• Verify the session has a title and content</li>
+                    <li>
+                      • Ensure the session is properly linked to the module
+                    </li>
+                    <li>• Check if the session document is published</li>
+                  </ul>
+                </div>
+                <div className='flex justify-center gap-4 mt-6'>
+                  <Link href={`/courses/${slug}`}>
+                    <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
+                      Back to Course
+                    </Button>
+                  </Link>
+                  <Button
+                    variant='outline'
+                    onClick={() => window.location.reload()}
+                    className='hover:bg-red-50 border-red-300 text-red-600'
+                  >
+                    Retry Loading
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   // Content sections configuration for new structured content
   const contentSections = [
@@ -174,11 +241,6 @@ export default function StudySessionContent({
     },
   ];
 
-  // Debug: Log session data to console
-  console.log("Session data:", session);
-  console.log("Has structured content:", hasStructuredContent);
-  console.log("Has legacy content:", hasLegacyContent);
-
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
       <div className='mx-auto mt-10 px-2 md:px-6 py-8 md:max-w-5xl'>
@@ -228,24 +290,20 @@ export default function StudySessionContent({
                       <PlayCircle className='w-6 h-6' />
                     </div>
                     <div className='p-2 text-emerald-100 md:text-sm text-wrap'>
-                      {course.title} • {module.title}
+                      {course?.title} • {module?.title}
                     </div>
                   </div>
                   <h1 className='mb-4 font-bold text-lg md:text-3xl lg:text-4xl leading-tight'>
-                    {session.title}
+                    {session?.title || "Study Session"}
                   </h1>
                   <div className='flex items-center gap-3 md:gap-6 text-emerald-100 text-nowrap'>
                     <div className='flex items-center gap-2'>
                       <Clock className='w-4 h-4' />
-                      <span>{estimatedTime} min read</span>
+                      <span>5 min read</span>
                     </div>
                     <div className='flex items-center gap-2'>
                       <Target className='w-4 h-4' />
-                      <span>
-                        {hasStructuredContent
-                          ? "Structured Learning"
-                          : "Learning Session"}
-                      </span>
+                      <span>Learning Session</span>
                     </div>
                   </div>
                 </div>
@@ -361,10 +419,16 @@ export default function StudySessionContent({
                   <h3 className='mb-2 font-semibold text-yellow-800 text-xl'>
                     Content Coming Soon
                   </h3>
-                  <p className='text-yellow-700'>
+                  <p className='mb-4 text-yellow-700'>
                     This study session is being prepared. Please check back
                     later for the complete content.
                   </p>
+                  <div className='bg-yellow-100 p-3 rounded-lg text-yellow-600 text-sm'>
+                    <p>
+                      <strong>For developers:</strong> Add content to this
+                      session in Sanity Studio
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -412,7 +476,7 @@ export default function StudySessionContent({
                       <div className='bg-blue-100 p-6 border border-blue-200 rounded-xl'>
                         <h4 className='flex items-center gap-2 mb-3 font-semibold text-blue-900'>
                           <Lightbulb className='w-5 h-5' />
-                          Reflection
+                          Questions For Reflection
                         </h4>
                         <p className='text-blue-800'>
                           {session.activity.reflectionPrompt}
@@ -471,6 +535,39 @@ export default function StudySessionContent({
                         </ul>
                       </div>
                     )}
+                    {session.rolePlay.variation && (
+                      <div className='bg-green-100 p-6 border border-green-200 rounded-xl'>
+                        <h4 className='mb-4 font-semibold text-green-900'>
+                          Variation:
+                        </h4>
+                        <ul className='space-y-3'>
+                          {session.rolePlay.variation.map(
+                            (variation: any, idx: number) => (
+                              <li key={idx} className='flex items-start gap-3'>
+                                <div className='flex justify-center items-center bg-green-500 mt-0.5 rounded-full w-6 h-6 font-bold text-white text-sm'>
+                                  {idx + 1}
+                                </div>
+                                <div className='flex-1 prose prose-sm'>
+                                  <PortableText value={variation} />
+                                </div>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {session.rolePlay.reflectionPrompt && (
+                      <div className='bg-white/70 p-6 border border-green-100 rounded-xl'>
+                        <h4 className='mb-3 font-semibold text-green-900'>
+                          Reflection Prompt:
+                        </h4>
+                        <div className='prose prose-sm'>
+                          <PortableText
+                            value={session.rolePlay.reflectionPrompt}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -521,7 +618,7 @@ export default function StudySessionContent({
                       <PenTool className='w-5 h-5 text-white' />
                     </div>
                     <h3 className='font-bold text-gray-900 text-2xl'>
-                      Reflection Prompts
+                      Takeaway Journaling Prompts
                     </h3>
                   </div>
                   <div className='space-y-4'>

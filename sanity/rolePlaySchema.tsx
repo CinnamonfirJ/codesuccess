@@ -32,7 +32,7 @@ export const rolePlaySchema = defineType({
     }),
     defineField({
       name: "reflectionPrompt",
-      title: "Reflection Prompt Question For RolePlay",
+      title: "Reflection Prompt",
       type: "text",
     }),
   ],

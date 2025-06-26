@@ -9,28 +9,53 @@ export async function getCoursesBySlug(slug: string) {
       "slug": slug.current,
       description,
       modules[]-> {
-        ..., // Keep other fields from the module document
         _id,
         _key,
         title,
         description,
         studySessions[]{
-          _id,
           _key,
-          title,
-          conceptDefinition,
-          whyItMatters,
-          whatThisMeansForYou,
-          commonMisconceptions,
-          realLifeExample,
-          whyTimeToActIsNow,
-          openLetterToYou,
-          content,
-          activity { _id, title, instructions, reflectionPrompt },
-          rolePlay { _id, title, scenario, instructions },
-          summaryBox { _id, content },
-          takeawayJournalingPrompts[] { _id, prompt },
-          quotes[] { _id, text, author }
+          "session": @-> {
+            _id,
+            title,
+            // New structured content fields
+            conceptDefinition,
+            whyItMatters,
+            whatThisMeansForYou,
+            commonMisconceptions,
+            realLifeExample,
+            whyTimeToActIsNow,
+            openLetterToYou,
+            // Keep the old content field for backward compatibility
+            content,
+            activity {
+              _id,
+              title,
+              instructions,
+              reflectionPrompt
+            },
+            rolePlay {
+              _id,
+              title,
+              scenario,
+              instructions,
+              variation,
+              reflectionPrompt
+            },
+            summaryBox {
+              _id,
+              content
+            },
+            takeawayJournalingPrompts[] {
+              _id,
+              prompt
+            },
+            quotes[] {
+              _id,
+              text,
+              author
+            }
+          }
         }
       }
     }`
@@ -40,6 +65,23 @@ export async function getCoursesBySlug(slug: string) {
     query: getCourseByExactSlugQuery,
     params: { slug },
   });
+
+  // Transform the data to flatten the session structure
+  if (course.data?.modules) {
+    course.data.modules = course.data.modules.map((module: any) => ({
+      ...module,
+      studySessions:
+        module.studySessions?.map((sessionRef: any) => ({
+          _key: sessionRef._key,
+          ...sessionRef.session,
+        })) || [],
+    }));
+  }
+
+  console.log(
+    "Full course data with preserved keys:",
+    JSON.stringify(course.data, null, 2)
+  );
 
   return course.data;
 }

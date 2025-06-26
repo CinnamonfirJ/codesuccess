@@ -2,7 +2,7 @@ import { defineType, defineField } from "sanity";
 
 export const reflectionQuestionSchema = defineType({
   name: "reflectionQuestion",
-  title: "Reflection Question",
+  title: "Questions For Reflection",
   type: "object",
   fields: [
     defineField({
