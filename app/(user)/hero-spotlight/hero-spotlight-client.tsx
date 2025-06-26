@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Star, Trophy, Users } from "lucide-react";
-// import { Search, Filter, Star, Trophy, Users } from "lucide-react";
+import { Search, Filter, Star, Trophy, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getHeroSpotlight } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
 import HeroSpotlightItem from "@/app/components/hero-spotlight-item";
 
@@ -116,7 +115,7 @@ export default function HeroSpotlightClient() {
             />
           </div>
           <div className='flex gap-2'>
-            {/* <Select value={selectedArea} onValueChange={setSelectedArea}>
+            <Select value={selectedArea} onValueChange={setSelectedArea}>
               <SelectTrigger className='w-48'>
                 <Filter className='mr-2 w-4 h-4' />
                 <SelectValue placeholder='Filter by area' />
@@ -124,12 +123,12 @@ export default function HeroSpotlightClient() {
               <SelectContent>
                 <SelectItem value='all'>All Areas</SelectItem>
                 {areas.map((area) => (
-                  <SelectItem key={area} value={area}>
+                  <SelectItem key={area} value={area || ""}>
                     {area}
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select> */}
+            </Select>
           </div>
         </div>
 

@@ -1,10 +1,19 @@
 import { Suspense } from "react";
 import HeroSpotlightClient from "./hero-spotlight-client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export default function HeroSpotlightPage() {
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
       <div className='mx-auto px-6 py-8 container'>
+        <Link href='/hero-spotlight'>
+          <Button variant='ghost' className='gap-2'>
+            <ArrowLeft className='w-4 h-4' />
+            Back to Heroes
+          </Button>
+        </Link>
         <div className='mb-12 text-center'>
           <h1 className='mb-4 font-bold text-gray-900 text-4xl md:text-5xl'>
             Hero Spotlight
