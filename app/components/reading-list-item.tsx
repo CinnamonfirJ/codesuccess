@@ -1,18 +1,27 @@
-"use client";
+// "use client"
 
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BookOpen } from "lucide-react";
+import {
+  ExternalLink,
+  BookOpen,
+  Lightbulb,
+  Target,
+  CheckCircle,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
-// Define the book type with categories array
+// Define the book type with new fields
 interface BookWithCategories {
   _id: string;
   bookTitle?: string;
   description?: string;
+  executiveSummary?: string;
+  coreConcepts?: string[];
+  whyReadThis?: string;
   image?: {
     asset?: {
       url?: string;
@@ -44,8 +53,8 @@ const getCategoryColor = (category: string) => {
     "purpose-discovery": "bg-blue-100 text-blue-700",
     "financial-literacy": "bg-green-100 text-green-700",
     communication: "bg-pink-100 text-pink-700",
-    confidence: "bg-pink-100 text-pink-700",
-    "emotional-intelligence": "bg-indigo-100 text-indigo-700",
+    confidence: "bg-indigo-100 text-indigo-700",
+    "emotional-intelligence": "bg-emerald-100 text-emerald-700",
   };
   return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-700";
 };
@@ -59,6 +68,9 @@ export default function ReadingListItem({
     item.image?.asset?.url || "/placeholder.svg?height=300&width=200";
   const bookTitle = item.bookTitle || "Untitled Book";
   const description = item.description || "No description available";
+  const executiveSummary = item.executiveSummary || "";
+  const coreConcepts = item.coreConcepts || [];
+  const whyReadThis = item.whyReadThis || "";
   const categories = item.categories || [];
 
   if (viewMode === "list") {
@@ -66,26 +78,39 @@ export default function ReadingListItem({
       <motion.div {...scaleOnHover}>
         <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-all duration-300'>
           <CardContent className='p-0'>
-            <div className='flex md:flex-row flex-col'>
+            <div className='flex lg:flex-row flex-col'>
               {/* Book Cover */}
-              <div className='flex-shrink-0 md:w-48'>
-                <div className='relative w-full h-64 md:h-full'>
+              <div className='flex-shrink-0 lg:w-64'>
+                <div className='relative w-full h-64 lg:h-full'>
                   <Image
                     src={imageUrl || "/placeholder.svg"}
                     alt={item.alt?.current || bookTitle}
                     fill
                     className='object-cover'
-                    sizes='(max-width: 768px) 100vw, 192px'
+                    sizes='(max-width: 1024px) 100vw, 256px'
                   />
                 </div>
               </div>
 
+              {/* Executive Summary */}
+              {description && (
+                <div className='mb-4'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Target className='w-4 h-4 text-blue-500' />
+                    <h4 className='font-semibold text-gray-900'>Description</h4>
+                  </div>
+                  <p className='text-gray-600 line-clamp-3 leading-relaxed'>
+                    {description}
+                  </p>
+                </div>
+              )}
+
               {/* Content */}
               <div className='flex flex-col flex-1 justify-between p-6'>
                 <div>
-                  <div className='flex justify-between items-start mb-3'>
+                  <div className='flex justify-between items-start mb-4'>
                     <div className='flex-1'>
-                      {/* Multiple Categories */}
+                      {/* Categories */}
                       <div className='flex flex-wrap gap-2 mb-3'>
                         {categories.map((category, index) => (
                           <Badge
@@ -98,17 +123,72 @@ export default function ReadingListItem({
                           </Badge>
                         ))}
                       </div>
-                      <h3 className='mb-2 font-bold text-gray-900 text-xl line-clamp-2'>
+                      <h3 className='mb-3 font-bold text-gray-900 text-2xl line-clamp-2'>
                         {bookTitle}
                       </h3>
                     </div>
                   </div>
-                  <p className='mb-4 text-gray-600 line-clamp-3 leading-relaxed'>
-                    {description}
-                  </p>
+
+                  {/* Executive Summary */}
+                  {executiveSummary && (
+                    <div className='mb-4'>
+                      <div className='flex items-center gap-2 mb-2'>
+                        <Target className='w-4 h-4 text-blue-500' />
+                        <h4 className='font-semibold text-gray-900'>
+                          Executive Summary
+                        </h4>
+                      </div>
+                      <p className='text-gray-600 line-clamp-3 leading-relaxed'>
+                        {executiveSummary}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Core Concepts */}
+                  {coreConcepts.length > 0 && (
+                    <div className='mb-4'>
+                      <div className='flex items-center gap-2 mb-2'>
+                        <Lightbulb className='w-4 h-4 text-yellow-500' />
+                        <h4 className='font-semibold text-gray-900'>
+                          Key Concepts
+                        </h4>
+                      </div>
+                      <div className='flex flex-wrap gap-2'>
+                        {coreConcepts.slice(0, 4).map((concept, index) => (
+                          <Badge
+                            key={index}
+                            variant='outline'
+                            className='text-xs'
+                          >
+                            {concept}
+                          </Badge>
+                        ))}
+                        {coreConcepts.length > 4 && (
+                          <Badge variant='outline' className='text-xs'>
+                            +{coreConcepts.length - 4} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Why Read This */}
+                  {whyReadThis && (
+                    <div className='mb-4'>
+                      <div className='flex items-center gap-2 mb-2'>
+                        <CheckCircle className='w-4 h-4 text-green-500' />
+                        <h4 className='font-semibold text-gray-900'>
+                          Why Read This
+                        </h4>
+                      </div>
+                      <p className='text-gray-600 line-clamp-2 leading-relaxed'>
+                        {whyReadThis}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                <div className='flex justify-between items-center'>
+                <div className='flex justify-between items-center pt-4 border-gray-100 border-t'>
                   <div className='flex items-center gap-2 text-gray-500 text-sm'>
                     <BookOpen className='w-4 h-4' />
                     <span>Recommended read</span>
@@ -171,12 +251,45 @@ export default function ReadingListItem({
 
           {/* Content */}
           <div className='flex flex-col flex-1 p-4'>
-            <h3 className='mb-2 min-h-[3.5rem] font-bold text-gray-900 text-lg line-clamp-2'>
+            <h3 className='mb-3 min-h-[3.5rem] font-bold text-gray-900 text-lg line-clamp-2'>
               {bookTitle}
             </h3>
-            <p className='flex-1 mb-4 text-gray-600 text-sm line-clamp-3 leading-relaxed'>
-              {description}
-            </p>
+
+            {/* Executive Summary */}
+            {executiveSummary && (
+              <div className='mb-3'>
+                <p className='text-gray-600 text-sm line-clamp-2 leading-relaxed'>
+                  {executiveSummary}
+                </p>
+              </div>
+            )}
+
+            {/* Core Concepts */}
+            {coreConcepts.length > 0 && (
+              <div className='mb-3'>
+                <div className='flex flex-wrap gap-1'>
+                  {coreConcepts.slice(0, 3).map((concept, index) => (
+                    <Badge key={index} variant='outline' className='text-xs'>
+                      {concept}
+                    </Badge>
+                  ))}
+                  {coreConcepts.length > 3 && (
+                    <Badge variant='outline' className='text-xs'>
+                      +{coreConcepts.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Why Read This */}
+            {whyReadThis && (
+              <div className='flex-1 mb-4'>
+                <p className='text-gray-600 text-sm line-clamp-2 leading-relaxed'>
+                  {whyReadThis}
+                </p>
+              </div>
+            )}
 
             <div className='mt-auto'>
               {item.linkUrl ? (

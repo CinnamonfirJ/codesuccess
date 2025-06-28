@@ -10,6 +10,7 @@ export const readingListSchema = defineType({
       title: "Book Title",
       type: "string",
       description: "The title of the book",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "description",
@@ -18,12 +19,35 @@ export const readingListSchema = defineType({
       description: "Optional description of the book or why it's recommended",
     }),
     defineField({
+      name: "executiveSummary",
+      title: "Executive Summary",
+      type: "text",
+      description: "A brief executive summary of the book's main points",
+      validation: (Rule) => Rule.required().min(50).max(500),
+    }),
+    defineField({
+      name: "coreConcepts",
+      title: "Core Concepts",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "Key concepts and ideas covered in the book",
+      validation: (Rule) => Rule.required().min(3).max(10),
+    }),
+    defineField({
+      name: "whyReadThis",
+      title: "Why Read This Book",
+      type: "text",
+      description: "Compelling reasons why someone should read this book",
+      validation: (Rule) => Rule.required().min(50).max(300),
+    }),
+    defineField({
       name: "image",
       title: "Book Cover Image",
       type: "image",
       options: {
         hotspot: true,
       },
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "alt",
