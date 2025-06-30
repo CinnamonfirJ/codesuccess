@@ -19,9 +19,11 @@ import {
   BookOpen,
   ExternalLink,
   Filter,
+  ArrowLeft,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ReadingListItem from "@/app/components/reading-list-item";
+import Link from "next/link";
 
 // Define the book type with categories array
 interface BookWithCategories {
@@ -185,6 +187,14 @@ export default function ReadingListClient({
           transition={{ duration: 0.6 }}
         >
           <div className='mb-8 text-center'>
+            <div className='flex justify-start items-center mb-4'>
+              <Link href='/homepage'>
+                <Button variant='ghost' className='gap-2'>
+                  <ArrowLeft className='w-4 h-4' />
+                  Back to Heroes
+                </Button>
+              </Link>
+            </div>
             <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto mb-4 rounded-full w-16 h-16'>
               <BookOpen className='w-8 h-8 text-white' />
             </div>
