@@ -15,16 +15,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+// Interface for Portable Text Block and Image
+interface PortableTextBlock {
+  _key: string;
+  _type: "block";
+  children: { _key: string; _type: "span"; marks: string[]; text: string }[];
+  markDefs: any[];
+  style: string;
+}
+
+interface PortableTextImage {
+  _key: string;
+  _type: "image";
+  asset: {
+    url: string;
+  };
+  alt?: string;
+  [key: string]: any; // Allow other properties like dimensions
+}
+
+type PortableTextContent = (PortableTextBlock | PortableTextImage)[];
+
 interface Hero {
   _id: string;
   _createdAt?: string | null;
   _updatedAt?: string | null;
   name?: string | null;
   imageUrl?: string | null;
-  description?: string | null;
+  description?: PortableTextContent | null; // Updated type
   areaOfExcellence?: string | null;
   adversities?: string[] | null;
-  overcomingChallenges?: string | null;
+  overcomingChallenges?: PortableTextContent | null; // Updated type
 }
 
 interface HeroDetailClientProps {
@@ -52,16 +73,76 @@ function getAreaColor(area: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
+// Helper to render Sanity's Portable Text blocks
+const PortableTextRenderer = ({
+  blocks,
+}: {
+  blocks: PortableTextContent | null;
+}) => {
+  if (!blocks || blocks.length === 0) {
+    return <p className='text-gray-600'>No content available.</p>;
+  }
+
+  return (
+    <div className='space-y-4 text-gray-700 leading-relaxed'>
+      {blocks.map((block, index) => {
+        if (block._type === "block") {
+          // Render block content (paragraphs, headings, etc.)
+          // This is a basic rendering for paragraphs. You might expand this
+          // to handle different block styles (h1, h2, lists, etc.) if needed.
+          const textContent = block.children
+            .map((child: any) => child.text)
+            .join("");
+          return <p key={block._key || index}>{textContent}</p>;
+        } else if (
+          block._type === "image" &&
+          (block as PortableTextImage).asset?.url
+        ) {
+          // Render image block
+          const imageBlock = block as PortableTextImage;
+          return (
+            <div
+              key={imageBlock._key || index}
+              className='my-4 rounded-md overflow-hidden'
+            >
+              <Image
+                src={imageBlock.asset.url}
+                alt={imageBlock.alt || "Content image"}
+                width={700} // Adjust as needed for max width
+                height={400} // Adjust as needed for aspect ratio
+                layout='responsive'
+                objectFit='contain'
+              />
+            </div>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
 export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
   const [isLiked, setIsLiked] = useState(false);
 
   const handleShare = async () => {
+    // Extract a plain text description for sharing
+    let shareText = `Learn about ${hero.name || "this hero"}'s inspiring story.`;
+    if (hero.description && hero.description.length > 0) {
+      const firstTextBlock = hero.description.find(
+        (block) =>
+          block._type === "block" && block.children && block.children.length > 0
+      ) as PortableTextBlock;
+      if (firstTextBlock) {
+        shareText = firstTextBlock.children[0].text.substring(0, 150) + "..."; // Take first 150 chars
+      }
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${hero.name} - Hero Spotlight`,
-          text:
-            hero.description || `Learn about ${hero.name}'s inspiring story`,
+          title: `${hero.name || "Hero"} - Hero Spotlight`,
+          text: shareText,
           url: window.location.href,
         });
       } catch (error) {
@@ -80,7 +161,7 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
       <div className='top-0 z-10 sticky bg-white border-b'>
         <div className='mx-auto px-4 py-4 container'>
           <div className='flex justify-between items-center'>
-            <Link href='/hero-spotlight'>
+            <Link href='/homepage'>
               <Button variant='ghost' className='gap-2'>
                 <ArrowLeft className='w-4 h-4' />
                 Back to Heroes
@@ -141,16 +222,19 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                     )}
                   </div>
 
-                  <p className='text-gray-600 text-lg leading-relaxed'>
-                    {hero.description || "No description available."}
-                  </p>
+                  {/* Render description using PortableTextRenderer */}
+                  <PortableTextRenderer blocks={hero.description || null} />
 
                   {hero._createdAt && (
                     <div className='flex items-center gap-2 text-gray-500 text-sm'>
                       <Calendar className='w-4 h-4' />
                       <span>
                         Featured on{" "}
-                        {new Date(hero._createdAt).toLocaleDateString()}
+                        {new Date(hero._createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </span>
                     </div>
                   )}
@@ -170,14 +254,14 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className='space-y-3'>
+                  <ul className='space-y-3'>
                     {hero.adversities.map((adversity, index) => (
-                      <div key={index} className='flex items-start gap-3'>
+                      <li key={index} className='flex items-start gap-3'>
                         <div className='flex-shrink-0 bg-red-400 mt-2 rounded-full w-2 h-2' />
                         <p className='text-gray-700'>{adversity}</p>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </CardContent>
               </Card>
             )}
@@ -192,9 +276,8 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className='text-gray-700 leading-relaxed'>
-                    {hero.overcomingChallenges}
-                  </p>
+                  {/* Render overcomingChallenges using PortableTextRenderer */}
+                  <PortableTextRenderer blocks={hero.overcomingChallenges} />
                 </CardContent>
               </Card>
             )}

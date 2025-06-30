@@ -7,10 +7,24 @@ export async function getHeroSpotlight() {
     _updatedAt,
     name,
     "imageUrl": image.asset->url,
-    description,
+    description[]{
+      ..., // Include all properties of the block
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    },
     areaOfExcellence,
     adversities,
-    overcomingChallenges
+    overcomingChallenges[]{
+      ..., // Include all properties of the block
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    }
   }`;
 
   return await client.fetch(query);
@@ -23,10 +37,24 @@ export async function getHeroById(id: string) {
     _updatedAt,
     name,
     "imageUrl": image.asset->url,
-    description,
+    description[]{
+      ..., // Include all properties of the block
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    },
     areaOfExcellence,
     adversities,
-    overcomingChallenges
+    overcomingChallenges[]{
+      ..., 
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    }
   }`;
 
   return await client.fetch(query, { id });
