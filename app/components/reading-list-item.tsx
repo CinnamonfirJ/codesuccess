@@ -5,34 +5,23 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ExternalLink,
-  BookOpen,
-  Lightbulb,
-  Target,
-  CheckCircle,
-} from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Define the book type with new fields
 interface BookWithCategories {
   _id: string;
   bookTitle?: string;
-  description?: string;
-  executiveSummary?: string;
-  coreConcepts?: string[];
-  whyReadThis?: string;
-  image?: {
-    asset?: {
-      url?: string;
+  name?: {
+    author?: string;
+    cover?: {
+      asset?: {
+        url?: string;
+      };
     };
   };
-  alt?: {
-    current?: string;
-  };
-  linkUrl?: string;
+  executiveSummary?: string;
   categories?: string[];
-  _createdAt?: string;
+  linkUrl?: string; // Still include for potential external links on detail page
 }
 
 interface ReadingListItemProps {
@@ -65,13 +54,13 @@ export default function ReadingListItem({
   onClick,
 }: ReadingListItemProps) {
   const imageUrl =
-    item.image?.asset?.url || "/placeholder.svg?height=300&width=200";
+    item.name?.cover?.asset?.url || "/placeholder.svg?height=300&width=200";
   const bookTitle = item.bookTitle || "Untitled Book";
-  const description = item.description || "No description available";
+  const author = item.name?.author || "Unknown Author";
   const executiveSummary = item.executiveSummary || "";
-  const coreConcepts = item.coreConcepts || [];
-  const whyReadThis = item.whyReadThis || "";
   const categories = item.categories || [];
+
+  const detailPageLink = `/reading-list/book/${item._id}`; // Dynamic link to the detail page
 
   if (viewMode === "list") {
     return (
@@ -79,12 +68,11 @@ export default function ReadingListItem({
         <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-all duration-300'>
           <CardContent className='p-0'>
             <div className='flex lg:flex-row flex-col'>
-              {/* Book Cover */}
               <div className='flex-shrink-0 lg:w-64'>
                 <div className='relative w-full h-64 lg:h-full'>
                   <Image
-                    src={imageUrl || "/placeholder.svg"}
-                    alt={item.alt?.current || bookTitle}
+                    src={imageUrl}
+                    alt={bookTitle}
                     fill
                     className='object-cover'
                     sizes='(max-width: 1024px) 100vw, 256px'
@@ -92,25 +80,10 @@ export default function ReadingListItem({
                 </div>
               </div>
 
-              {/* Executive Summary */}
-              {description && (
-                <div className='mb-4'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <Target className='w-4 h-4 text-blue-500' />
-                    <h4 className='font-semibold text-gray-900'>Description</h4>
-                  </div>
-                  <p className='text-gray-600 line-clamp-3 leading-relaxed'>
-                    {description}
-                  </p>
-                </div>
-              )}
-
-              {/* Content */}
               <div className='flex flex-col flex-1 justify-between p-6'>
                 <div>
                   <div className='flex justify-between items-start mb-4'>
                     <div className='flex-1'>
-                      {/* Categories */}
                       <div className='flex flex-wrap gap-2 mb-3'>
                         {categories.map((category, index) => (
                           <Badge
@@ -123,66 +96,17 @@ export default function ReadingListItem({
                           </Badge>
                         ))}
                       </div>
-                      <h3 className='mb-3 font-bold text-gray-900 text-2xl line-clamp-2'>
+                      <h3 className='mb-1 font-bold text-gray-900 text-2xl line-clamp-2'>
                         {bookTitle}
                       </h3>
+                      <p className='mb-3 text-gray-700 text-sm'>By {author}</p>
                     </div>
                   </div>
 
-                  {/* Executive Summary */}
                   {executiveSummary && (
                     <div className='mb-4'>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Target className='w-4 h-4 text-blue-500' />
-                        <h4 className='font-semibold text-gray-900'>
-                          Executive Summary
-                        </h4>
-                      </div>
                       <p className='text-gray-600 line-clamp-3 leading-relaxed'>
                         {executiveSummary}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Core Concepts */}
-                  {coreConcepts.length > 0 && (
-                    <div className='mb-4'>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Lightbulb className='w-4 h-4 text-yellow-500' />
-                        <h4 className='font-semibold text-gray-900'>
-                          Key Concepts
-                        </h4>
-                      </div>
-                      <div className='flex flex-wrap gap-2'>
-                        {coreConcepts.slice(0, 4).map((concept, index) => (
-                          <Badge
-                            key={index}
-                            variant='outline'
-                            className='text-xs'
-                          >
-                            {concept}
-                          </Badge>
-                        ))}
-                        {coreConcepts.length > 4 && (
-                          <Badge variant='outline' className='text-xs'>
-                            +{coreConcepts.length - 4} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Why Read This */}
-                  {whyReadThis && (
-                    <div className='mb-4'>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <CheckCircle className='w-4 h-4 text-green-500' />
-                        <h4 className='font-semibold text-gray-900'>
-                          Why Read This
-                        </h4>
-                      </div>
-                      <p className='text-gray-600 line-clamp-2 leading-relaxed'>
-                        {whyReadThis}
                       </p>
                     </div>
                   )}
@@ -193,19 +117,11 @@ export default function ReadingListItem({
                     <BookOpen className='w-4 h-4' />
                     <span>Recommended read</span>
                   </div>
-                  {item.linkUrl && (
-                    <Link
-                      href={item.linkUrl}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      onClick={onClick}
-                    >
-                      <Button className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 text-white'>
-                        <ExternalLink className='mr-2 w-4 h-4' />
-                        Get Book
-                      </Button>
-                    </Link>
-                  )}
+                  <Link href={detailPageLink} onClick={onClick}>
+                    <Button className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 text-white'>
+                      View Details
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -220,16 +136,14 @@ export default function ReadingListItem({
     <motion.div {...scaleOnHover}>
       <Card className='bg-white shadow-lg hover:shadow-xl border-0 h-full overflow-hidden transition-all duration-300'>
         <CardContent className='flex flex-col p-0 h-full'>
-          {/* Book Cover */}
           <div className='relative w-full h-64'>
             <Image
-              src={imageUrl || "/placeholder.svg"}
-              alt={item.alt?.current || bookTitle}
+              src={imageUrl}
+              alt={bookTitle}
               fill
               className='object-cover'
               sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
             />
-            {/* Categories overlay */}
             <div className='top-3 left-3 absolute flex flex-wrap gap-1 max-w-[calc(100%-1.5rem)]'>
               {categories.slice(0, 2).map((category, index) => (
                 <Badge
@@ -249,13 +163,12 @@ export default function ReadingListItem({
             </div>
           </div>
 
-          {/* Content */}
           <div className='flex flex-col flex-1 p-4'>
-            <h3 className='mb-3 min-h-[3.5rem] font-bold text-gray-900 text-lg line-clamp-2'>
+            <h3 className='mb-1 min-h-[3.5rem] font-bold text-gray-900 text-lg line-clamp-2'>
               {bookTitle}
             </h3>
+            <p className='mb-3 text-gray-700 text-sm'>By {author}</p>
 
-            {/* Executive Summary */}
             {executiveSummary && (
               <div className='mb-3'>
                 <p className='text-gray-600 text-sm line-clamp-2 leading-relaxed'>
@@ -264,55 +177,12 @@ export default function ReadingListItem({
               </div>
             )}
 
-            {/* Core Concepts */}
-            {coreConcepts.length > 0 && (
-              <div className='mb-3'>
-                <div className='flex flex-wrap gap-1'>
-                  {coreConcepts.slice(0, 3).map((concept, index) => (
-                    <Badge key={index} variant='outline' className='text-xs'>
-                      {concept}
-                    </Badge>
-                  ))}
-                  {coreConcepts.length > 3 && (
-                    <Badge variant='outline' className='text-xs'>
-                      +{coreConcepts.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Why Read This */}
-            {whyReadThis && (
-              <div className='flex-1 mb-4'>
-                <p className='text-gray-600 text-sm line-clamp-2 leading-relaxed'>
-                  {whyReadThis}
-                </p>
-              </div>
-            )}
-
             <div className='mt-auto'>
-              {item.linkUrl ? (
-                <Link
-                  href={item.linkUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  onClick={onClick}
-                >
-                  <Button className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 w-full text-white'>
-                    <ExternalLink className='mr-2 w-4 h-4' />
-                    Get Book
-                  </Button>
-                </Link>
-              ) : (
-                <Button
-                  disabled
-                  className='bg-gray-100 w-full text-gray-400 cursor-not-allowed'
-                >
-                  <BookOpen className='mr-2 w-4 h-4' />
-                  Coming Soon
+              <Link href={detailPageLink} onClick={onClick}>
+                <Button className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 w-full text-white'>
+                  View Details
                 </Button>
-              )}
+              </Link>
             </div>
           </div>
         </CardContent>

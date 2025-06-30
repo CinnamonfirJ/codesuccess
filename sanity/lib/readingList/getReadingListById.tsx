@@ -1,20 +1,20 @@
 import { client } from "../client";
 
-export async function getReadingList() {
+export async function getReadingListItemById(id: string) {
   try {
-    const query = `*[_type == "readingList"] | order(_createdAt desc) {
+    const query = `*[_type == "readingList" && _id == $id][0] {
       _id,
       bookTitle,
-      name { // Access the 'name' object for book information
+      name {
         author,
-        cover { // Access the 'cover' field within 'name'
+        cover {
           asset -> {
             url
           }
         },
       },
       executiveSummary,
-      coreConceptsSection { // Access the 'coreConceptsSection' object
+      coreConceptsSection {
         coreConcepts,
         mainPoints[]{
           ...,
@@ -25,7 +25,7 @@ export async function getReadingList() {
           }
         }
       },
-      whyReadSection { // Access the 'whyReadSection' object
+      whyReadSection {
         whyReadThis[]{
           ...,
           _type == "image" => {
@@ -56,10 +56,10 @@ export async function getReadingList() {
       _createdAt
     }`;
 
-    const readingList = await client.fetch(query);
-    return readingList;
+    const readingListItem = await client.fetch(query, { id });
+    return readingListItem;
   } catch (error) {
-    console.error("Error fetching reading list:", error);
+    console.error(`Error fetching reading list item with ID ${id}:`, error);
     throw error;
   }
 }
