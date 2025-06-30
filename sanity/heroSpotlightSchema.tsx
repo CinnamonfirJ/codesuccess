@@ -25,9 +25,10 @@ export const heroSpotlightSchema = defineType({
     defineField({
       name: "description",
       title: "Short Description",
-      type: "text",
-      description: "A short summary about the hero",
-      validation: (Rule) => Rule.required().min(20),
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "A brief overview of the hero's life and achievements",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "areaOfExcellence",
