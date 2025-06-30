@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Form from "next/form";
 import Link from "next/link";
+import Image from "next/image";
 
 interface NavbarProps {
   onLeftSidebarToggle?: () => void;
@@ -45,8 +46,14 @@ export default function Navbar({
 
           {/* Logo */}
           <div className='flex items-center gap-2'>
-            <div className='flex justify-center items-center bg-gradient-to-br from-teal to-coral rounded-lg w-8 h-8'>
-              <span className='font-bold text-white text-sm'>CS</span>
+            <div className='flex justify-center items-center rounded-lg w-8 h-8'>
+              <Image
+                src='/logo.png' // Path to your image in the public directory
+                alt='CodeSuccess Logo' // Important for accessibility and SEO
+                width={32} // Match the 'w-8' (32px)
+                height={32} // Match the 'h-8' (32px)
+                className='rounded-lg' // Apply border-radius if needed
+              />
             </div>
             <h1 className='hidden sm:block font-bold text-navy text-xl'>
               CodeSuccesx
