@@ -48,9 +48,9 @@ export const heroSpotlightSchema = defineType({
     defineField({
       name: "overcomingChallenges",
       title: "How They Overcame Challenges",
-      type: "text",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
       description: "Narrative of how they fought through difficulties",
-      validation: (Rule) => Rule.required().min(20),
     }),
   ],
 });

@@ -5,97 +5,100 @@ export const readingListSchema = defineType({
   title: "Reading List",
   type: "document",
   fields: [
+    // 1. Book Information
     defineField({
       name: "bookTitle",
       title: "Book Title",
       type: "string",
-      description: "The title of the book",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "description",
-      title: "Description",
-      type: "text",
-      description: "Optional description of the book or why it's recommended",
+      name: "name",
+      title: "Book Information",
+      type: "object",
+      validation: (Rule) => Rule.required(),
+      fields: [
+        defineField({
+          name: "author",
+          title: "Author",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "cover", // Renamed from 'image' to match your 'Cover'
+          title: "Cover",
+          type: "image",
+          options: {
+            hotspot: true,
+          },
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
     }),
+
+    // 2. Executive Summary
+
     defineField({
       name: "executiveSummary",
       title: "Executive Summary",
       type: "text",
-      description: "A brief executive summary of the book's main points",
       validation: (Rule) => Rule.required().min(50).max(500),
     }),
+
+    // 3. *Core Concepts, *Main Point
+
     defineField({
-      name: "coreConcepts",
-      title: "Core Concepts",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "Key concepts and ideas covered in the book",
-      validation: (Rule) => Rule.required().min(3).max(10),
-    }),
-    defineField({
-      name: "whyReadThis",
-      title: "Why Read This Book",
-      type: "text",
-      description: "Compelling reasons why someone should read this book",
-      validation: (Rule) => Rule.required().min(50).max(300),
-    }),
-    defineField({
-      name: "image",
-      title: "Book Cover Image",
-      type: "image",
-      options: {
-        hotspot: true,
-      },
+      name: "coreConceptsSection", // Name for the object grouping core concepts
+      title: "Core Concepts Section",
+      type: "object",
       validation: (Rule) => Rule.required(),
-    }),
+      fields: [
+        defineField({
+          name: "coreConcepts",
+          title: "Core Concepts",
+          type: "array",
+          of: [{ type: "string", title: "Point" }],
+          validation: (Rule) => Rule.required().min(3).max(10),
+        }),
+        defineField({
+          name: "mainPoints",
+          title: "Main Points",
+          type: "array",
+          of: [{ type: "block" }, { type: "image" }],
+          description: "Explain the main points of the book",
+        }),
+      ],
+    }), // 4. *Why Read the Book, *Here's why it's a must-read., *Final Word
     defineField({
-      name: "alt",
-      type: "slug",
-      title: "Alternative text",
-      options: {
-        source: "bookTitle",
-        maxLength: 96,
-      },
+      name: "whyReadSection", // Name for the object grouping "Why Read" fields
+      title: "Why Read The Book",
+      type: "object",
       validation: (Rule) => Rule.required(),
-    }),
+      fields: [
+        defineField({
+          name: "whyReadThis",
+          title: "Why Read This Book",
+          type: "text",
+          validation: (Rule) => Rule.required().min(50).max(300),
+        }),
+        defineField({
+          name: "whyMustRead",
+          title: "Here's Why It's a Must-Read",
+          type: "text",
+          validation: (Rule) => Rule.required().min(50).max(300),
+        }),
+        defineField({
+          name: "finalWord",
+          title: "Final Word",
+          type: "text",
+          validation: (Rule) => Rule.required().min(20).max(200),
+        }),
+      ],
+    }), // 5. Linkurl
     defineField({
       name: "linkUrl",
       title: "Link URL",
       type: "url",
-      description: "A link to purchase, preview, or read the book online",
-    }),
-    defineField({
-      name: "categories",
-      title: "Categories",
-      type: "array",
-      of: [
-        {
-          type: "string",
-          options: {
-            list: [
-              { title: "Mindset", value: "mindset" },
-              { title: "Motivation", value: "motivation" },
-              { title: "Purpose Discovery", value: "purpose-discovery" },
-              { title: "Financial Literacy", value: "financial-literacy" },
-              {
-                title: "Communication",
-                value: "communication",
-              },
-              {
-                title: "Confidence",
-                value: "confidence",
-              },
-              {
-                title: "Emotional Intelligence",
-                value: "emotional-intelligence",
-              },
-            ],
-          },
-        },
-      ],
-      description: "Select one or more categories for this book",
-      validation: (Rule) => Rule.required().min(1).max(5),
     }),
   ],
 });
