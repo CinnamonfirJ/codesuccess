@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PortableText } from "next-sanity";
 
 // Interface for Portable Text Block and Image
 interface PortableTextBlock {
@@ -73,54 +74,54 @@ function getAreaColor(area: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
-// Helper to render Sanity's Portable Text blocks
-const PortableTextRenderer = ({
-  blocks,
-}: {
-  blocks: PortableTextContent | null;
-}) => {
-  if (!blocks || blocks.length === 0) {
-    return <p className='text-gray-600'>No content available.</p>;
-  }
+// // Helper to render Sanity's Portable Text blocks
+// const PortableTextRenderer = ({
+//   blocks,
+// }: {
+//   blocks: PortableTextContent | null;
+// }) => {
+//   if (!blocks || blocks.length === 0) {
+//     return <p className='text-gray-600'>No content available.</p>;
+//   }
 
-  return (
-    <div className='space-y-4 text-gray-700 leading-relaxed'>
-      {blocks.map((block, index) => {
-        if (block._type === "block") {
-          // Render block content (paragraphs, headings, etc.)
-          // This is a basic rendering for paragraphs. You might expand this
-          // to handle different block styles (h1, h2, lists, etc.) if needed.
-          const textContent = block.children
-            .map((child: any) => child.text)
-            .join("");
-          return <p key={block._key || index}>{textContent}</p>;
-        } else if (
-          block._type === "image" &&
-          (block as PortableTextImage).asset?.url
-        ) {
-          // Render image block
-          const imageBlock = block as PortableTextImage;
-          return (
-            <div
-              key={imageBlock._key || index}
-              className='my-4 rounded-md overflow-hidden'
-            >
-              <Image
-                src={imageBlock.asset.url}
-                alt={imageBlock.alt || "Content image"}
-                width={700} // Adjust as needed for max width
-                height={400} // Adjust as needed for aspect ratio
-                layout='responsive'
-                objectFit='contain'
-              />
-            </div>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-};
+//   return (
+//     <div className='space-y-4 text-gray-700 leading-relaxed'>
+//       {blocks.map((block, index) => {
+//         if (block._type === "block") {
+//           // Render block content (paragraphs, headings, etc.)
+//           // This is a basic rendering for paragraphs. You might expand this
+//           // to handle different block styles (h1, h2, lists, etc.) if needed.
+//           const textContent = block.children
+//             .map((child: any) => child.text)
+//             .join("");
+//           return <p key={block._key || index}>{textContent}</p>;
+//         } else if (
+//           block._type === "image" &&
+//           (block as PortableTextImage).asset?.url
+//         ) {
+//           // Render image block
+//           const imageBlock = block as PortableTextImage;
+//           return (
+//             <div
+//               key={imageBlock._key || index}
+//               className='my-4 rounded-md overflow-hidden'
+//             >
+//               <Image
+//                 src={imageBlock.asset.url}
+//                 alt={imageBlock.alt || "Content image"}
+//                 width={700} // Adjust as needed for max width
+//                 height={400} // Adjust as needed for aspect ratio
+//                 layout='responsive'
+//                 objectFit='contain'
+//               />
+//             </div>
+//           );
+//         }
+//         return null;
+//       })}
+//     </div>
+//   );
+// };
 
 export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
   const [isLiked, setIsLiked] = useState(false);
@@ -185,7 +186,7 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
       </div>
 
       <div className='mx-auto px-4 py-8 container'>
-        <div className='mx-auto max-w-4xl'>
+        <div className='mx-auto max-w-7xl'>
           {/* Hero Header */}
           <div className='bg-white shadow-sm mb-8 rounded-lg overflow-hidden'>
             <div className='md:flex'>
@@ -223,7 +224,7 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                   </div>
 
                   {/* Render description using PortableTextRenderer */}
-                  <PortableTextRenderer blocks={hero.description || null} />
+                  <PortableText value={hero.description || []} />
 
                   {hero._createdAt && (
                     <div className='flex items-center gap-2 text-gray-500 text-sm'>
@@ -277,7 +278,7 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                 </CardHeader>
                 <CardContent>
                   {/* Render overcomingChallenges using PortableTextRenderer */}
-                  <PortableTextRenderer blocks={hero.overcomingChallenges} />
+                  <PortableText value={hero.overcomingChallenges} />
                 </CardContent>
               </Card>
             )}
