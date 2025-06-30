@@ -42,7 +42,7 @@ export const readingListSchema = defineType({
       name: "executiveSummary",
       title: "Executive Summary",
       type: "text",
-      validation: (Rule) => Rule.required().min(50).max(500),
+      validation: (Rule) => Rule.required(),
     }),
 
     // 3. *Core Concepts, *Main Point
@@ -58,7 +58,7 @@ export const readingListSchema = defineType({
           title: "Core Concepts",
           type: "array",
           of: [{ type: "string", title: "Point" }],
-          validation: (Rule) => Rule.required().min(3).max(10),
+          validation: (Rule) => Rule.required(),
         }),
         defineField({
           name: "mainPoints",
@@ -79,19 +79,19 @@ export const readingListSchema = defineType({
           name: "whyReadThis",
           title: "Why Read This Book",
           type: "text",
-          validation: (Rule) => Rule.required().min(50).max(300),
+          validation: (Rule) => Rule.required(),
         }),
         defineField({
           name: "whyMustRead",
           title: "Here's Why It's a Must-Read",
           type: "text",
-          validation: (Rule) => Rule.required().min(50).max(300),
+          validation: (Rule) => Rule.required(),
         }),
         defineField({
           name: "finalWord",
           title: "Final Word",
           type: "text",
-          validation: (Rule) => Rule.required().min(20).max(200),
+          validation: (Rule) => Rule.required(),
         }),
       ],
     }), // 5. Linkurl
@@ -130,7 +130,7 @@ export const readingListSchema = defineType({
         },
       ],
       description: "Select one or more categories for this book",
-      validation: (Rule) => Rule.required().min(1).max(5),
+      validation: (Rule) => Rule.required(),
     }),
   ],
 });
