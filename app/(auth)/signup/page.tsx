@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
+// import { registerUser } from "@/lib/auth/register";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -47,18 +48,24 @@ export default function SignupPage() {
     agreeToTerms: false,
   });
 
+  // const [form, setForm] = useState({
+  //   username: "",
+  //   email: "",
+  //   password1: "",
+  //   password2: "",
+  // });
+
+  // const [message, setMessage] = useState<string | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    // Redirect to onboarding or dashboard
-    window.location.href = "/onboarding";
+    setIsLoading(!isLoading);
+    // await registerUser(form, setIsLoading);
   };
 
   return (

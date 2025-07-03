@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { ExpandableSection } from "./ExpandableSection";
 import CourseLink from "./courseLink";
 import type { GetCoursesQueryResult } from "@/sanity.types";
@@ -36,9 +36,9 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
     >
       {/* User Profile Card */}
       <Card className='bg-white shadow-xl border-0 overflow-hidden'>
-        <CardHeader className='bg-gradient-to-r from-emerald-500 to-blue-500 p-6 text-white'>
+        <CardHeader className='bg-gradient-to-r from-emerald-500 to-blue-500 p-3 text-white'>
           <div className='flex flex-col items-center text-center'>
-            <Avatar className='mb-4 border-4 border-white/20 w-20 h-20'>
+            <Avatar className='mb-2 border-4 border-white/20 w-16 h-16'>
               <AvatarImage
                 src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
                 alt='User'
@@ -48,14 +48,14 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               </AvatarFallback>
             </Avatar>
             <h2 className='mb-2 font-bold text-xl'>Jane Doe</h2>
-            <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge>
+            {/* <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge> */}
             <p className='text-emerald-100 text-sm leading-relaxed'>
               Aspiring developer passionate about creating positive change
               through technology.
             </p>
           </div>
         </CardHeader>
-        <CardContent className='p-4'>
+        {/* <CardContent className='p-4'>
           <div className='gap-4 grid grid-cols-3 text-center'>
             <div>
               <div className='font-bold text-emerald-600 text-lg'>12</div>
@@ -65,12 +65,12 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               <div className='font-bold text-blue-600 text-lg'>89%</div>
               <div className='text-gray-600 text-xs'>Progress</div>
             </div>
-            {/* <div>
+            <div>
               <div className='font-bold text-purple-600 text-lg'>156</div>
               <div className='text-gray-600 text-xs'>Points</div>
-            </div> */}
+            </div>
           </div>
-        </CardContent>
+        </CardContent> */}
       </Card>
 
       {/* Navigation Sections */}
@@ -174,7 +174,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
             </ExpandableSection>
 
             <ExpandableSection
-              title='Start CodeSuccesx'
+              title='Start CodeSuccex'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg w-8 h-8'>
                   <GraduationCap className='w-4 h-4 text-white' />

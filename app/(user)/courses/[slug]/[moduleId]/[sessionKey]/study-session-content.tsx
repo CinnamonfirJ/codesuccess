@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import clsx from "clsx";
 
 interface StudySessionContentProps {
   session: any;
@@ -35,6 +36,7 @@ interface StudySessionContentProps {
   slug: string;
   moduleId: string;
   sessionKey: string;
+  className?: string;
 }
 
 const fadeInUp = {
@@ -58,6 +60,7 @@ export default function StudySessionContent({
   slug,
   moduleId,
   sessionKey,
+  className,
 }: StudySessionContentProps) {
   const [isCompleted, setIsCompleted] = useState(false);
 
@@ -68,10 +71,10 @@ export default function StudySessionContent({
   const prevSession = module.studySessions?.[currentSessionIndex - 1];
 
   // Debug: Log all the data
-  console.log("Session data:", session);
-  console.log("Module data:", module);
-  console.log("Course data:", course);
-  console.log("All sessions:", module.studySessions);
+  // console.log("Session data:", session);
+  // console.log("Module data:", module);
+  // console.log("Course data:", course);
+  // console.log("All sessions:", module.studySessions);
 
   // Check if session data is properly loaded
   const isSessionEmpty =
@@ -142,9 +145,7 @@ export default function StudySessionContent({
                     <strong>Possible solutions:</strong>
                   </p>
                   <ul className='space-y-1 text-left'>
-                    <li>
-                      • Check if the study session exists in Sanity Studio
-                    </li>
+                    <li>• Check if the study session exists</li>
                     <li>• Verify the session has a title and content</li>
                     <li>
                       • Ensure the session is properly linked to the module
@@ -242,7 +243,12 @@ export default function StudySessionContent({
   ];
 
   return (
-    <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
+    <div
+      className={clsx(
+        "bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen",
+        className
+      )}
+    >
       <div className='mx-auto mt-10 px-2 md:px-6 py-8 md:max-w-5xl'>
         {/* Header Navigation */}
         <motion.div
@@ -511,7 +517,9 @@ export default function StudySessionContent({
                         Scenario:
                       </h4>
                       <div className='prose prose-sm'>
-                        <PortableText value={session.rolePlay.scenario} />
+                        <p className='text-green-800'>
+                          {session.rolePlay.scenario}
+                        </p>
                       </div>
                     </div>
                     {session.rolePlay.instructions && (
@@ -562,9 +570,9 @@ export default function StudySessionContent({
                           Reflection Prompt:
                         </h4>
                         <div className='prose prose-sm'>
-                          <PortableText
-                            value={session.rolePlay.reflectionPrompt}
-                          />
+                          <p className='text-green-800'>
+                            {session.rolePlay.reflectionPrompt}
+                          </p>
                         </div>
                       </div>
                     )}

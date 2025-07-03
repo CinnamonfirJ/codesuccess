@@ -39,7 +39,7 @@ const posts = [
       verified: true,
     },
     content:
-      "Just completed my first coding challenge on CodeSuccesx! The community support here is amazing. Feeling motivated to tackle the next one! 🚀 #CodeNewbie #LearningToCode",
+      "Just completed my first coding challenge on CodeSuccex! The community support here is amazing. Feeling motivated to tackle the next one! 🚀 #CodeNewbie #LearningToCode",
     image: "/WhatsApp Image 2025-05-21 at 18.42.02_95109c88 (1).png",
     timestamp: "2 hours ago",
     likes: 24,
@@ -87,7 +87,7 @@ const posts = [
   {
     id: 4,
     author: {
-      name: "CodeSuccesx Team",
+      name: "CodeSuccex Team",
       avatar: "/hussein-xodie-xtiGJzxb5zo-unsplash.jpg",
       initials: "CS",
       verified: true,

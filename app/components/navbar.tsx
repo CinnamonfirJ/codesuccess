@@ -56,7 +56,7 @@ export default function Navbar({
               />
             </div>
             <h1 className='hidden sm:block font-bold text-navy text-xl'>
-              CodeSuccesx
+              CodeSuccex
             </h1>
           </div>
         </div>

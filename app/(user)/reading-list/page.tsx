@@ -6,8 +6,8 @@ export default async function ReadingListPage() {
     const books = await getReadingList();
 
     // Ensure we have an array
-    const booksArray = Array.isArray(books) ? books : [];
-    console.log(booksArray);
+    // const booksArray = Array.isArray(books) ? books : [];
+    // console.log(booksArray);
 
     return <ReadingListClient initialBooks={books} />;
   } catch (error) {

@@ -115,6 +115,7 @@ export default async function StudySessionPage({
       slug={slug}
       moduleId={moduleId}
       sessionKey={sessionKey}
+      className='select-none'
     />
   );
 }

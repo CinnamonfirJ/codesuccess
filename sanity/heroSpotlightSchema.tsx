@@ -31,12 +31,27 @@ export const heroSpotlightSchema = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "areaOfExcellence",
-      title: "Area of Excellence",
-      type: "string",
-      description:
-        "Field or area the hero is known for (e.g. Education, Innovation)",
+      name: "excellenceSection",
+      title: "Excellence Section",
+      type: "object",
       validation: (Rule) => Rule.required(),
+      fields: [
+        defineField({
+          name: "areaOfExcellence",
+          title: "Area of Excellence",
+          type: "string",
+          description:
+            "Field or area the hero is known for (e.g. Education, Innovation)",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "descriptionOfExcellence",
+          title: "Description of Excellence",
+          type: "array",
+          of: [{ type: "block" }, { type: "image" }],
+          description: "Describe how this person excels.",
+        }),
+      ],
     }),
     defineField({
       name: "adversities",
@@ -52,6 +67,21 @@ export const heroSpotlightSchema = defineType({
       type: "array",
       of: [{ type: "block" }, { type: "image" }],
       description: "Narrative of how they fought through difficulties",
+    }),
+    defineField({
+      name: "inspiration",
+      title: "Why Our Hero Inspires Us",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "Reasons why this hero is an inspiration to others",
+      validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
+      name: "heroMessage",
+      title: "Hero's Message to the World",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }],
+      description: "The hero's message to the world",
     }),
   ],
 });

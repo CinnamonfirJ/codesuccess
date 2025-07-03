@@ -119,8 +119,8 @@ export default function RightSidebar() {
     >
       {/* Header Card */}
       <Card className='bg-gradient-to-r from-orange-500 to-pink-500 shadow-xl border-0 text-white'>
-        <CardHeader className='p-6 text-center'>
-          <div className='flex justify-center items-center bg-white/20 mx-auto mb-3 rounded-full w-12 h-12'>
+        <CardHeader className='p-3 text-center'>
+          <div className='flex justify-center items-center bg-white/20 mx-auto rounded-full w-12 h-12'>
             <Zap className='w-6 h-6' />
           </div>
           <h2 className='font-bold text-xl'>Opportunities</h2>

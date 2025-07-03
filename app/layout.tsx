@@ -14,7 +14,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "CodeX",
+  title: "CodeSuccex",
   description:
     "A social media-inspired platform for youth to learn, grow, and engage in productive activities",
 };
