@@ -12,7 +12,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getHeroSpotlight } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
-import HeroSpotlightItem from "@/app/components/hero-spotlight-item";
+import HeroSpotlightCard from "@/app/components/hero-spotlight-card"; // Renamed import to HeroSpotlightCard for clarity
+
+// --- Portable Text Type Definitions ---
+// Make sure these match exactly what you have in your HeroDetailClient and HeroSpotlightCard
+interface PortableTextBlock {
+  _key: string;
+  _type: "block";
+  children: { _key: string; _type: "span"; marks: string[]; text: string }[];
+  markDefs: any[];
+  style: string;
+}
+
+interface PortableTextImage {
+  _key: string;
+  _type: "image";
+  asset: {
+    url: string;
+  };
+  alt?: string;
+  [key: string]: any;
+}
+
+type PortableTextContent = (PortableTextBlock | PortableTextImage)[];
 
 interface Hero {
   _id: string;
@@ -20,10 +42,15 @@ interface Hero {
   _updatedAt?: string | null;
   name?: string | null;
   imageUrl?: string | null;
-  description?: string | null;
-  areaOfExcellence?: string | null;
+  description?: PortableTextContent | null;
+  excellenceSection?: {
+    areaOfExcellence?: string[] | null;
+    descriptionOfExcellence?: PortableTextContent | null;
+  } | null;
   adversities?: string[] | null;
-  overcomingChallenges?: string | null;
+  overcomingChallenges?: PortableTextContent | null;
+  inspiration?: string[] | null;
+  heroMessage?: PortableTextContent | null;
 }
 
 export default function HeroSpotlightClient() {
@@ -33,10 +60,27 @@ export default function HeroSpotlightClient() {
   const [selectedArea, setSelectedArea] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get unique areas of excellence for filter
+  // Helper to extract plain text from Portable Text for search functionality
+  const getPlainText = (blocks: PortableTextContent | null): string => {
+    if (!blocks) return "";
+    return blocks
+      .filter((block) => block._type === "block")
+      .map((block) =>
+        (block as PortableTextBlock).children.map((span) => span.text).join("")
+      )
+      .join(" ")
+      .toLowerCase();
+  };
+
+  // Get unique areas of excellence for filter dropdown
+  // This now correctly flattens the array of arrays (hero.excellenceSection.areaOfExcellence)
   const areas = Array.from(
-    new Set(heroes.map((hero) => hero.areaOfExcellence).filter(Boolean))
-  ).sort();
+    new Set(
+      heroes.flatMap((hero) => hero.excellenceSection?.areaOfExcellence || [])
+    )
+  )
+    .filter(Boolean)
+    .sort() as string[];
 
   useEffect(() => {
     async function fetchHeroes() {
@@ -56,23 +100,39 @@ export default function HeroSpotlightClient() {
 
   useEffect(() => {
     let filtered = heroes;
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (hero) =>
-          hero.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          hero.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          hero.areaOfExcellence
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
+          hero.name?.toLowerCase().includes(lowerCaseSearchTerm) ||
+          getPlainText(hero.description || null).includes(
+            lowerCaseSearchTerm
+          ) ||
+          hero.excellenceSection?.areaOfExcellence?.some((area) =>
+            area.toLowerCase().includes(lowerCaseSearchTerm)
+          ) ||
+          getPlainText(
+            hero.excellenceSection?.descriptionOfExcellence || null
+          ).includes(lowerCaseSearchTerm) ||
+          hero.adversities?.some((adversity) =>
+            adversity.toLowerCase().includes(lowerCaseSearchTerm)
+          ) ||
+          getPlainText(hero.overcomingChallenges || null).includes(
+            lowerCaseSearchTerm
+          ) ||
+          hero.inspiration?.some((reason) =>
+            reason.toLowerCase().includes(lowerCaseSearchTerm)
+          ) ||
+          getPlainText(hero.heroMessage || null).includes(lowerCaseSearchTerm)
       );
     }
 
-    // Filter by area of excellence
+    // Filter by area of excellence (now checks if array includes the selected area)
     if (selectedArea !== "all") {
-      filtered = filtered.filter(
-        (hero) => hero.areaOfExcellence === selectedArea
+      filtered = filtered.filter((hero) =>
+        hero.excellenceSection?.areaOfExcellence?.includes(selectedArea)
       );
     }
 
@@ -123,7 +183,7 @@ export default function HeroSpotlightClient() {
               <SelectContent>
                 <SelectItem value='all'>All Areas</SelectItem>
                 {areas.map((area) => (
-                  <SelectItem key={area} value={area || ""}>
+                  <SelectItem key={area} value={area}>
                     {area}
                   </SelectItem>
                 ))}
@@ -154,7 +214,7 @@ export default function HeroSpotlightClient() {
       {filteredHeroes.length > 0 ? (
         <div className='gap-8 grid md:grid-cols-2 lg:grid-cols-3'>
           {filteredHeroes.map((hero) => (
-            <HeroSpotlightItem key={hero._id} hero={hero} />
+            <HeroSpotlightCard key={hero._id} hero={hero} />
           ))}
         </div>
       ) : (
