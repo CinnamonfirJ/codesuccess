@@ -3,7 +3,7 @@ import { defineQuery } from "groq";
 
 export async function getCourses() {
   const getCoursesQuery =
-    defineQuery(`*[_type == "course"] | order(_createdAt desc) {
+    defineQuery(`*[_type == "course"] | order(_createdAt asc) {
         ...,
         "slug": slug.current,
         "description": description.current,

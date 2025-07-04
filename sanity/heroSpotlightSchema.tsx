@@ -38,11 +38,12 @@ export const heroSpotlightSchema = defineType({
       fields: [
         defineField({
           name: "areaOfExcellence",
-          title: "Area of Excellence",
-          type: "string",
+          title: "Areas of Excellence", // Changed title to plural
+          type: "array", // Changed to array
+          of: [{ type: "string" }], // Array of strings
           description:
-            "Field or area the hero is known for (e.g. Education, Innovation)",
-          validation: (Rule) => Rule.required(),
+            "Fields or areas the hero is known for (e.g., Education, Innovation)",
+          validation: (Rule) => Rule.required().min(1), // Added min(1) validation
         }),
         defineField({
           name: "descriptionOfExcellence",

@@ -8,17 +8,36 @@ export async function getHeroSpotlight() {
     name,
     "imageUrl": image.asset->url,
     description[]{
-      ..., // Include all properties of the block
+      ...,
       _type == "image" => {
         asset -> {
           url
         }
       }
     },
-    areaOfExcellence,
+    excellenceSection {
+      areaOfExcellence, // This will now fetch an array of strings
+      descriptionOfExcellence[]{
+        ...,
+        _type == "image" => {
+          asset -> {
+            url
+          }
+        }
+      }
+    },
     adversities,
     overcomingChallenges[]{
-      ..., // Include all properties of the block
+      ...,
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    },
+    inspiration,
+    heroMessage[]{
+      ...,
       _type == "image" => {
         asset -> {
           url
@@ -38,17 +57,36 @@ export async function getHeroById(id: string) {
     name,
     "imageUrl": image.asset->url,
     description[]{
-      ..., // Include all properties of the block
+      ...,
       _type == "image" => {
         asset -> {
           url
         }
       }
     },
-    areaOfExcellence,
+    excellenceSection {
+      areaOfExcellence, // This will now fetch an array of strings
+      descriptionOfExcellence[]{
+        ...,
+        _type == "image" => {
+          asset -> {
+            url
+          }
+        }
+      }
+    },
     adversities,
     overcomingChallenges[]{
-      ..., 
+      ...,
+      _type == "image" => {
+        asset -> {
+          url
+        }
+      }
+    },
+    inspiration,
+    heroMessage[]{
+      ...,
       _type == "image" => {
         asset -> {
           url

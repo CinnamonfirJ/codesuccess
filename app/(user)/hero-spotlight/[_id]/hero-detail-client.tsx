@@ -10,6 +10,9 @@ import {
   Heart,
   BookOpen,
   Target,
+  MessageSquareText,
+  Check,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,10 +46,15 @@ interface Hero {
   _updatedAt?: string | null;
   name?: string | null;
   imageUrl?: string | null;
-  description?: PortableTextContent | null; // Updated type
-  areaOfExcellence?: string | null;
+  description?: PortableTextContent | null;
+  excellenceSection?: {
+    areaOfExcellence?: string[] | null; // Changed to array of strings
+    descriptionOfExcellence?: PortableTextContent | null;
+  } | null;
   adversities?: string[] | null;
-  overcomingChallenges?: PortableTextContent | null; // Updated type
+  overcomingChallenges?: PortableTextContent | null;
+  inspiration?: string[] | null; // New field
+  heroMessage?: PortableTextContent | null; // New field
 }
 
 interface HeroDetailClientProps {
@@ -214,13 +222,29 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                     <h1 className='mb-2 font-bold text-gray-900 text-3xl'>
                       {hero.name || "Unknown Hero"}
                     </h1>
-                    {hero.areaOfExcellence && (
-                      <Badge
-                        className={`${getAreaColor(hero.areaOfExcellence)} text-sm px-3 py-1`}
-                      >
-                        {hero.areaOfExcellence}
-                      </Badge>
-                    )}
+                    {hero.excellenceSection?.areaOfExcellence &&
+                      hero.excellenceSection.areaOfExcellence.length > 0 && (
+                        <div className='flex flex-wrap gap-2 mb-4'>
+                          {hero.excellenceSection.areaOfExcellence.map(
+                            (area, index) => (
+                              <Badge
+                                key={index}
+                                className={`${getAreaColor(area)} text-sm px-3 py-1`}
+                              >
+                                {area}
+                              </Badge>
+                            )
+                          )}
+                        </div>
+                      )}
+
+                    <div>
+                      <PortableText
+                        value={
+                          hero.excellenceSection?.descriptionOfExcellence || []
+                        }
+                      />
+                    </div>
                   </div>
 
                   {/* Render description using PortableTextRenderer */}
@@ -279,6 +303,43 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                 <CardContent>
                   {/* Render overcomingChallenges using PortableTextRenderer */}
                   <PortableText value={hero.overcomingChallenges} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Why Our Hero Inspires Us */}
+            {hero.inspiration && hero.inspiration.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2 text-purple-700'>
+                    <Sparkles className='w-5 h-5 text-purple-500' />
+                    Why Our Hero Inspires Us
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className='space-y-3'>
+                    {hero.inspiration.map((reason, index) => (
+                      <li key={index} className='flex items-start gap-3'>
+                        <Check className='flex-shrink-0 mt-1 w-5 h-5 text-purple-600' />
+                        <p className='text-gray-700'>{reason}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Hero's Message to the World */}
+            {hero.heroMessage && hero.heroMessage.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2 text-blue-700'>
+                    <MessageSquareText className='w-5 h-5 text-blue-500' />A
+                    Message from Our Hero
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PortableText value={hero.heroMessage} />
                 </CardContent>
               </Card>
             )}
