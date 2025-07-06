@@ -22,7 +22,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
-// import { registerUser } from "@/lib/auth/register";
+import { registerUser } from "@/lib/auth/register";
+import { useRouter } from "next/navigation";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -36,36 +37,27 @@ const scaleOnHover = {
 };
 
 export default function SignupPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    password: "",
-    confirmPassword: "",
+    password1: "",
+    password2: "",
     agreeToTerms: false,
   });
 
-  // const [form, setForm] = useState({
-  //   username: "",
-  //   email: "",
-  //   password1: "",
-  //   password2: "",
-  // });
-
-  // const [message, setMessage] = useState<string | null>(null);
-  // const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password1 !== formData.password2) {
       alert("Passwords don't match!");
       return;
     }
     setIsLoading(!isLoading);
-    // await registerUser(form, setIsLoading);
+    await registerUser(formData, setIsLoading, () => router.push("/login"));
   };
 
   return (
@@ -102,7 +94,7 @@ export default function SignupPage() {
                   transition={{ delay: 0.3, duration: 0.6 }}
                 >
                   <Label
-                    htmlFor='firstName'
+                    htmlFor='first_name'
                     className='font-medium text-gray-700'
                   >
                     First Name
@@ -110,13 +102,13 @@ export default function SignupPage() {
                   <div className='relative mt-2'>
                     <User className='top-1/2 left-3 absolute w-5 h-5 text-gray-400 -translate-y-1/2 transform' />
                     <Input
-                      id='firstName'
+                      id='first Name'
                       type='text'
                       placeholder='First name'
                       className='pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                      value={formData.firstName}
+                      value={formData.first_name}
                       onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
+                        setFormData({ ...formData, first_name: e.target.value })
                       }
                       required
                     />
@@ -129,7 +121,7 @@ export default function SignupPage() {
                   transition={{ delay: 0.3, duration: 0.6 }}
                 >
                   <Label
-                    htmlFor='lastName'
+                    htmlFor='last_name'
                     className='font-medium text-gray-700'
                   >
                     Last Name
@@ -137,13 +129,13 @@ export default function SignupPage() {
                   <div className='relative mt-2'>
                     <User className='top-1/2 left-3 absolute w-5 h-5 text-gray-400 -translate-y-1/2 transform' />
                     <Input
-                      id='lastName'
+                      id='last_name'
                       type='text'
                       placeholder='Last name'
                       className='pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                      value={formData.lastName}
+                      value={formData.last_name}
                       onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
+                        setFormData({ ...formData, last_name: e.target.value })
                       }
                       required
                     />
@@ -180,19 +172,22 @@ export default function SignupPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
               >
-                <Label htmlFor='password' className='font-medium text-gray-700'>
+                <Label
+                  htmlFor='password1'
+                  className='font-medium text-gray-700'
+                >
                   Password
                 </Label>
                 <div className='relative mt-2'>
                   <Lock className='top-1/2 left-3 absolute w-5 h-5 text-gray-400 -translate-y-1/2 transform' />
                   <Input
-                    id='password'
+                    id='password1'
                     type={showPassword ? "text" : "password"}
                     placeholder='Create a strong password'
                     className='pr-10 pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                    value={formData.password}
+                    value={formData.password1}
                     onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
+                      setFormData({ ...formData, password1: e.target.value })
                     }
                     required
                   />
@@ -216,7 +211,7 @@ export default function SignupPage() {
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
                 <Label
-                  htmlFor='confirmPassword'
+                  htmlFor='password2'
                   className='font-medium text-gray-700'
                 >
                   Confirm Password
@@ -224,15 +219,15 @@ export default function SignupPage() {
                 <div className='relative mt-2'>
                   <Lock className='top-1/2 left-3 absolute w-5 h-5 text-gray-400 -translate-y-1/2 transform' />
                   <Input
-                    id='confirmPassword'
+                    id='password2'
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder='Confirm your password'
                     className='pr-10 pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                    value={formData.confirmPassword}
+                    value={formData.password2}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        confirmPassword: e.target.value,
+                        password2: e.target.value,
                       })
                     }
                     required

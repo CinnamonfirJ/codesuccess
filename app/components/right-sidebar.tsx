@@ -4,19 +4,20 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import {
   ChevronDown,
-  Users,
-  Award,
+  // Users,
+  // Award,
   Star,
-  Calendar,
-  Heart,
-  Trophy,
+  // Calendar,
+  // Heart,
+  // Trophy,
   Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { getHeroSpotlight } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
 import HeroLink from "./hero-link";
+import AdCard from "./adCard";
 
 interface Hero {
   _id: string;
@@ -134,7 +135,7 @@ export default function RightSidebar() {
       <Card className='bg-white shadow-lg border-0'>
         <CardContent className='p-0'>
           <div className='divide-y divide-gray-100'>
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Mentorship & Live Events'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg w-8 h-8'>
@@ -177,9 +178,9 @@ export default function RightSidebar() {
                   </Badge>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Challenges & Competitions'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-orange-500 to-red-500 rounded-lg w-8 h-8'>
@@ -219,7 +220,7 @@ export default function RightSidebar() {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
             <ExpandableSection
               title='Our Heroes'
@@ -264,7 +265,7 @@ export default function RightSidebar() {
               </div>
             </ExpandableSection>
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Special Guests'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg w-8 h-8'>
@@ -304,9 +305,9 @@ export default function RightSidebar() {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Success Stories'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg w-8 h-8'>
@@ -343,9 +344,9 @@ export default function RightSidebar() {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Our Role Models'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg w-8 h-8'>
@@ -382,10 +383,16 @@ export default function RightSidebar() {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
           </div>
         </CardContent>
       </Card>
+
+      <AdCard
+        image='/sample-ad.png'
+        title='Join the 30-Day Coding Bootcamp'
+        description='Upskill fast and land your next job — remote-friendly & beginner-safe'
+      />
     </motion.div>
   );
 }

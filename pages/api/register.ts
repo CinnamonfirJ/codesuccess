@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios";
+import api from "@/lib/axios";
+import { AxiosError } from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -10,8 +11,8 @@ export default async function handler(
   }
 
   try {
-    const response = await axios.post(
-      "https://codesuccex.onrender.com/api/v1/dj-rest-auth/registration/",
+    const response = await api.post(
+      "/api/v1/dj-rest-auth/registration/",
       req.body,
       {
         headers: {

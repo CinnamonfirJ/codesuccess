@@ -59,7 +59,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.h1
-            className='bg-clip-text bg-gradient-to-r from-gray-900 via-emerald-800 to-blue-800 mx-auto max-w-5xl font-bold text-transparent text-3xl md:text-7xl leading-tight'
+            className='z-10 bg-clip-text bg-gradient-to-r from-gray-900 via-emerald-800 to-blue-800 mx-auto max-w-5xl font-bold text-transparent text-3xl md:text-7xl leading-tight'
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}

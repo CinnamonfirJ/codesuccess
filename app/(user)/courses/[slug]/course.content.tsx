@@ -65,10 +65,10 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
               The course you&apos;re looking for doesn&apos;t exist or has been
               removed.
             </p>
-            <Link href='/profile/me'>
+            <Link href='/homepage'>
               <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
                 <ArrowLeft className='mr-2 w-4 h-4' />
-                Back to Courses
+                Back
               </Button>
             </Link>
           </CardContent>
@@ -111,11 +111,11 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
           transition={{ duration: 0.6 }}
         >
           <Link
-            href='/profile/me'
+            href='/homepage'
             className='group inline-flex items-center mb-6 font-medium text-emerald-600 hover:text-emerald-700 transition-colors'
           >
             <ArrowLeft className='mr-2 w-4 h-4 transition-transform group-hover:-translate-x-1' />
-            Back to Course Overview
+            Back
           </Link>
 
           <div className='bg-white shadow-xl p-8 border border-gray-100 rounded-2xl'>

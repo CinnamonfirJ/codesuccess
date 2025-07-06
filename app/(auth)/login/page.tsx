@@ -19,6 +19,8 @@ import {
   Chrome,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { loginUser } from "@/lib/auth/login";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -32,6 +34,7 @@ const scaleOnHover = {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,12 +44,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    // Redirect to dashboard
-    window.location.href = "/dashboard";
+    await loginUser(formData, setIsLoading, () => router.push("/homepage"));
   };
 
   return (

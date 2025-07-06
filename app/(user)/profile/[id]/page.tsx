@@ -4,25 +4,27 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Settings,
   BookOpen,
-  Award,
+  // Award,
   Calendar,
-  MapPin,
+  // MapPin,
   Mail,
-  Phone,
+  // Phone,
   Edit,
   Share2,
-  Download,
+  // Download,
   Users,
-  Clock,
+  // Clock,
   Trophy,
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { getUser } from "@/lib/auth/getUser";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -38,10 +40,10 @@ const staggerContainer = {
   },
 };
 
-const scaleOnHover = {
-  whileHover: { scale: 1.02 },
-  whileTap: { scale: 0.98 },
-};
+// const scaleOnHover = {
+//   whileHover: { scale: 1.02 },
+//   whileTap: { scale: 0.98 },
+// };
 
 // Mock user data
 const userData = {
@@ -125,8 +127,36 @@ const userData = {
 
 export default function ProfilePage() {
   // const [activeTab, setActiveTab] = useState("overview")
-  const progressPercentage =
-    (userData.stats.coursesCompleted / userData.stats.totalCourses) * 100;
+  // const progressPercentage =
+  //   (userData.stats.coursesCompleted / userData.stats.totalCourses) * 100;
+
+  const [user, setUser] = useState<null | {
+    pk: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    avatar?: string;
+  }>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const user = await getUser();
+      setUser(user);
+      setLoading(false);
+    }
+
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
+        <div className='text-gray-500'>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
@@ -169,38 +199,38 @@ export default function ProfilePage() {
                 <CardHeader className='bg-gradient-to-r from-emerald-500 to-blue-500 p-8 text-white text-center'>
                   <Avatar className='mx-auto mb-4 border-4 border-white/20 w-24 h-24'>
                     <AvatarImage
-                      src={userData.avatar || "/placeholder.svg"}
-                      alt={`${userData.firstName} ${userData.lastName}`}
+                      src={user?.avatar || "/placeholder.svg"}
+                      alt={`${user?.first_name} ${user?.last_name}`}
                     />
                     <AvatarFallback className='bg-white/20 font-bold text-white text-2xl'>
-                      {userData.firstName[0]}
-                      {userData.lastName[0]}
+                      {user?.first_name[0]}
+                      {user?.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
                   <h2 className='mb-2 font-bold text-2xl'>
-                    {userData.firstName} {userData.lastName}
+                    {user?.first_name} {user?.last_name}
                   </h2>
                   <Badge className='bg-white/20 mb-3 text-white'>
                     {userData.stats.rank}
                   </Badge>
-                  <p className='text-emerald-100 text-sm leading-relaxed'>
+                  {/* <p className='text-emerald-100 text-sm leading-relaxed'>
                     {userData.bio}
-                  </p>
+                  </p> */}
                 </CardHeader>
                 <CardContent className='p-6'>
                   <div className='space-y-4'>
                     <div className='flex items-center gap-3 text-gray-600'>
                       <Mail className='w-4 h-4' />
-                      <span className='text-sm'>{userData.email}</span>
+                      <span className='text-sm'>{user?.email}</span>
                     </div>
-                    <div className='flex items-center gap-3 text-gray-600'>
+                    {/* <div className='flex items-center gap-3 text-gray-600'>
                       <Phone className='w-4 h-4' />
                       <span className='text-sm'>{userData.phone}</span>
                     </div>
                     <div className='flex items-center gap-3 text-gray-600'>
                       <MapPin className='w-4 h-4' />
                       <span className='text-sm'>{userData.location}</span>
-                    </div>
+                    </div> */}
                     <div className='flex items-center gap-3 text-gray-600'>
                       <Calendar className='w-4 h-4' />
                       <span className='text-sm'>
@@ -217,7 +247,7 @@ export default function ProfilePage() {
             </motion.div>
 
             {/* Stats Card */}
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-lg'>
@@ -271,7 +301,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
 
           {/* Right Column - Main Content */}
@@ -282,7 +312,7 @@ export default function ProfilePage() {
             animate='animate'
           >
             {/* Achievements */}
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <div className='flex justify-between items-center'>
@@ -328,10 +358,10 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
             {/* Recent Activity */}
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-lg'>
@@ -379,7 +409,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
             {/* Quick Actions */}
             <motion.div variants={fadeInUp}>
@@ -397,13 +427,13 @@ export default function ProfilePage() {
                       <BookOpen className='mr-2 w-4 h-4' />
                       Continue Learning
                     </Button>
-                    <Button
+                    {/* <Button
                       variant='outline'
                       className='hover:bg-white/10 border-white text-white'
                     >
                       <Download className='mr-2 w-4 h-4' />
                       Download Certificate
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Search,
   Bell,
@@ -19,6 +21,9 @@ import {
 import Form from "next/form";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getUser } from "@/lib/auth/getUser";
 
 interface NavbarProps {
   onLeftSidebarToggle?: () => void;
@@ -29,6 +34,36 @@ export default function Navbar({
   onLeftSidebarToggle,
   onRightSidebarToggle,
 }: NavbarProps) {
+  const router = useRouter();
+  const [user, setUser] = useState<null | {
+    pk: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    avatar?: string;
+  }>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const user = await getUser();
+      setUser(user);
+      setLoading(false);
+    }
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    router.push("/login");
+  };
+
   return (
     <nav className='top-0 right-0 left-0 z-50 fixed bg-background/80 backdrop-blur-md border-b border-b-white'>
       <div className='flex justify-between items-center mx-auto px-4 py-3 container'>
@@ -103,21 +138,38 @@ export default function Navbar({
                 className='relative rounded-full w-10 h-10'
               >
                 <Avatar className='w-9 h-9'>
-                  <AvatarImage
-                    src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
-                    alt='User'
-                  />
+                  <AvatarImage src='/placeholder.svg' alt='User' />
                   <AvatarFallback className='bg-teal-100 text-teal-800'>
-                    JD
+                    {loading ? (
+                      <span>Loading...</span>
+                    ) : user?.first_name && user?.last_name ? (
+                      `${user.first_name[0]}${user.last_name[0]}`
+                    ) : (
+                      <span>JD</span>
+                    )}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-56' align='end' forceMount>
               <div className='flex flex-col space-y-1 p-2'>
-                <p className='font-medium text-sm leading-none'>Jane Doe</p>
+                <p className='font-medium text-sm leading-none'>
+                  {loading ? (
+                    <span>Loading...</span>
+                  ) : user?.first_name && user?.last_name ? (
+                    `${user.first_name} ${user.last_name}`
+                  ) : (
+                    <span>Jane Doe</span>
+                  )}
+                </p>
                 <p className='text-muted-foreground text-xs leading-none'>
-                  jane@example.com
+                  {loading ? (
+                    <span>Loading...</span>
+                  ) : user?.email ? (
+                    user.email
+                  ) : (
+                    <span>jane@example.com</span>
+                  )}
                 </p>
               </div>
               <DropdownMenuSeparator />
@@ -143,7 +195,14 @@ export default function Navbar({
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <span>Log out</span>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='w-full text-left'
+                  onClick={handleLogout}
+                >
+                  <span>Log out</span>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -12,10 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getHeroSpotlight } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
-import HeroSpotlightCard from "@/app/components/hero-spotlight-card"; // Renamed import to HeroSpotlightCard for clarity
+import HeroSpotlightCard from "@/app/components/hero-spotlight-card";
 
-// --- Portable Text Type Definitions ---
-// Make sure these match exactly what you have in your HeroDetailClient and HeroSpotlightCard
 interface PortableTextBlock {
   _key: string;
   _type: "block";
@@ -60,7 +58,6 @@ export default function HeroSpotlightClient() {
   const [selectedArea, setSelectedArea] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper to extract plain text from Portable Text for search functionality
   const getPlainText = (blocks: PortableTextContent | null): string => {
     if (!blocks) return "";
     return blocks
@@ -72,8 +69,6 @@ export default function HeroSpotlightClient() {
       .toLowerCase();
   };
 
-  // Get unique areas of excellence for filter dropdown
-  // This now correctly flattens the array of arrays (hero.excellenceSection.areaOfExcellence)
   const areas = Array.from(
     new Set(
       heroes.flatMap((hero) => hero.excellenceSection?.areaOfExcellence || [])

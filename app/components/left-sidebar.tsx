@@ -1,9 +1,9 @@
 "use client";
 import {
-  User,
-  MessageSquare,
+  // User,
+  // MessageSquare,
   BookOpen,
-  Heart,
+  // Heart,
   GraduationCap,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +14,8 @@ import CourseLink from "./courseLink";
 import type { GetCoursesQueryResult } from "@/sanity.types";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getUser } from "@/lib/auth/getUser";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
@@ -27,6 +29,26 @@ const fadeInUp = {
 };
 
 export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
+  const [user, setUser] = useState<null | {
+    pk: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    avatar?: string;
+  }>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const user = await getUser();
+      setUser(user);
+      setLoading(false);
+    }
+
+    fetchUser();
+  }, []);
+
   return (
     <motion.div
       className='space-y-6'
@@ -40,18 +62,22 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
           <div className='flex flex-col items-center text-center'>
             <Avatar className='mb-2 border-4 border-white/20 w-16 h-16'>
               <AvatarImage
-                src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
+                src={user?.avatar || "/placeholder.svg"}
                 alt='User'
               />
               <AvatarFallback className='bg-white/20 font-bold text-white text-xl'>
-                JD
+                {user?.first_name[0]}
+                {user?.last_name[0]}
               </AvatarFallback>
             </Avatar>
-            <h2 className='mb-2 font-bold text-xl'>Jane Doe</h2>
+            <h2 className='mb-2 font-bold text-xl'>
+              {user?.first_name} {user?.last_name}
+            </h2>
             {/* <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge> */}
             <p className='text-emerald-100 text-sm leading-relaxed'>
-              Aspiring developer passionate about creating positive change
-              through technology.
+              {loading && "Loading..."}
+              {/* Aspiring developer passionate about creating positive change
+              through technology. */}
             </p>
           </div>
         </CardHeader>
@@ -77,7 +103,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
       <Card className='bg-white shadow-lg border-0'>
         <CardContent className='p-0'>
           <div className='divide-y divide-gray-100'>
-            <ExpandableSection
+            {/* <ExpandableSection
               title='About Me'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg w-8 h-8'>
@@ -123,9 +149,9 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Daily Affirmations'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 rounded-lg w-8 h-8'>
@@ -171,7 +197,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
             <ExpandableSection
               title='Start CodeSuccex'
@@ -183,6 +209,24 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
             >
               <div className='space-y-2'>
                 {courses && courses.length > 0 ? (
+                  <CourseLink
+                    key={courses[0]._id}
+                    course={courses[0]}
+                    onClick={() => onNavigate?.(`/courses/${courses[0].slug}`)}
+                    href={`/courses/${courses[0].slug}`}
+                  />
+                ) : (
+                  <div className='p-3 text-center'>
+                    <div className='flex justify-center items-center bg-gray-100 mx-auto mb-2 rounded-full w-12 h-12'>
+                      <BookOpen className='w-6 h-6 text-gray-400' />
+                    </div>
+                    <p className='text-gray-500 text-sm'>
+                      No courses available
+                    </p>
+                  </div>
+                )}
+
+                {/* {courses && courses.length > 0 ? (
                   courses.map((course) => (
                     <CourseLink
                       key={course._id}
@@ -200,11 +244,11 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                       No courses available
                     </p>
                   </div>
-                )}
+                )} */}
               </div>
             </ExpandableSection>
 
-            <ExpandableSection
+            {/* <ExpandableSection
               title='Safe Peer Space'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg w-8 h-8'>
@@ -241,7 +285,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   </span>
                 </a>
               </div>
-            </ExpandableSection>
+            </ExpandableSection> */}
 
             <ExpandableSection
               title='Reading Lists'

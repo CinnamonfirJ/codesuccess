@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 // const inter = Inter({ subsets: ["latin"] });
 
 import { Lato } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/context/AuthContext";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -26,7 +28,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={lato.className}>{children}</body>
+      <body className={lato.className}>
+        <AuthProvider>
+          <Toaster position='top-center' reverseOrder={false} />
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
