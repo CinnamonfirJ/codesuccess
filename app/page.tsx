@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -41,13 +42,25 @@ export default function LandingPage() {
     <div className='flex flex-col min-h-screen overflow-hidden'>
       {/* Hero Section */}
       <section className='relative bg-gradient-to-br from-emerald-50 via-white to-blue-50 px-6 py-24 text-center'>
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1200')] opacity-5"></div>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className='z-10 relative'
         >
+          {/* Brand Name and Logo */}
+          <div className='mb-8'>
+            <Image
+              src='/logo.png'
+              alt='codesuccex logo'
+              className='mx-auto mb-2 w-16 h-16'
+              width={64}
+              height={64}
+            />
+            <span className='font-bold text-gray-900 text-3xl'>CodeSuccex</span>
+          </div>
+          {/* End Brand Name and Logo */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}

@@ -234,7 +234,7 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
                         {module.studySessions.map(
                           (session: any, sessionIndex: number) => {
                             const isCompleted = completedSessions.has(
-                              session._key
+                              session[0]._key
                             );
                             return (
                               <motion.div
@@ -249,7 +249,7 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
                                       : "bg-white hover:bg-gray-50 border-gray-200 hover:border-emerald-300 hover:shadow-lg"
                                   }`}
                                   onClick={() =>
-                                    toggleSessionCompletion(session._key)
+                                    toggleSessionCompletion(session[0]._key)
                                   }
                                 >
                                   <CardContent className='p-6'>

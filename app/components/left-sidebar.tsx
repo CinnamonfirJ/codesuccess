@@ -1,9 +1,9 @@
 "use client";
 import {
-  // User,
-  // MessageSquare,
+  User,
+  MessageSquare,
   BookOpen,
-  // Heart,
+  Heart,
   GraduationCap,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -103,7 +103,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
       <Card className='bg-white shadow-lg border-0'>
         <CardContent className='p-0'>
           <div className='divide-y divide-gray-100'>
-            {/* <ExpandableSection
+            <ExpandableSection
               title='About Me'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg w-8 h-8'>
@@ -118,10 +118,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                 >
                   <div className='bg-purple-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-purple-600'>
-                    Advertise Your Business
+                    Upcoming Advertise Your Business
                   </span>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
                 >
@@ -147,11 +147,11 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   <span className='text-gray-700 group-hover:text-purple-600'>
                     Share Your Determination
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Daily Affirmations'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 rounded-lg w-8 h-8'>
@@ -166,10 +166,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                 >
                   <div className='bg-pink-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-pink-600'>
-                    Today&apos;s Affirmations
+                    Upcoming Today&apos;s Affirmations
                   </span>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
                 >
@@ -195,9 +195,9 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   <span className='text-gray-700 group-hover:text-pink-600'>
                     Create Your Own
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
             <ExpandableSection
               title='Start CodeSuccex'
@@ -248,7 +248,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               </div>
             </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Safe Peer Space'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg w-8 h-8'>
@@ -263,10 +263,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                 >
                   <div className='bg-blue-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-blue-600'>
-                    Join a Group
+                    Join a Group Upcoming
                   </span>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors'
                 >
@@ -283,9 +283,9 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   <span className='text-gray-700 group-hover:text-blue-600'>
                     My Groups
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
             <ExpandableSection
               title='Reading Lists'

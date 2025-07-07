@@ -4,16 +4,16 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import {
   ChevronDown,
-  // Users,
-  // Award,
+  Users,
+  Award,
   Star,
-  // Calendar,
-  // Heart,
-  // Trophy,
+  Calendar,
+  Heart,
+  Trophy,
   Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { getHeroSpotlight } from "@/sanity/lib/heroSpotlight/getHeroSpotlight";
 import HeroLink from "./hero-link";
@@ -135,7 +135,7 @@ export default function RightSidebar() {
       <Card className='bg-white shadow-lg border-0'>
         <CardContent className='p-0'>
           <div className='divide-y divide-gray-100'>
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Mentorship & Live Events'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg w-8 h-8'>
@@ -156,16 +156,16 @@ export default function RightSidebar() {
                     3 New
                   </Badge>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors'
                 >
                   <div className='bg-blue-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-blue-600'>
-                    Find a Mentor
+                    Upcoming Find a Mentor
                   </span>
-                </a>
-                <a
+                </a> */}
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors'
                 >
@@ -176,11 +176,11 @@ export default function RightSidebar() {
                   <Badge className='bg-green-100 ml-auto text-green-700 text-xs'>
                     Live
                   </Badge>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Challenges & Competitions'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-orange-500 to-red-500 rounded-lg w-8 h-8'>
@@ -189,7 +189,7 @@ export default function RightSidebar() {
               }
             >
               <div className='space-y-2'>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-orange-50 p-3 rounded-lg transition-colors'
                 >
@@ -200,17 +200,17 @@ export default function RightSidebar() {
                   <Badge className='bg-orange-100 ml-auto text-orange-700 text-xs'>
                     ₦50k Prize
                   </Badge>
-                </a>
+                </a> */}
                 <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-orange-50 p-3 rounded-lg transition-colors'
                 >
                   <div className='bg-orange-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-orange-600'>
-                    Creative Competitions
+                    Upcoming Creative Competitions
                   </span>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-orange-50 p-3 rounded-lg transition-colors'
                 >
@@ -218,9 +218,9 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-orange-600'>
                     Win Rewards
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
             <ExpandableSection
               title='Our Heroes'
@@ -265,7 +265,7 @@ export default function RightSidebar() {
               </div>
             </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Special Guests'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg w-8 h-8'>
@@ -286,7 +286,7 @@ export default function RightSidebar() {
                     This Week
                   </Badge>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
                 >
@@ -294,8 +294,8 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-purple-600'>
                     Past Interviews
                   </span>
-                </a>
-                <a
+                </a> */}
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
                 >
@@ -303,11 +303,11 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-purple-600'>
                     Submit Questions
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Success Stories'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg w-8 h-8'>
@@ -316,7 +316,7 @@ export default function RightSidebar() {
               }
             >
               <div className='space-y-2'>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-green-50 p-3 rounded-lg transition-colors'
                 >
@@ -333,20 +333,20 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-green-600'>
                     Career Transformations
                   </span>
-                </a>
+                </a> */}
                 <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-green-50 p-3 rounded-lg transition-colors'
                 >
                   <div className='bg-green-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-green-600'>
-                    Share Your Story
+                    Share Your Story Upcoming
                   </span>
                 </a>
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
 
-            {/* <ExpandableSection
+            <ExpandableSection
               title='Our Role Models'
               icon={
                 <div className='flex justify-center items-center bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg w-8 h-8'>
@@ -355,7 +355,7 @@ export default function RightSidebar() {
               }
             >
               <div className='space-y-2'>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
                 >
@@ -363,17 +363,17 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-indigo-600'>
                     Industry Leaders
                   </span>
-                </a>
+                </a> */}
                 <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
                 >
                   <div className='bg-indigo-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-indigo-600'>
-                    Community Champions
+                    Upcoming Community Champions
                   </span>
                 </a>
-                <a
+                {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-indigo-50 p-3 rounded-lg transition-colors'
                 >
@@ -381,9 +381,9 @@ export default function RightSidebar() {
                   <span className='text-gray-700 group-hover:text-indigo-600'>
                     Nominate a Role Model
                   </span>
-                </a>
+                </a> */}
               </div>
-            </ExpandableSection> */}
+            </ExpandableSection>
           </div>
         </CardContent>
       </Card>

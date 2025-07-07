@@ -1,6 +1,6 @@
 import LeftSidebar from "../../../components/left-sidebar";
 import RightSidebar from "../../../components/right-sidebar";
-// import Feed from "../../../components/feed";
+import Feed from "../../../components/feed";
 import { getCourses } from "@/sanity/lib/courses/getCourses";
 import ComingSoon from "@/app/components/comingSoon";
 
@@ -18,7 +18,7 @@ export default async function Home() {
 
         {/* Main Content */}
         <div className='pt-10 md:pt-0 w-full md:w-2/4 lg:w-3/5 min-h-screen'>
-          {/* <Feed /> */}
+          <Feed />
           <ComingSoon />
         </div>
 
