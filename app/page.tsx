@@ -48,17 +48,24 @@ export default function LandingPage() {
           transition={{ duration: 0.8 }}
           className='z-10 relative'
         >
-          {/* Brand Name and Logo */}
-          <div className='mb-8'>
+          {/* Brand Name and Logo - Facebook Login Page Style */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className='flex justify-center items-center mb-8'
+          >
             <Image
               src='/logo.png'
               alt='codesuccex logo'
-              className='mx-auto mb-2 w-16 h-16'
-              width={64}
-              height={64}
+              className='mr-4 w-20 h-20'
+              width={80}
+              height={80}
             />
-            <span className='font-bold text-gray-900 text-3xl'>CodeSuccex</span>
-          </div>
+            <span className='font-bold text-gray-900 text-3xl md:text-6xl leading-none'>
+              CodeSuccex
+            </span>
+          </motion.div>
           {/* End Brand Name and Logo */}
 
           <motion.div
