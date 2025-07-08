@@ -311,24 +311,24 @@ export default function LandingPage() {
           >
             {[
               {
-                name: "Adebayo Johnson",
-                role: "Tech Entrepreneur",
+                name: "Mr. Arogunmasa Samuel Peter",
+                role: "Vice Principal, Therbow School",
                 content:
-                  "CodeSuccex connected me with a mentor who helped me launch my fintech startup. We're now serving 10,000+ users across Nigeria!",
+                  "The Codesuccex initiative offers students a powerful opportunity and clear roadmap to be empowered, guided, and exposed to the right ingredients for lasting success. I wholeheartedly recommend the CodeSuccex platform.",
                 rating: 5,
               },
               {
-                name: "Fatima Abdullahi",
-                role: "Digital Marketer",
+                name: "Mrs. Helen Marcus",
+                role: "Teacher, Therbow School",
                 content:
-                  "The courses here are practical and relevant. I landed my dream job at a top agency just 3 months after completing the program.",
+                  "Codesuccex is the real deal. It proves that true success doesn’t come from connections, but from self-discovery, personal development, and relying on God. CodeSuccex is the platform that empowers young people to become the best version of themselves.",
                 rating: 5,
               },
               {
-                name: "Chinedu Okafor",
-                role: "Business Owner",
+                name: "Mr. Joseph Bright Chindo",
+                role: "HOD Sciences, Christ Schools",
                 content:
-                  "The network I built here is invaluable. I've collaborated on multiple projects and my business has grown 300% this year.",
+                  "CodeSuccex is a platform that opens our students’ eyes to the truth that, regardless of their circumstances or family background, they have everything it takes to succeed in life. We deeply appreciate this platform. Its message is timeless—no one ever outgrows what CodeSuccex offers.",
                 rating: 5,
               },
             ].map((testimonial, index) => (
