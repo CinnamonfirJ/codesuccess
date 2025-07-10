@@ -191,7 +191,7 @@ export default function ReadingListClient({
               <Link href='/homepage'>
                 <Button variant='ghost' className='gap-2'>
                   <ArrowLeft className='w-4 h-4' />
-                  Back to Heroes
+                  Home
                 </Button>
               </Link>
             </div>

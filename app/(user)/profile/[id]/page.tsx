@@ -21,6 +21,7 @@ import {
   // Clock,
   Trophy,
   Zap,
+  ArrowLeft,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -171,7 +172,15 @@ export default function ProfilePage() {
           transition={{ duration: 0.6 }}
         >
           <div className='flex justify-between items-center'>
-            <h1 className='font-bold text-gray-900 text-3xl'>My Profile</h1>
+            <div className='flex justify-start items-center gap-4 mb-4'>
+              <Link href='/homepage'>
+                <Button variant='ghost' className='gap-2'>
+                  <ArrowLeft className='w-4 h-4' />
+                  Home
+                </Button>
+              </Link>
+              <h1 className='font-bold text-gray-900 text-3xl'>My Profile</h1>
+            </div>
             <div className='flex items-center gap-4'>
               <Button variant='outline' className='border-gray-300'>
                 <Share2 className='mr-2 w-4 h-4' />

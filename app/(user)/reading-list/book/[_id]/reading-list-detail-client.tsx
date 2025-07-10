@@ -307,7 +307,7 @@ export default function ReadingListDetailClient({
             <Card className='bg-gradient-to-r from-emerald-50 to-teal-50 mt-8 border-emerald-200'>
               <CardContent className='p-8 text-center'>
                 <h3 className='mb-4 font-bold text-gray-900 text-xl'>
-                  Ready to dive into &qout;{bookTitle}&qout;?
+                  Ready to dive into &#34;{bookTitle}&#34;?
                 </h3>
                 <p className='mb-6 text-gray-600'>
                   Click the button below to get your copy and start reading!

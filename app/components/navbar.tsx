@@ -157,7 +157,7 @@ export default function Navbar({
                   {loading ? (
                     <span>Loading...</span>
                   ) : user?.first_name && user?.last_name ? (
-                    `${user.first_name} ${user.last_name}`
+                    `${user.first_name} ${user.last_name} ${user.pk}`
                   ) : (
                     <span>Jane Doe</span>
                   )}
@@ -176,7 +176,7 @@ export default function Navbar({
               <Link href='/profile/me'>
                 <DropdownMenuItem>
                   <User className='mr-2 w-4 h-4' />
-                  <span>Profile</span>
+                  <span>Profile {user?.pk}</span>
                 </DropdownMenuItem>
               </Link>
               <Link href='/profile/me'>

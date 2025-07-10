@@ -27,6 +27,16 @@ export default function PostModal({
   const [media, setMedia] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
+  function getCookie(name: string): string | null {
+    if (typeof document === "undefined") return null; // SSR safety
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()!.split(";").shift()!;
+    return null;
+  }
+
+  const csrfToken = getCookie("csrftoken");
+
   async function handleSubmit() {
     if (!content.trim() && !media) {
       toast.error("Post must contain text or media.");
@@ -39,8 +49,12 @@ export default function PostModal({
 
     try {
       setLoading(true);
+      console.log(`Form Data is ${formData} and csrf is ${csrfToken}`);
       await axios.post("/api/posts", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "X-CSRFToken": csrfToken ?? "",
+          "Content-Type": "multipart/form-data",
+        },
         withCredentials: true,
       });
       toast.success("Post created 🎉");
@@ -48,6 +62,7 @@ export default function PostModal({
       setContent("");
       setMedia(null);
     } catch {
+      console.log(`Form Data is ${formData} and csrf is ${csrfToken}`);
       toast.error("Failed to create post ❌");
     } finally {
       setLoading(false);
