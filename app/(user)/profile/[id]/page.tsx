@@ -136,6 +136,8 @@ export default function ProfilePage() {
     first_name: string;
     last_name: string;
     avatar?: string;
+    bio?: string;
+    location?: string;
   }>(null);
 
   const [loading, setLoading] = useState(true);
