@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/lib/auth/login";
+import toast from "react-hot-toast";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -37,14 +37,31 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  // const [formData, setFormData] = useState({
+  //   email: "",
+  //   password: "",
+  // });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await loginUser(formData, setIsLoading, () => router.push("/homepage"));
+    setIsLoading(true);
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (res.ok) {
+      toast.success("Login successful!");
+      setIsLoading(false);
+      router.push("/homepage");
+    } else {
+      toast.error("Login failed. Please check your credentials.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -89,10 +106,8 @@ export default function LoginPage() {
                     type='email'
                     placeholder='Enter your email'
                     className='pl-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 h-12'
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -113,10 +128,8 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder='Enter your password'
                     className='pr-10 pl-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 h-12'
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <button

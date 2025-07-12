@@ -24,8 +24,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { getUser } from "@/lib/auth/getUser";
+
+import { useUser } from "@/hooks/useUser";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -131,35 +131,23 @@ export default function ProfilePage() {
   // const progressPercentage =
   //   (userData.stats.coursesCompleted / userData.stats.totalCourses) * 100;
 
-  const [user, setUser] = useState<null | {
-    pk: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-    avatar?: string;
-    bio?: string;
-    location?: string;
-  }>(null);
+  const { user } = useUser();
 
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUser() {
-      const user = await getUser();
-      setUser(user);
-      setLoading(false);
-    }
-
-    fetchUser();
-  }, []);
-
-  if (loading) {
+  if (!user) {
     return (
       <div className='flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
         <div className='text-gray-500'>Loading...</div>
       </div>
     );
   }
+
+  // if (loading) {
+  //   return (
+  //     <div className='flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
+  //       <div className='text-gray-500'>Loading...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
@@ -249,10 +237,12 @@ export default function ProfilePage() {
                       </span>
                     </div>
                   </div>
-                  <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 mt-6 w-full text-white'>
-                    <Edit className='mr-2 w-4 h-4' />
-                    Edit Profile
-                  </Button>
+                  <Link href={"/profile/settings"}>
+                    <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 mt-6 w-full text-white'>
+                      <Edit className='mr-2 w-4 h-4' />
+                      Edit Profile
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </motion.div>

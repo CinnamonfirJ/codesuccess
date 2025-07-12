@@ -6,7 +6,6 @@ import type { Metadata } from "next";
 
 import { Lato } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@/context/AuthContext";
 import FooterSection from "./components/footer";
 
 const lato = Lato({
@@ -30,12 +29,10 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={lato.className}>
-        <AuthProvider>
-          <Toaster position='top-center' reverseOrder={false} />
-          {children}
-          {/* Footer */}
-          <FooterSection />
-        </AuthProvider>
+        <Toaster position='top-center' reverseOrder={false} />
+        {children}
+        {/* Footer */}
+        <FooterSection />
       </body>
     </html>
   );

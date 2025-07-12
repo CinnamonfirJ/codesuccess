@@ -22,8 +22,7 @@ import Form from "next/form";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getUser } from "@/lib/auth/getUser";
+import { useUser } from "@/hooks/useUser";
 
 interface NavbarProps {
   onLeftSidebarToggle?: () => void;
@@ -35,30 +34,13 @@ export default function Navbar({
   onRightSidebarToggle,
 }: NavbarProps) {
   const router = useRouter();
-  const [user, setUser] = useState<null | {
-    pk: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-    avatar?: string;
-  }>(null);
+  const { user } = useUser();
 
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUser() {
-      const user = await getUser();
-      setUser(user);
-      setLoading(false);
-    }
-
-    fetchUser();
-  }, []);
+  // if (isError || !user) return <p>Not logged in</p>;
 
   const handleLogout = async () => {
-    await fetch("/api/logout", {
+    await fetch("/api/auth/logout", {
       method: "POST",
-      credentials: "include",
     });
 
     router.push("/login");
@@ -140,9 +122,7 @@ export default function Navbar({
                 <Avatar className='w-9 h-9'>
                   <AvatarImage src='/placeholder.svg' alt='User' />
                   <AvatarFallback className='bg-teal-100 text-teal-800'>
-                    {loading ? (
-                      <span>Loading...</span>
-                    ) : user?.first_name && user?.last_name ? (
+                    {user?.first_name && user?.last_name ? (
                       `${user.first_name[0]}${user.last_name[0]}`
                     ) : (
                       <span>JD</span>
@@ -154,32 +134,24 @@ export default function Navbar({
             <DropdownMenuContent className='w-56' align='end' forceMount>
               <div className='flex flex-col space-y-1 p-2'>
                 <p className='font-medium text-sm leading-none'>
-                  {loading ? (
-                    <span>Loading...</span>
-                  ) : user?.first_name && user?.last_name ? (
-                    `${user.first_name} ${user.last_name} ${user.pk}`
+                  {user?.first_name && user?.last_name ? (
+                    `${user.first_name} ${user.last_name}`
                   ) : (
-                    <span>Jane Doe</span>
+                    <span>JD</span>
                   )}
                 </p>
                 <p className='text-muted-foreground text-xs leading-none'>
-                  {loading ? (
-                    <span>Loading...</span>
-                  ) : user?.email ? (
-                    user.email
-                  ) : (
-                    <span>jane@example.com</span>
-                  )}
+                  {user?.email ? user.email : <span>JD</span>}
                 </p>
               </div>
               <DropdownMenuSeparator />
               <Link href='/profile/me'>
                 <DropdownMenuItem>
                   <User className='mr-2 w-4 h-4' />
-                  <span>Profile {user?.pk}</span>
+                  <span>Profile</span>
                 </DropdownMenuItem>
               </Link>
-              <Link href='/profile/me'>
+              <Link href='/profile/settings'>
                 <DropdownMenuItem>
                   <Settings className='mr-2 w-4 h-4' />
                   <span>Settings</span>

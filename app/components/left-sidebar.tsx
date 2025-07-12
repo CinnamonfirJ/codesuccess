@@ -14,8 +14,7 @@ import CourseLink from "./courseLink";
 import type { GetCoursesQueryResult } from "@/sanity.types";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getUser } from "@/lib/auth/getUser";
+import { useUser } from "@/hooks/useUser";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
@@ -29,25 +28,17 @@ const fadeInUp = {
 };
 
 export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
-  const [user, setUser] = useState<null | {
-    pk: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-    avatar?: string;
-  }>(null);
+  const { user, isLoading } = useUser();
 
-  const [loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   async function fetchUser() {
+  //     const user = await getUser();
+  //     setUser(user);
+  //     setLoading(false);
+  //   }
 
-  useEffect(() => {
-    async function fetchUser() {
-      const user = await getUser();
-      setUser(user);
-      setLoading(false);
-    }
-
-    fetchUser();
-  }, []);
+  //   fetchUser();
+  // }, []);
 
   return (
     <motion.div
@@ -62,7 +53,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
           <div className='flex flex-col items-center text-center'>
             <Avatar className='mb-2 border-4 border-white/20 w-16 h-16'>
               <AvatarImage
-                src={user?.avatar || "/placeholder.svg"}
+                src={user?.profile?.avatar || "/placeholder.svg"}
                 alt='User'
               />
               <AvatarFallback className='bg-white/20 font-bold text-white text-xl'>
@@ -75,7 +66,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
             </h2>
             {/* <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge> */}
             <p className='text-emerald-100 text-sm leading-relaxed'>
-              {loading && "Loading..."}
+              {isLoading && "Loading..."}
               {/* Aspiring developer passionate about creating positive change
               through technology. */}
             </p>
