@@ -1,6 +1,5 @@
 // app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import cookie from "cookie";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -9,40 +8,43 @@ export async function POST(req: NextRequest) {
 
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    const fallback = await res.text();
+    let msg = "Something went wrong";
+    try {
+      const data = await res.json();
+      msg = data.detail || data.error || JSON.stringify(data);
+    } catch {
+      msg = fallback;
+    }
+    return NextResponse.json({ error: msg }, { status: 401 });
   }
 
   const data = await res.json();
-
   const response = NextResponse.json({ success: true });
 
-  response.headers.set(
-    "Set-Cookie",
-    [
-      cookie.serialize("access", data.access, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60,
-      }),
-      cookie.serialize("refresh", data.refresh, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
-      }),
-    ].join(", ")
-  );
+  response.cookies.set({
+    name: "access",
+    value: data.access,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+  response.cookies.set({
+    name: "refresh",
+    value: data.refresh,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
 
   return response;
 }
