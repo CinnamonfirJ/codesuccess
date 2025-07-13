@@ -1,29 +1,32 @@
 // app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import cookie from "cookie";
-import { parse } from "path";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const rawCookies = req.headers.get("cookie") || "";
-  const parsed = parse(rawCookies);
-  const csrfToken = parsed["csrftoken"];
-
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": csrfToken,
     },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    let errorMessage = "Something went wrong";
+    try {
+      const errorData = await res.json();
+      errorMessage =
+        errorData.detail || errorData.error || JSON.stringify(errorData);
+    } catch {
+      errorMessage = await res.text();
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: 401 });
   }
 
   const data = await res.json();
@@ -36,14 +39,14 @@ export async function POST(req: NextRequest) {
       cookie.serialize("access", data.access, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60,
       }),
       cookie.serialize("refresh", data.refresh, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
       }),
