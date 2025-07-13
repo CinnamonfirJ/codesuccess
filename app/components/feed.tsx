@@ -2,33 +2,34 @@
 
 import { useEffect, useState } from "react";
 import {
-  Heart,
-  MessageSquare,
-  Share2,
-  MoreHorizontal,
-  Play,
-  Pause,
+  // Heart,
+  // MessageSquare,
+  // Share2,
+  // MoreHorizontal,
+  // Play,
+  // Pause,
   ImageIcon,
   Target,
   Sparkles,
   Send,
-  Bookmark,
-  TrendingUp,
+  // Bookmark,
+  // TrendingUp,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
+  // CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
+// import { Badge } from "@/components/ui/badge";
+// import { Separator } from "@/components/ui/separator";
+// import Image from "next/image";
 import { motion } from "framer-motion";
 import PostModal from "./postModal";
 import toast from "react-hot-toast";
+import PostCard from "./postCard";
 
 type PostType = {
   id: number;
@@ -122,46 +123,46 @@ type PostType = {
 //   },
 // ];
 
-const AudioAffirmation = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
+// const AudioAffirmation = () => {
+//   const [isPlaying, setIsPlaying] = useState(false);
 
-  return (
-    <motion.div
-      className='flex items-center bg-gradient-to-r from-emerald-50 to-blue-50 my-4 p-4 border border-emerald-200 rounded-xl'
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Button
-        variant='outline'
-        size='icon'
-        className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-lg mr-4 border-0 rounded-full w-12 h-12 text-white'
-        onClick={() => setIsPlaying(!isPlaying)}
-      >
-        {isPlaying ? (
-          <Pause className='w-5 h-5' />
-        ) : (
-          <Play className='w-5 h-5' />
-        )}
-      </Button>
-      <div className='flex-1'>
-        <div className='bg-gray-200 mb-2 rounded-full h-2'>
-          <motion.div
-            className='bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full h-2'
-            initial={{ width: "0%" }}
-            animate={{ width: isPlaying ? "33%" : "33%" }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-        <div className='flex justify-between text-gray-600 text-xs'>
-          <span>0:45</span>
-          <span className='font-medium'>Daily Affirmation</span>
-          <span>2:30</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+//   return (
+//     <motion.div
+//       className='flex items-center bg-gradient-to-r from-emerald-50 to-blue-50 my-4 p-4 border border-emerald-200 rounded-xl'
+//       initial={{ opacity: 0, scale: 0.95 }}
+//       animate={{ opacity: 1, scale: 1 }}
+//       transition={{ duration: 0.3 }}
+//     >
+//       <Button
+//         variant='outline'
+//         size='icon'
+//         className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-lg mr-4 border-0 rounded-full w-12 h-12 text-white'
+//         onClick={() => setIsPlaying(!isPlaying)}
+//       >
+//         {isPlaying ? (
+//           <Pause className='w-5 h-5' />
+//         ) : (
+//           <Play className='w-5 h-5' />
+//         )}
+//       </Button>
+//       <div className='flex-1'>
+//         <div className='bg-gray-200 mb-2 rounded-full h-2'>
+//           <motion.div
+//             className='bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full h-2'
+//             initial={{ width: "0%" }}
+//             animate={{ width: isPlaying ? "33%" : "33%" }}
+//             transition={{ duration: 0.5 }}
+//           />
+//         </div>
+//         <div className='flex justify-between text-gray-600 text-xs'>
+//           <span>0:45</span>
+//           <span className='font-medium'>Daily Affirmation</span>
+//           <span>2:30</span>
+//         </div>
+//       </div>
+//     </motion.div>
+//   );
+// };
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -308,165 +309,181 @@ export default function Feed() {
           initial='initial'
           animate='animate'
         >
-          {posts.map((post, index) => {
-            const isLiked = likedPosts.has(post.id);
-            return (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
-                  <CardHeader className='pb-3'>
-                    <div className='flex justify-between items-center'>
-                      <div className='flex items-center gap-3'>
-                        <Avatar className='border-2 border-gray-200'>
-                          <AvatarImage
-                            src={post.author || "/placeholder.svg"}
-                            alt={post.author}
-                          />
-                          <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                            {post.author}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className='flex items-center gap-2'>
-                            <p className='font-semibold text-gray-900'>
-                              {post.author}
-                            </p>
-                            {/* This indicates the author is verified */}
-                            {post.author && (
-                              <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
-                                <span className='text-white text-xs'>✓</span>
-                              </div>
-                            )}
-                          </div>
-                          <p className='text-gray-500 text-sm'>
-                            {post.timestamp}
-                          </p>
-                        </div>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='hover:bg-gray-100 rounded-full'
-                        >
-                          <Bookmark className='w-4 h-4' />
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='hover:bg-gray-100 rounded-full'
-                        >
-                          <MoreHorizontal className='w-5 h-5' />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className='pb-3'>
-                    <p
-                      className={`leading-relaxed ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
-                    >
-                      {post.body}
-                    </p>
-
-                    {post.tags && (
-                      <div className='flex flex-wrap gap-2 mt-3'>
-                        {post.tags.map((tag, idx) => (
-                          <Badge
-                            key={idx}
-                            variant='outline'
-                            className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
-                          >
-                            #{tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {post.isAffirmation && <AudioAffirmation />}
-
-                    {post.media && (
-                      <motion.div
-                        className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Image
-                          src={post.media || "/placeholder.svg"}
-                          alt='Post content'
-                          className='w-full h-auto object-cover'
-                          width={600}
-                          height={400}
-                        />
-                      </motion.div>
-                    )}
-                  </CardContent>
-
-                  <CardFooter className='pt-0'>
-                    <div className='w-full'>
-                      <div className='flex justify-between items-center mb-3 text-gray-500 text-sm'>
-                        <div className='flex items-center gap-4'>
-                          <span className='flex items-center gap-1'>
-                            <Heart className='w-4 h-4 text-red-500' />
-                            {post?.likes
-                              ? post.likes +
-                                (isLiked && !post.isLiked
-                                  ? 1
-                                  : isLiked || post.isLiked
-                                    ? 0
-                                    : 0)
-                              : 0}{" "}
-                            likes
-                          </span>
-                          <span className='flex items-center gap-1'>
-                            <TrendingUp className='w-4 h-4' />
-                            Trending
-                          </span>
-                        </div>
-                        <span>
-                          {post.comments} comments • {post.shares} shares
-                        </span>
-                      </div>
-                      <Separator className='mb-3' />
-                      <div className='flex justify-between'>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className={`flex-1 gap-2 transition-colors ${
-                            isLiked
-                              ? "text-red-500 hover:text-red-600 hover:bg-red-50"
-                              : "text-gray-600 hover:text-red-500 hover:bg-red-50"
-                          }`}
-                          onClick={() => toggleLike(post.id)}
-                        >
-                          <Heart
-                            className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
-                          />
-                          {isLiked ? "Liked" : "Like"}
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
-                        >
-                          <MessageSquare className='w-4 h-4' />
-                          Comment
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='flex-1 gap-2 hover:bg-emerald-50 text-gray-600 hover:text-emerald-500'
-                        >
-                          <Share2 className='w-4 h-4' />
-                          Share
-                        </Button>
-                      </div>
-                    </div>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            );
-          })}
+          {posts.map((post) => (
+            <motion.div key={post.id} variants={fadeInUp}>
+              <PostCard
+                post={post}
+                isLiked={likedPosts.has(post.id)}
+                toggleLike={toggleLike}
+              />
+            </motion.div>
+          ))}
         </motion.div>
+        // <motion.div
+        //   className='space-y-6'
+        //   variants={staggerContainer}
+        //   initial='initial'
+        //   animate='animate'
+        // >
+        //   {posts.map((post, index) => {
+        //     const isLiked = likedPosts.has(post.id);
+        //     return (
+        //       <motion.div key={index} variants={fadeInUp}>
+        //         <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
+        //           <CardHeader className='pb-3'>
+        //             <div className='flex justify-between items-center'>
+        //               <div className='flex items-center gap-3'>
+        //                 <Avatar className='border-2 border-gray-200'>
+        //                   <AvatarImage
+        //                     src={post.author || "/placeholder.svg"}
+        //                     alt={post.author}
+        //                   />
+        //                   <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
+        //                     {post.author}
+        //                   </AvatarFallback>
+        //                 </Avatar>
+        //                 <div>
+        //                   <div className='flex items-center gap-2'>
+        //                     <p className='font-semibold text-gray-900'>
+        //                       {post.author}
+        //                     </p>
+        //                     {/* This indicates the author is verified */}
+        //                     {post.author && (
+        //                       <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
+        //                         <span className='text-white text-xs'>✓</span>
+        //                       </div>
+        //                     )}
+        //                   </div>
+        //                   <p className='text-gray-500 text-sm'>
+        //                     {post.timestamp}
+        //                   </p>
+        //                 </div>
+        //               </div>
+        //               <div className='flex items-center gap-2'>
+        //                 <Button
+        //                   variant='ghost'
+        //                   size='icon'
+        //                   className='hover:bg-gray-100 rounded-full'
+        //                 >
+        //                   <Bookmark className='w-4 h-4' />
+        //                 </Button>
+        //                 <Button
+        //                   variant='ghost'
+        //                   size='icon'
+        //                   className='hover:bg-gray-100 rounded-full'
+        //                 >
+        //                   <MoreHorizontal className='w-5 h-5' />
+        //                 </Button>
+        //               </div>
+        //             </div>
+        //           </CardHeader>
+
+        //           <CardContent className='pb-3'>
+        //             <p
+        //               className={`leading-relaxed ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
+        //             >
+        //               {post.body}
+        //             </p>
+
+        //             {post.tags && (
+        //               <div className='flex flex-wrap gap-2 mt-3'>
+        //                 {post.tags.map((tag, idx) => (
+        //                   <Badge
+        //                     key={idx}
+        //                     variant='outline'
+        //                     className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
+        //                   >
+        //                     #{tag}
+        //                   </Badge>
+        //                 ))}
+        //               </div>
+        //             )}
+
+        //             {post.isAffirmation && <AudioAffirmation />}
+
+        //             {post.media && (
+        //               <motion.div
+        //                 className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+        //                 whileHover={{ scale: 1.02 }}
+        //                 transition={{ duration: 0.2 }}
+        //               >
+        //                 <Image
+        //                   src={post.media || "/placeholder.svg"}
+        //                   alt='Post content'
+        //                   className='w-full h-auto object-cover'
+        //                   width={600}
+        //                   height={400}
+        //                 />
+        //               </motion.div>
+        //             )}
+        //           </CardContent>
+
+        //           <CardFooter className='pt-0'>
+        //             <div className='w-full'>
+        //               <div className='flex justify-between items-center mb-3 text-gray-500 text-sm'>
+        //                 <div className='flex items-center gap-4'>
+        //                   <span className='flex items-center gap-1'>
+        //                     <Heart className='w-4 h-4 text-red-500' />
+        //                     {post?.likes
+        //                       ? post.likes +
+        //                         (isLiked && !post.isLiked
+        //                           ? 1
+        //                           : isLiked || post.isLiked
+        //                             ? 0
+        //                             : 0)
+        //                       : 0}{" "}
+        //                     likes
+        //                   </span>
+        //                   <span className='flex items-center gap-1'>
+        //                     <TrendingUp className='w-4 h-4' />
+        //                     Trending
+        //                   </span>
+        //                 </div>
+        //                 <span>
+        //                   {post.comments} comments • {post.shares} shares
+        //                 </span>
+        //               </div>
+        //               <Separator className='mb-3' />
+        //               <div className='flex justify-between'>
+        //                 <Button
+        //                   variant='ghost'
+        //                   size='sm'
+        //                   className={`flex-1 gap-2 transition-colors ${
+        //                     isLiked
+        //                       ? "text-red-500 hover:text-red-600 hover:bg-red-50"
+        //                       : "text-gray-600 hover:text-red-500 hover:bg-red-50"
+        //                   }`}
+        //                   onClick={() => toggleLike(post.id)}
+        //                 >
+        //                   <Heart
+        //                     className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+        //                   />
+        //                   {isLiked ? "Liked" : "Like"}
+        //                 </Button>
+        //                 <Button
+        //                   variant='ghost'
+        //                   size='sm'
+        //                   className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
+        //                 >
+        //                   <MessageSquare className='w-4 h-4' />
+        //                   Comment
+        //                 </Button>
+        //                 <Button
+        //                   variant='ghost'
+        //                   size='sm'
+        //                   className='flex-1 gap-2 hover:bg-emerald-50 text-gray-600 hover:text-emerald-500'
+        //                 >
+        //                   <Share2 className='w-4 h-4' />
+        //                   Share
+        //                 </Button>
+        //               </div>
+        //             </div>
+        //           </CardFooter>
+        //         </Card>
+        //       </motion.div>
+        //     );
+        //   })}
+        // </motion.div>
       )}
     </div>
   );
