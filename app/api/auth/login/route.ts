@@ -17,16 +17,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (!res.ok) {
-    let errorMessage = "Something went wrong";
-    try {
-      const errorData = await res.json();
-      errorMessage =
-        errorData.detail || errorData.error || JSON.stringify(errorData);
-    } catch {
-      errorMessage = await res.text();
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 401 });
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
   const data = await res.json();
@@ -39,14 +30,14 @@ export async function POST(req: NextRequest) {
       cookie.serialize("access", data.access, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60,
       }),
       cookie.serialize("refresh", data.refresh, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
       }),
