@@ -234,7 +234,7 @@ export default function CourseContent({ course, slug }: CourseContentProps) {
                         {module.studySessions.map(
                           (session: any, sessionIndex: number) => {
                             const isCompleted = completedSessions.has(
-                              session[0]._key
+                              session._key
                             );
                             return (
                               <motion.div

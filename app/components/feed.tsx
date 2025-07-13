@@ -308,10 +308,10 @@ export default function Feed() {
           initial='initial'
           animate='animate'
         >
-          {posts.map((post) => {
+          {posts.map((post, index) => {
             const isLiked = likedPosts.has(post.id);
             return (
-              <motion.div key={post.id} variants={fadeInUp}>
+              <motion.div key={index} variants={fadeInUp}>
                 <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
                   <CardHeader className='pb-3'>
                     <div className='flex justify-between items-center'>
