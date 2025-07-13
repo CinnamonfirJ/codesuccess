@@ -13,15 +13,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (!res.ok) {
-    const fallback = await res.text();
-    let msg = "Something went wrong";
-    try {
-      const data = await res.json();
-      msg = data.detail || data.error || JSON.stringify(data);
-    } catch {
-      msg = fallback;
-    }
-    return NextResponse.json({ error: msg }, { status: 401 });
+    return NextResponse.json({ error: "Login failed" }, { status: 401 });
   }
 
   const data = await res.json();

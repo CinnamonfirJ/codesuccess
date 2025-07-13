@@ -84,7 +84,6 @@ export default function SignupPage() {
 
     if (res.ok) {
       toast.success("Signup successful!");
-
       router.push("/homepage");
     } else {
       toast.error(
