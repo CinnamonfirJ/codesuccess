@@ -67,7 +67,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
             {/* <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge> */}
             <p className='text-emerald-100 text-sm leading-relaxed'>
               {isLoading && "Loading..."}
-              {user.profile?.bio ||
+              {user?.profile?.bio ||
                 "Welcome to your profile! Update your bio and explore courses."}
             </p>
           </div>

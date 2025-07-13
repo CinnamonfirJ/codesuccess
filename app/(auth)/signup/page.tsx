@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -82,10 +83,13 @@ export default function SignupPage() {
     const data = await res.json();
 
     if (res.ok) {
-      // user is logged in after registration
-      router.push("/homepage"); // or wherever you want
+      toast.success("Signup successful!");
+      router.push("/homepage");
     } else {
-      console.error("Registration error:", data.error);
+      toast.error(
+        "Signup failed." + (data.error?.non_field_errors || "Please try again.")
+      );
+      setIsLoading(false);
     }
   };
 
