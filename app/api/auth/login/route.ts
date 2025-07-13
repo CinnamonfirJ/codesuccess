@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
 
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/login/`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -24,26 +25,46 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.json({ success: true });
 
   // Set cookies (HttpOnly & Secure)
+  // response.headers.append(
+  //   "Set-Cookie",
+  //   cookie.serialize("access", data.access, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === "production",
+  //     sameSite: "strict",
+  //     path: "/",
+  //     maxAge: 60 * 60, // 1 hour
+  //   })
+  // );
+
+  // response.headers.append(
+  //   "Set-Cookie",
+  //   cookie.serialize("refresh", data.refresh, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === "production",
+  //     sameSite: "strict",
+  //     path: "/",
+  //     maxAge: 60 * 60 * 24 * 7, // 7 days
+  //   })
+  // );
+
   response.headers.set(
     "Set-Cookie",
-    cookie.serialize("access", data.access, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60, // 1 hour
-    })
-  );
-
-  response.headers.append(
-    "Set-Cookie",
-    cookie.serialize("refresh", data.refresh, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
+    [
+      cookie.serialize("access", data.access, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60,
+      }),
+      cookie.serialize("refresh", data.refresh, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      }),
+    ].join(", ")
   );
 
   return response;

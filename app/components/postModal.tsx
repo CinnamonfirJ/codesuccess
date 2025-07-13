@@ -1,4 +1,3 @@
-// components/PostModal.tsx
 "use client";
 
 import {
@@ -11,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { toast } from "react-hot-toast";
-import axios from "axios";
+import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 export default function PostModal({
   open,
@@ -26,44 +25,44 @@ export default function PostModal({
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  function getCookie(name: string): string | null {
-    if (typeof document === "undefined") return null; // SSR safety
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()!.split(";").shift()!;
-    return null;
+  function handleMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMedia(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
   }
 
-  const csrfToken = getCookie("csrftoken");
-
   async function handleSubmit() {
-    if (!content.trim() && !media) {
-      toast.error("Post must contain text or media.");
-      return;
-    }
+    if (!content) return;
 
-    const formData = new FormData();
-    formData.append("body", content);
-    if (media) formData.append("media", media);
-
+    setLoading(true);
     try {
-      setLoading(true);
-      console.log(`Form Data is ${formData} and csrf is ${csrfToken}`);
-      await axios.post("/api/posts", formData, {
-        headers: {
-          "X-CSRFToken": csrfToken ?? "",
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
+      const formData = new FormData();
+      formData.append("body", content);
+      if (media) {
+        formData.append("media", media);
+      }
+
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        body: formData,
       });
-      toast.success("Post created 🎉");
-      onOpenChange(false);
-      setContent("");
-      setMedia(null);
-    } catch {
-      console.log(`Form Data is ${formData} and csrf is ${csrfToken}`);
-      toast.error("Failed to create post ❌");
+
+      const data = await res.json();
+      if (res.ok) {
+        setContent("");
+        setMedia(null);
+        setPreviewUrl(null);
+        onOpenChange(false);
+      } else {
+        console.error("Error creating post:", data);
+        alert("Failed to post. Try again.");
+      }
+    } catch (err) {
+      console.error("Post error:", err);
     } finally {
       setLoading(false);
     }
@@ -71,9 +70,9 @@ export default function PostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-lg'>
+      <DialogContent className='p-6 max-w-md'>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className='mb-2 font-bold text-2xl'>
             {type === "post" ? "Create Post" : "Create Affirmation"}
           </DialogTitle>
         </DialogHeader>
@@ -82,20 +81,39 @@ export default function PostModal({
           placeholder="What's on your mind?"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          className='min-h-[120px]'
         />
 
         <Input
           type='file'
           accept='image/*,video/*,audio/*'
-          onChange={(e) => setMedia(e.target.files?.[0] || null)}
+          onChange={handleMediaChange}
         />
 
+        {previewUrl && (
+          <div className='mt-4 border border-gray-200 rounded-lg overflow-hidden'>
+            <Image
+              src={previewUrl}
+              alt='Preview'
+              width={500}
+              height={300}
+              className='w-full h-auto object-cover'
+            />
+          </div>
+        )}
+
         <Button
-          className='bg-gradient-to-r from-emerald-500 to-blue-500 mt-4 text-white'
+          className='bg-gradient-to-r from-emerald-500 to-blue-500 mt-4 w-full text-white'
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? "Posting..." : "Post"}
+          {loading ? (
+            <>
+              <Loader2 className='mr-2 w-4 h-4 animate-spin' /> Posting...
+            </>
+          ) : (
+            "Post"
+          )}
         </Button>
       </DialogContent>
     </Dialog>

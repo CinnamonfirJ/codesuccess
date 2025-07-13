@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Heart,
   MessageSquare,
@@ -27,9 +27,24 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { usePosts } from "@/hooks/usePost";
 import PostModal from "./postModal";
 import toast from "react-hot-toast";
+
+type PostType = {
+  id: number;
+  body: string;
+  author: string;
+  media?: string;
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
+  isAffirmation?: boolean;
+  isLiked?: boolean;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  timestamp?: string;
+};
 
 // Mock data for posts
 // const posts = [
@@ -163,25 +178,39 @@ const staggerContainer = {
 };
 
 export default function Feed() {
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set([2, 4]));
+  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
 
-  const toggleLike = (postId: number) => {
+  const toggleLike = (id: number) => {
     setLikedPosts((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(postId)) {
-        newSet.delete(postId);
-      } else {
-        newSet.add(postId);
-      }
-      return newSet;
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
   };
 
-  const { posts, loading } = usePosts();
+  useEffect(() => {
+    setLoading(true);
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch("/api/posts", {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setLoading(false);
+        setPosts(data);
+        console.log("Post data: ", data);
+      } catch (err) {
+        console.error("Failed to load posts", err);
+      }
+    };
 
-  console.log("Post", posts);
+    fetchPosts();
+  }, []);
 
   return (
     <div className='space-y-6 mx-auto max-w-2xl'>
@@ -279,11 +308,6 @@ export default function Feed() {
           initial='initial'
           animate='animate'
         >
-          {/* {posts.map((post) => {
-            // const isLiked = likedPosts.has(post.id);
-
-            return (
-              <motion.div key={post.id} variants={fadeInUp}> */}
           {posts.map((post) => {
             const isLiked = likedPosts.has(post.id);
             return (
@@ -294,11 +318,11 @@ export default function Feed() {
                       <div className='flex items-center gap-3'>
                         <Avatar className='border-2 border-gray-200'>
                           <AvatarImage
-                            src={post.author.avatar || "/placeholder.svg"}
+                            src={post.author || "/placeholder.svg"}
                             alt={post.author}
                           />
                           <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                            {post.author.initials}
+                            {post.author}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -306,7 +330,8 @@ export default function Feed() {
                             <p className='font-semibold text-gray-900'>
                               {post.author}
                             </p>
-                            {post.author.verified && (
+                            {/* This indicates the author is verified */}
+                            {post.author && (
                               <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
                                 <span className='text-white text-xs'>✓</span>
                               </div>
@@ -382,12 +407,14 @@ export default function Feed() {
                         <div className='flex items-center gap-4'>
                           <span className='flex items-center gap-1'>
                             <Heart className='w-4 h-4 text-red-500' />
-                            {post.likes +
-                              (isLiked && !post.isLiked
-                                ? 1
-                                : isLiked || post.isLiked
-                                  ? 0
-                                  : 0)}{" "}
+                            {post?.likes
+                              ? post.likes +
+                                (isLiked && !post.isLiked
+                                  ? 1
+                                  : isLiked || post.isLiked
+                                    ? 0
+                                    : 0)
+                              : 0}{" "}
                             likes
                           </span>
                           <span className='flex items-center gap-1'>
@@ -440,9 +467,6 @@ export default function Feed() {
             );
           })}
         </motion.div>
-        //     );
-        //   })}
-        // </motion.div>
       )}
     </div>
   );

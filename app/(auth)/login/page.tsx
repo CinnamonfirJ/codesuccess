@@ -56,7 +56,6 @@ export default function LoginPage() {
 
     if (res.ok) {
       toast.success("Login successful!");
-      setIsLoading(false);
       router.push("/homepage");
     } else {
       toast.error("Login failed. Please check your credentials.");
