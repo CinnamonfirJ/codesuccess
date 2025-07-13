@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-import cookie from "cookie";
-
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
@@ -22,31 +20,26 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await res.json();
-  const response = NextResponse.json({ user: data.user }, { status: 201 });
+  const response = NextResponse.json({ success: true });
 
-  // Set access token
-  response.headers.set(
-    "Set-Cookie",
-    cookie.serialize("access", data.access, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60, // 1 hour
-    })
-  );
-
-  // Set refresh token
-  response.headers.append(
-    "Set-Cookie",
-    cookie.serialize("refresh", data.refresh, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
-  );
+  response.cookies.set({
+    name: "access",
+    value: data.access,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+  response.cookies.set({
+    name: "refresh",
+    value: data.refresh,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
 
   return response;
 }
