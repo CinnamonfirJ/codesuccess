@@ -35,7 +35,7 @@ export async function GET() {
     "Set-Cookie",
     cookie.serialize("access", data.access, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
       maxAge: 60 * 60,
