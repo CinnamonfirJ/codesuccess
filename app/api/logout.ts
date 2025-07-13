@@ -9,7 +9,7 @@ export async function POST() {
     "Set-Cookie",
     cookie.serialize("access", "", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",,
       sameSite: "strict",
       path: "/",
       maxAge: 0,
@@ -20,7 +20,7 @@ export async function POST() {
     "Set-Cookie",
     cookie.serialize("refresh", "", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",,
       sameSite: "strict",
       path: "/",
       maxAge: 0,
