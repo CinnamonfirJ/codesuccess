@@ -16,6 +16,7 @@ export async function PATCH(req: NextRequest) {
 
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
     method: "PATCH",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${access}`,

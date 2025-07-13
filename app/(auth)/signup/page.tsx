@@ -22,7 +22,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { registerUser } from "@/lib/auth/register";
 import { useRouter } from "next/navigation";
 
 const fadeInUp = {
@@ -41,23 +40,53 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password1: "",
-    password2: "",
-    agreeToTerms: false,
-  });
+  // const [formData, setFormData] = useState({
+  //   first_name: "",
+  //   last_name: "",
+  //   email: "",
+  //   password1: "",
+  //   password2: "",
+  //   agreeToTerms: false,
+  // });
+  const [email, setEmail] = useState("");
+  const [password1, setPassword1] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password1 !== formData.password2) {
+
+    if (password1 !== password2) {
       alert("Passwords don't match!");
       return;
     }
-    setIsLoading(!isLoading);
-    await registerUser(formData, setIsLoading, () => router.push("/login"));
+
+    setIsLoading(true);
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password1,
+        password2,
+        first_name,
+        last_name,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // user is logged in after registration
+      router.push("/homepage"); // or wherever you want
+    } else {
+      console.error("Registration error:", data.error);
+    }
   };
 
   return (
@@ -106,10 +135,8 @@ export default function SignupPage() {
                       type='text'
                       placeholder='First name'
                       className='pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                      value={formData.first_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, first_name: e.target.value })
-                      }
+                      value={first_name}
+                      onChange={(e) => setFirstName(e.target.value)}
                       required
                     />
                   </div>
@@ -133,10 +160,8 @@ export default function SignupPage() {
                       type='text'
                       placeholder='Last name'
                       className='pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                      value={formData.last_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, last_name: e.target.value })
-                      }
+                      value={last_name}
+                      onChange={(e) => setLastName(e.target.value)}
                       required
                     />
                   </div>
@@ -158,10 +183,8 @@ export default function SignupPage() {
                     type='email'
                     placeholder='Enter your email'
                     className='pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -185,10 +208,8 @@ export default function SignupPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder='Create a strong password'
                     className='pr-10 pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                    value={formData.password1}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password1: e.target.value })
-                    }
+                    value={password1}
+                    onChange={(e) => setPassword1(e.target.value)}
                     required
                   />
                   <button
@@ -223,13 +244,8 @@ export default function SignupPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder='Confirm your password'
                     className='pr-10 pl-10 border-gray-200 focus:border-purple-500 focus:ring-purple-500 h-12'
-                    value={formData.password2}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        password2: e.target.value,
-                      })
-                    }
+                    value={password2}
+                    onChange={(e) => setPassword2(e.target.value)}
                     required
                   />
                   <button
@@ -254,12 +270,9 @@ export default function SignupPage() {
               >
                 <Checkbox
                   id='terms'
-                  checked={formData.agreeToTerms}
+                  checked={agreeToTerms}
                   onCheckedChange={(checked) =>
-                    setFormData({
-                      ...formData,
-                      agreeToTerms: checked as boolean,
-                    })
+                    setAgreeToTerms(checked as boolean)
                   }
                   className='mt-1'
                 />
@@ -287,7 +300,7 @@ export default function SignupPage() {
               <motion.div {...scaleOnHover}>
                 <Button
                   type='submit'
-                  disabled={isLoading || !formData.agreeToTerms}
+                  disabled={isLoading || !agreeToTerms}
                   className='bg-gradient-to-r from-purple-500 hover:from-purple-600 to-pink-500 hover:to-pink-600 disabled:opacity-50 shadow-lg w-full h-12 font-semibold text-white text-lg'
                 >
                   {isLoading ? (
