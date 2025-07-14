@@ -10,8 +10,8 @@ import {
   Pause,
   Send,
   Bookmark,
-  TrendingUp,
-  Loader2, // Added for loading indicator
+  Loader2,
+  // CornerDownRight, // Icon for replies
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -23,26 +23,28 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input"; // Added for comment input
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import moment from "moment";
 
-// Define the type for a single comment
 type CommentType = {
   id: number;
   post: number;
-  author: string; // Assuming author is a string (name or username)
+  author: number;
+  author_username: string;
   content: string;
   created_at: string;
-  parent?: number | null; // For nested comments, if applicable
+  parent?: number | null;
+  replies?: CommentType[]; // For nested comments
 };
 
-// Define the type for a single post
 type PostType = {
   id: number;
   body: string;
-  author: string;
+  author: number;
+  author_name: string;
   media?: string;
   created_at: string;
   updated_at: string;
@@ -52,17 +54,15 @@ type PostType = {
   likes?: number;
   comments?: number;
   shares?: number;
-  timestamp?: string; // Assuming this is a formatted string like "2 hours ago"
+  timestamp?: string;
 };
 
-// Props for the PostCard component
 interface PostCardProps {
   post: PostType;
   isLiked: boolean;
   toggleLike: (postId: number) => void;
 }
 
-// AudioAffirmation component (remains the same)
 const AudioAffirmation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -104,6 +104,141 @@ const AudioAffirmation = () => {
   );
 };
 
+// CommentItem component for recursive rendering of comments and replies
+interface CommentItemProps {
+  comment: CommentType;
+  postId: number;
+  onCommentPosted: () => void; // Callback to refresh comments
+}
+
+const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  postId,
+  onCommentPosted,
+}) => {
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [postingReply, setPostingReply] = useState(false);
+
+  const handlePostReply = async () => {
+    if (!replyContent.trim()) {
+      toast.error("Reply cannot be empty.");
+      return;
+    }
+
+    setPostingReply(true);
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          post: postId,
+          content: replyContent,
+          parent: comment.id, // Set the parent ID for the reply
+        }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to post reply");
+      }
+
+      toast.success("Reply posted successfully!");
+      setReplyContent("");
+      setShowReplyInput(false); // Hide reply input after posting
+      onCommentPosted(); // Refresh comments in parent PostCard
+    } catch (error: any) {
+      console.error("Error posting reply:", error);
+      toast.error(error.message || "Failed to post reply.");
+    } finally {
+      setPostingReply(false);
+    }
+  };
+
+  return (
+    <div className='flex items-start gap-3'>
+      <Avatar className='border border-gray-100 w-8 h-8'>
+        {/* <AvatarImage
+          src={`https://placehold.co/40x40/E0F2F7/00796B?text=${comment.author_username.charAt(0).toUpperCase()}`}
+          alt={comment.author_username}
+        /> */}
+        {/* <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
+          {comment.author_username.charAt(0).toUpperCase()}
+        </AvatarFallback> */}
+      </Avatar>
+      <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
+        <p className='font-semibold text-gray-800 text-sm'>
+          {comment.author_username}
+        </p>
+        <p className='mt-1 text-gray-600 text-sm'>{comment.content}</p>
+        <p className='mt-1 text-gray-400 text-xs'>
+          {moment(comment.created_at).format("MMMM Do YYYY, h:mm a")}
+        </p>
+        <Button
+          variant='ghost'
+          size='sm'
+          className='hover:bg-blue-100 mt-2 px-2 py-1 rounded-md text-blue-600 text-xs'
+          onClick={() => setShowReplyInput(!showReplyInput)}
+        >
+          Reply
+        </Button>
+
+        {showReplyInput && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className='flex items-center gap-2 mt-3'
+          >
+            <Input
+              type='text'
+              placeholder={`Reply to ${comment.author_username}...`}
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              className='flex-1 border-gray-300 focus:border-emerald-500 rounded-full focus:ring-emerald-500 text-sm'
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && !postingReply) {
+                  handlePostReply();
+                }
+              }}
+            />
+            <Button
+              size='icon'
+              className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 rounded-full w-8 h-8 text-white'
+              onClick={handlePostReply}
+              disabled={postingReply}
+            >
+              {postingReply ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <Send className='w-4 h-4' />
+              )}
+            </Button>
+          </motion.div>
+        )}
+
+        {/* Recursively render replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className='space-y-4 mt-4 ml-6 pl-4 border-gray-200 border-l'>
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                postId={postId}
+                onCommentPosted={onCommentPosted}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Main PostCard component
 export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
@@ -112,7 +247,6 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
   const [loadingComments, setLoadingComments] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
 
-  // Function to fetch comments for the current post
   const fetchComments = async () => {
     setLoadingComments(true);
     try {
@@ -122,8 +256,45 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
       if (!res.ok) {
         throw new Error("Failed to fetch comments");
       }
-      const data = await res.json();
-      setComments(data);
+      const data: CommentType[] = await res.json();
+
+      // Build comment tree
+      const commentsMap = new Map<number, CommentType>();
+      const rootComments: CommentType[] = [];
+
+      // Initialize all comments in a map and ensure replies array exists
+      data.forEach((comment) => {
+        commentsMap.set(comment.id, { ...comment, replies: [] });
+      });
+
+      // Populate replies and identify root comments
+      data.forEach((comment) => {
+        const currentComment = commentsMap.get(comment.id);
+        if (currentComment) {
+          if (comment.parent && commentsMap.has(comment.parent)) {
+            const parentComment = commentsMap.get(comment.parent);
+            parentComment?.replies?.push(currentComment);
+          } else {
+            rootComments.push(currentComment);
+          }
+        }
+      });
+
+      // Sort root comments and their replies by creation date (newest first for example)
+      const sortComments = (arr: CommentType[]) => {
+        return arr
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+          .map((comment) => ({
+            ...comment,
+            replies: comment.replies ? sortComments(comment.replies) : [],
+          }));
+      };
+
+      setComments(sortComments(rootComments));
     } catch (error) {
       console.error("Error fetching comments:", error);
       toast.error("Failed to load comments.");
@@ -132,14 +303,10 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
     }
   };
 
-  // Effect to fetch comments when showComments becomes true
   useEffect(() => {
-    if (showComments && comments.length === 0) {
-      fetchComments();
-    }
-  }, [showComments, post.id]); // Add post.id to dependencies
+    fetchComments();
+  }, [showComments, post.id]);
 
-  // Function to handle posting a new comment
   const handlePostComment = async () => {
     if (!newCommentContent.trim()) {
       toast.error("Comment cannot be empty.");
@@ -153,10 +320,7 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          post: post.id,
-          content: newCommentContent,
-        }),
+        body: JSON.stringify({ content: newCommentContent, post: post.id }),
         credentials: "include",
       });
 
@@ -166,7 +330,7 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
       }
 
       toast.success("Comment posted successfully!");
-      setNewCommentContent(""); // Clear the input field
+      setNewCommentContent("");
       fetchComments(); // Re-fetch comments to show the new one
     } catch (error: any) {
       console.error("Error posting comment:", error);
@@ -183,25 +347,29 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
           <div className='flex items-center gap-3'>
             <Avatar className='border-2 border-gray-200'>
               <AvatarImage
-                src={post.author || "/placeholder.svg"} // Assuming post.author can be used as image src or fallback
-                alt={post.author}
+                src={post.author_name || "/placeholder.svg"}
+                alt={post.author_name}
               />
               <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                {post.author.charAt(0).toUpperCase()}{" "}
-                {/* Display first initial of author */}
+                {post.author_name
+                  ? post.author_name.charAt(0).toUpperCase()
+                  : "L"}
               </AvatarFallback>
             </Avatar>
             <div>
               <div className='flex items-center gap-2'>
-                <p className='font-semibold text-gray-900'>{post.author}</p>
-                {/* This indicates the author is verified (placeholder logic) */}
-                {post.author && ( // Simplified verification check
+                <p className='font-semibold text-gray-900'>
+                  {post.author_name}
+                </p>
+                {post.author_name && (
                   <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
                     <span className='text-white text-xs'>✓</span>
                   </div>
                 )}
               </div>
-              <p className='text-gray-500 text-sm'>{post.timestamp}</p>
+              <p className='text-gray-500 text-sm'>
+                {moment(post.created_at).fromNow()}
+              </p>
             </div>
           </div>
           <div className='flex items-center gap-2'>
@@ -279,14 +447,8 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
                   : 0}{" "}
                 likes
               </span>
-              <span className='flex items-center gap-1'>
-                <TrendingUp className='w-4 h-4' />
-                Trending
-              </span>
             </div>
-            <span>
-              {post.comments} comments • {post.shares} shares
-            </span>
+            <span>{comments.length} comments</span>
           </div>
           <Separator className='mb-3' />
           <div className='flex justify-between'>
@@ -307,7 +469,7 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
               variant='ghost'
               size='sm'
               className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
-              onClick={() => setShowComments(!showComments)} // Toggle comments section
+              onClick={() => setShowComments(!showComments)}
             >
               <MessageSquare className='w-4 h-4' />
               Comment
@@ -322,7 +484,6 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
             </Button>
           </div>
 
-          {/* Comments Section */}
           {showComments && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -346,33 +507,17 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
               ) : (
                 <div className='space-y-4'>
                   {comments.map((comment) => (
-                    <div key={comment.id} className='flex items-start gap-3'>
-                      <Avatar className='border border-gray-100 w-8 h-8'>
-                        <AvatarImage
-                          src={`https://placehold.co/40x40/E0F2F7/00796B?text=${comment.author.charAt(0).toUpperCase()}`}
-                          alt={comment.author}
-                        />
-                        <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
-                          {comment.author.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
-                        <p className='font-semibold text-gray-800 text-sm'>
-                          {comment.author}
-                        </p>
-                        <p className='mt-1 text-gray-600 text-sm'>
-                          {comment.content}
-                        </p>
-                        <p className='mt-1 text-gray-400 text-xs'>
-                          {new Date(comment.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
+                    // Render top-level comments using CommentItem
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      postId={post.id}
+                      onCommentPosted={fetchComments}
+                    />
                   ))}
                 </div>
               )}
 
-              {/* Comment Input */}
               <div className='flex items-center gap-2 mt-4'>
                 <Input
                   type='text'

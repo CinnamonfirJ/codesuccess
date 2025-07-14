@@ -16,12 +16,15 @@ import {
   LogOut,
   User,
   BookOpen,
+  Camera,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -44,6 +47,9 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  // Corrected: Explicitly define avatarFile to accept File or null
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -56,41 +62,55 @@ export default function SettingsPage() {
       setEmail(user.email || "");
       setBio(user.profile?.bio || "");
       setLocation(user.profile?.location || "");
+      setAvatarUrl(user.profile?.avatar_url || "");
     }
   }, [user]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // TypeScript now knows setAvatarFile can take a File object
+      setAvatarFile(file);
+      setAvatarUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
-    const payload = {
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      profile: {
-        bio: bio,
-        location: location,
-      },
-    };
-
     try {
+      const formData = new FormData();
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("email", email);
+      formData.append("profile.bio", bio);
+      formData.append("profile.location", location);
+
+      if (avatarFile) {
+        formData.append("profile.avatar", avatarFile);
+      }
+
       const res = await fetch("/api/auth/update-user", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        throw new Error("Failed to update profile");
+        const message =
+          data?.message ||
+          data?.error ||
+          data?.profile?.avatar?.[0] ||
+          "Failed to update profile";
+        throw new Error(message);
       }
 
       toast.success("Updated Profile Successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update profile: ");
+    } catch (err: any) {
+      console.error("Update error:", err);
+      toast.error(err.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
@@ -107,7 +127,6 @@ export default function SettingsPage() {
   return (
     <div className='bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
       <div className='mx-auto px-6 py-8 max-w-7xl'>
-        {/* Header */}
         <motion.div
           className='mb-8'
           initial={{ opacity: 0, y: -20 }}
@@ -126,7 +145,6 @@ export default function SettingsPage() {
         </motion.div>
 
         <div className='gap-8 grid lg:grid-cols-3'>
-          {/* Left Column - Navigation */}
           <motion.div
             className='space-y-6 lg:col-span-1'
             variants={staggerContainer}
@@ -184,14 +202,12 @@ export default function SettingsPage() {
             </motion.div>
           </motion.div>
 
-          {/* Right Column - Settings Content */}
           <motion.div
             className='space-y-8 lg:col-span-2'
             variants={staggerContainer}
             initial='initial'
             animate='animate'
           >
-            {/* General Settings */}
             <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
@@ -204,6 +220,40 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className='space-y-6'>
                   <form onSubmit={handleUpdateProfile} className='space-y-6'>
+                    <div className='flex flex-col items-center gap-4'>
+                      <div className='relative shadow-md border-4 border-emerald-500 rounded-full w-24 h-24 overflow-hidden'>
+                        <Image
+                          src={
+                            avatarUrl ||
+                            `https://placehold.co/96x96/E0F2F7/000?text=${firstName.charAt(0)}${lastName.charAt(0)}`
+                          }
+                          alt='Avatar'
+                          width={96}
+                          height={96}
+                          className='w-full h-full object-cover'
+                        />
+                        <label
+                          htmlFor='avatar-upload'
+                          className='absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white transition-opacity duration-300 cursor-pointer'
+                        >
+                          <Camera className='w-6 h-6' />
+                        </label>
+                      </div>
+                      <Input
+                        id='avatar-upload'
+                        type='file'
+                        accept='image/*'
+                        onChange={handleAvatarChange}
+                        className='hidden'
+                      />
+                      <Label
+                        htmlFor='avatar-upload'
+                        className='text-blue-600 hover:underline cursor-pointer'
+                      >
+                        Change Profile Picture
+                      </Label>
+                    </div>
+
                     <div className='gap-2 grid'>
                       <Label htmlFor='firstName'>First Name</Label>
                       <Input
@@ -252,14 +302,20 @@ export default function SettingsPage() {
                       className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'
                       disabled={isSaving}
                     >
-                      {isSaving ? "Saving..." : "Save Changes"}
+                      {isSaving ? (
+                        <>
+                          <Loader2 className='mr-2 w-4 h-4 animate-spin' />{" "}
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
+                      )}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Notifications Settings */}
             <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
@@ -304,7 +360,6 @@ export default function SettingsPage() {
               </Card>
             </motion.div>
 
-            {/* Privacy Settings */}
             <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
@@ -341,7 +396,6 @@ export default function SettingsPage() {
               </Card>
             </motion.div>
 
-            {/* Help & Support */}
             <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
@@ -351,8 +405,7 @@ export default function SettingsPage() {
                   <p className='text-gray-600 text-sm'>
                     Find answers to your questions or contact us.
                   </p>
-                </CardHeader>{" "}
-                {/* Corrected: Removed extra </p> tag here */}
+                </CardHeader>
                 <CardContent className='space-y-4'>
                   <Link href='#' passHref>
                     <Button variant='outline' className='justify-start w-full'>

@@ -122,7 +122,12 @@ export default function Navbar({
                 className='relative rounded-full w-10 h-10'
               >
                 <Avatar className='w-9 h-9'>
-                  <AvatarImage src='/placeholder.svg' alt='User' />
+                  {user?.profile.avatar ? (
+                    <AvatarImage src={user?.profile?.avatar} alt='User' />
+                  ) : (
+                    <AvatarImage src='/placeholder.svg' alt='User' />
+                  )}
+
                   <AvatarFallback className='bg-teal-100 text-teal-800'>
                     {user?.first_name && user?.last_name ? (
                       `${user.first_name[0]}${user.last_name[0]}`

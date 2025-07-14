@@ -30,11 +30,13 @@ import { motion } from "framer-motion";
 import PostModal from "./postModal";
 import toast from "react-hot-toast";
 import PostCard from "./postCard";
+import { useUser } from "@/hooks/useUser";
 
 type PostType = {
   id: number;
   body: string;
-  author: string;
+  author: number;
+  author_name: string;
   media?: string;
   created_at: string;
   updated_at: string;
@@ -179,6 +181,7 @@ const staggerContainer = {
 };
 
 export default function Feed() {
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
@@ -224,7 +227,7 @@ export default function Feed() {
             <div className='flex items-center gap-4'>
               <Avatar className='border-2 border-emerald-200'>
                 <AvatarImage
-                  src='/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg'
+                  src={user?.profile?.avatar || "/placeholder.svg"}
                   alt='User'
                 />
                 <AvatarFallback className='bg-emerald-100 font-bold text-emerald-800'>

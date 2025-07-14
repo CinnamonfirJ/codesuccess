@@ -10,6 +10,7 @@ import { activitySchema } from "../activitySchema";
 import { rolePlaySchema } from "../rolePlaySchema";
 import { readingListSchema } from "../readingListSchema";
 import { heroSpotlightSchema } from "../heroSpotlightSchema";
+import { affirmationSchema } from "../affirmationSchema";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -24,5 +25,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     reflectionQuestionSchema,
     readingListSchema,
     heroSpotlightSchema,
+    affirmationSchema,
   ],
 };

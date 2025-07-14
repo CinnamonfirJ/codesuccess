@@ -12,16 +12,14 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-
+  const formData = await req.formData();
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
     method: "PATCH",
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${access}`,
     },
-    body: JSON.stringify(body),
+    body: formData, // Send the formData directly
   });
 
   const data = await res.json();

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 // import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -26,6 +26,7 @@ import {
 import { motion } from "framer-motion";
 
 import { useUser } from "@/hooks/useUser";
+import moment from "moment";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -198,7 +199,7 @@ export default function ProfilePage() {
                 <CardHeader className='bg-gradient-to-r from-emerald-500 to-blue-500 p-8 text-white text-center'>
                   <Avatar className='mx-auto mb-4 border-4 border-white/20 w-24 h-24'>
                     <AvatarImage
-                      src={user?.avatar || "/placeholder.svg"}
+                      src={user?.profile.avatar || "/placeholder.svg"}
                       alt={`${user?.first_name} ${user?.last_name}`}
                     />
                     <AvatarFallback className='bg-white/20 font-bold text-white text-2xl'>
@@ -209,12 +210,12 @@ export default function ProfilePage() {
                   <h2 className='mb-2 font-bold text-2xl'>
                     {user?.first_name} {user?.last_name}
                   </h2>
-                  <Badge className='bg-white/20 mb-3 text-white'>
+                  {/* <Badge className='bg-white/20 mb-3 text-white'>
                     {userData.stats.rank}
-                  </Badge>
-                  {/* <p className='text-emerald-100 text-sm leading-relaxed'>
-                    {userData.bio}
-                  </p> */}
+                  </Badge> */}
+                  <p className='text-emerald-100 text-sm leading-relaxed'>
+                    {user?.profile.bio}
+                  </p>
                 </CardHeader>
                 <CardContent className='p-6'>
                   <div className='space-y-4'>
@@ -233,7 +234,7 @@ export default function ProfilePage() {
                     <div className='flex items-center gap-3 text-gray-600'>
                       <Calendar className='w-4 h-4' />
                       <span className='text-sm'>
-                        Joined {userData.joinDate}
+                        Joined {moment(userData.joinDate).format("MMM Do YY")}
                       </span>
                     </div>
                   </div>
