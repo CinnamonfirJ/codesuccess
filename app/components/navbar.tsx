@@ -122,8 +122,11 @@ export default function Navbar({
                 className='relative rounded-full w-10 h-10'
               >
                 <Avatar className='w-9 h-9'>
-                  {user?.profile.avatar ? (
-                    <AvatarImage src={user?.profile?.avatar} alt='User' />
+                  {user?.profile?.profile_image ? (
+                    <AvatarImage
+                      src={user?.profile?.profile_image}
+                      alt='User'
+                    />
                   ) : (
                     <AvatarImage src='/placeholder.svg' alt='User' />
                   )}

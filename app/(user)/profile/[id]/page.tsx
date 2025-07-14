@@ -199,7 +199,7 @@ export default function ProfilePage() {
                 <CardHeader className='bg-gradient-to-r from-emerald-500 to-blue-500 p-8 text-white text-center'>
                   <Avatar className='mx-auto mb-4 border-4 border-white/20 w-24 h-24'>
                     <AvatarImage
-                      src={user?.profile.avatar || "/placeholder.svg"}
+                      src={user?.profile?.profile_image || "/placeholder.svg"}
                       alt={`${user?.first_name} ${user?.last_name}`}
                     />
                     <AvatarFallback className='bg-white/20 font-bold text-white text-2xl'>

@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+// import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ArrowLeft,
-  Mail,
-  Bell,
-  Lock,
-  LifeBuoy,
+  // Mail,
+  // Bell,
+  // Lock,
+  // LifeBuoy,
   LogOut,
   User,
-  BookOpen,
+  // BookOpen,
   Camera,
   Loader2,
 } from "lucide-react";
@@ -52,8 +52,8 @@ export default function SettingsPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
+  // const [emailNotifications, setEmailNotifications] = useState(true);
+  // const [pushNotifications, setPushNotifications] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -165,27 +165,27 @@ export default function SettingsPage() {
                       <User className='mr-3 w-5 h-5' />
                       General
                     </Button>
-                    <Button
+                    {/* <Button
                       variant='ghost'
                       className='justify-start hover:bg-gray-50 px-6 py-4 rounded-none w-full text-gray-700 hover:text-blue-600 text-lg'
                     >
                       <Bell className='mr-3 w-5 h-5' />
                       Notifications
-                    </Button>
-                    <Button
+                    </Button> */}
+                    {/* <Button
                       variant='ghost'
                       className='justify-start hover:bg-gray-50 px-6 py-4 rounded-none w-full text-gray-700 hover:text-purple-600 text-lg'
                     >
                       <Lock className='mr-3 w-5 h-5' />
                       Privacy
-                    </Button>
-                    <Button
+                    </Button> */}
+                    {/* <Button
                       variant='ghost'
                       className='justify-start hover:bg-gray-50 px-6 py-4 rounded-none w-full text-gray-700 hover:text-orange-600 text-lg'
                     >
                       <LifeBuoy className='mr-3 w-5 h-5' />
                       Help & Support
-                    </Button>
+                    </Button> */}
                   </nav>
                 </CardContent>
               </Card>
@@ -225,6 +225,7 @@ export default function SettingsPage() {
                         <Image
                           src={
                             avatarUrl ||
+                            user?.profile?.profile_image ||
                             `https://placehold.co/96x96/E0F2F7/000?text=${firstName.charAt(0)}${lastName.charAt(0)}`
                           }
                           alt='Avatar'
@@ -316,7 +317,7 @@ export default function SettingsPage() {
               </Card>
             </motion.div>
 
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-xl'>
@@ -358,9 +359,9 @@ export default function SettingsPage() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-xl'>
@@ -394,9 +395,9 @@ export default function SettingsPage() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
 
-            <motion.div variants={fadeInUp}>
+            {/* <motion.div variants={fadeInUp}>
               <Card className='bg-white shadow-lg border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-xl'>
@@ -421,7 +422,7 @@ export default function SettingsPage() {
                   </Link>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
         </div>
       </div>

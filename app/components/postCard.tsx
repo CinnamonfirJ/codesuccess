@@ -34,6 +34,7 @@ type CommentType = {
   post: number;
   author: number;
   author_username: string;
+  author_image: string;
   content: string;
   created_at: string;
   parent?: number | null;
@@ -43,15 +44,16 @@ type CommentType = {
 type PostType = {
   id: number;
   body: string;
-  author: number;
-  author_name: string;
+  author_username: string;
+  author_full_name: string;
+  author_image: string;
   media?: string;
   created_at: string;
   updated_at: string;
   tags?: string[];
   isAffirmation?: boolean;
-  isLiked?: boolean;
-  likes?: number;
+  liked_by_user?: boolean;
+  likes_count?: number;
   comments?: number;
   shares?: number;
   timestamp?: string;
@@ -59,7 +61,7 @@ type PostType = {
 
 interface PostCardProps {
   post: PostType;
-  isLiked: boolean;
+  liked_by_user: boolean;
   toggleLike: (postId: number) => void;
 }
 
@@ -161,10 +163,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div className='flex items-start gap-3'>
       <Avatar className='border border-gray-100 w-8 h-8'>
-        {/* <AvatarImage
-          src={`https://placehold.co/40x40/E0F2F7/00796B?text=${comment.author_username.charAt(0).toUpperCase()}`}
+        <AvatarImage
+          src={comment.author_image || "/placeholder.svg"}
           alt={comment.author_username}
-        /> */}
+        />
         {/* <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
           {comment.author_username.charAt(0).toUpperCase()}
         </AvatarFallback> */}
@@ -240,7 +242,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
 };
 
 // Main PostCard component
-export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
+export default function PostCard({
+  post,
+  liked_by_user,
+  toggleLike,
+}: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [newCommentContent, setNewCommentContent] = useState("");
@@ -257,6 +263,8 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
         throw new Error("Failed to fetch comments");
       }
       const data: CommentType[] = await res.json();
+
+      console.log("Comments data: ", data);
 
       // Build comment tree
       const commentsMap = new Map<number, CommentType>();
@@ -347,21 +355,21 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
           <div className='flex items-center gap-3'>
             <Avatar className='border-2 border-gray-200'>
               <AvatarImage
-                src={post.author_name || "/placeholder.svg"}
-                alt={post.author_name}
+                src={post.author_image || "/placeholder.svg"}
+                alt={post.author_full_name}
               />
               <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                {post.author_name
-                  ? post.author_name.charAt(0).toUpperCase()
+                {post.author_full_name
+                  ? post.author_full_name.charAt(0).toUpperCase()
                   : "L"}
               </AvatarFallback>
             </Avatar>
             <div>
               <div className='flex items-center gap-2'>
                 <p className='font-semibold text-gray-900'>
-                  {post.author_name}
+                  {post.author_full_name}
                 </p>
-                {post.author_name && (
+                {post.author_full_name && (
                   <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
                     <span className='text-white text-xs'>✓</span>
                   </div>
@@ -437,11 +445,11 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
             <div className='flex items-center gap-4'>
               <span className='flex items-center gap-1'>
                 <Heart className='w-4 h-4 text-red-500' />
-                {post?.likes
-                  ? post.likes +
-                    (isLiked && !post.isLiked
+                {post?.likes_count
+                  ? post.likes_count +
+                    (liked_by_user && !post.liked_by_user
                       ? 1
-                      : isLiked || post.isLiked
+                      : liked_by_user || post.liked_by_user
                         ? 0
                         : 0)
                   : 0}{" "}
@@ -456,14 +464,16 @@ export default function PostCard({ post, isLiked, toggleLike }: PostCardProps) {
               variant='ghost'
               size='sm'
               className={`flex-1 gap-2 transition-colors ${
-                isLiked
+                liked_by_user
                   ? "text-red-500 hover:text-red-600 hover:bg-red-50"
                   : "text-gray-600 hover:text-red-500 hover:bg-red-50"
               }`}
               onClick={() => toggleLike(post.id)}
             >
-              <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-              {isLiked ? "Liked" : "Like"}
+              <Heart
+                className={`w-4 h-4 ${liked_by_user ? "fill-current" : ""}`}
+              />
+              {liked_by_user ? "Liked" : "Like"}
             </Button>
             <Button
               variant='ghost'

@@ -53,7 +53,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
           <div className='flex flex-col items-center text-center'>
             <Avatar className='mb-2 border-4 border-white/20 w-16 h-16'>
               <AvatarImage
-                src={user?.profile?.avatar || "/placeholder.svg"}
+                src={user?.profile?.profile_image || "/placeholder.svg"}
                 alt='User'
               />
               <AvatarFallback className='bg-white/20 font-bold text-white text-xl'>

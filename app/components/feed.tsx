@@ -35,15 +35,16 @@ import { useUser } from "@/hooks/useUser";
 type PostType = {
   id: number;
   body: string;
-  author: number;
-  author_name: string;
+  author_username: string;
+  author_full_name: string;
+  author_image: string;
   media?: string;
   created_at: string;
   updated_at: string;
   tags?: string[];
   isAffirmation?: boolean;
-  isLiked?: boolean;
-  likes?: number;
+  liked_by_user?: boolean;
+  likes_count?: number;
   comments?: number;
   shares?: number;
   timestamp?: string;
@@ -63,10 +64,10 @@ type PostType = {
 //       "Just completed my first coding challenge on CodeSuccex! The community support here is amazing. Feeling motivated to tackle the next one! 🚀 #CodeNewbie #LearningToCode",
 //     image: "/WhatsApp Image 2025-05-21 at 18.42.02_95109c88 (1).png",
 //     timestamp: "2 hours ago",
-//     likes: 24,
+//     likes_count: 24,
 //     comments: 5,
 //     shares: 2,
-//     isLiked: false,
+//     liked_by_user: false,
 //     tags: ["coding", "achievement"],
 //   },
 //   {
@@ -82,10 +83,10 @@ type PostType = {
 //     timestamp: "4 hours ago",
 //     isAffirmation: true,
 //     audioUrl: "#",
-//     likes: 56,
+//     likes_count: 56,
 //     comments: 12,
 //     shares: 8,
-//     isLiked: true,
+//     liked_by_user: true,
 //     tags: ["affirmation", "mindset"],
 //   },
 //   {
@@ -99,10 +100,10 @@ type PostType = {
 //     content:
 //       "Excited to share that I've been accepted into the mentorship program! Looking forward to learning from industry professionals and growing my skills. This is just the beginning! 💪 #Mentorship #Growth",
 //     timestamp: "Yesterday",
-//     likes: 89,
+//     likes_count: 89,
 //     comments: 15,
 //     shares: 7,
-//     isLiked: false,
+//     liked_by_user: false,
 //     tags: ["mentorship", "growth"],
 //   },
 //   {
@@ -117,10 +118,10 @@ type PostType = {
 //       "New challenge alert! 📸 Join our 30-day photography challenge starting next week. Capture themed shots, improve your skills, and stand a chance to win exciting prizes! Register now in the Challenges section.",
 //     image: "/ChatGPT Image May 24, 2025, 07_38_07 PM.png",
 //     timestamp: "2 days ago",
-//     likes: 132,
+//     likes_count: 132,
 //     comments: 28,
 //     shares: 45,
-//     isLiked: true,
+//     liked_by_user: true,
 //     tags: ["challenge", "photography"],
 //   },
 // ];
@@ -186,15 +187,69 @@ export default function Feed() {
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
   const [posts, setPosts] = useState<PostType[]>([]);
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  // const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
 
-  const toggleLike = (id: number) => {
-    setLikedPosts((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleLike = async (postId: number) => {
+    const postIndex = posts.findIndex((p) => p.id === postId);
+    if (postIndex === -1) {
+      console.warn(
+        `Attempted to toggle like for non-existent post ID: ${postId}`
+      );
+      return;
+    }
+
+    const currentPost = posts[postIndex];
+    const isCurrentlyLiked = currentPost.liked_by_user;
+
+    // Optimistically update UI
+    const updatedPosts = [...posts];
+    updatedPosts[postIndex] = {
+      ...currentPost,
+      liked_by_user: !isCurrentlyLiked,
+      likes_count: isCurrentlyLiked
+        ? (currentPost.likes_count || 0) - 1
+        : (currentPost.likes_count || 0) + 1,
+    };
+    setPosts(updatedPosts);
+
+    const apiUrl = isCurrentlyLiked
+      ? `/api/posts/${postId}/unlike`
+      : `/api/posts/${postId}/like`;
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json(); // Attempt to parse error response
+        console.error(
+          `API call failed for ${apiUrl}: Status ${res.status}`,
+          errorData
+        );
+        toast.error(
+          errorData.detail || "Failed to update like status. Please try again."
+        );
+        // Revert UI on API error
+        setPosts(posts); // Revert to the state before optimistic update
+        return;
+      }
+      toast.success(isCurrentlyLiked ? "Post unliked!" : "Post liked!");
+    } catch (error: any) {
+      console.error(
+        `Network or unexpected error while toggling like for post ${postId}:`,
+        error
+      );
+      toast.error(
+        error.message || "Could not update like status due to a network error."
+      );
+      // Revert UI on network/other error
+      setPosts(posts); // Revert to the state before optimistic update
+    }
   };
 
   useEffect(() => {
@@ -227,7 +282,7 @@ export default function Feed() {
             <div className='flex items-center gap-4'>
               <Avatar className='border-2 border-emerald-200'>
                 <AvatarImage
-                  src={user?.profile?.avatar || "/placeholder.svg"}
+                  src={user?.profile?.profile_image || "/placeholder.svg"}
                   alt='User'
                 />
                 <AvatarFallback className='bg-emerald-100 font-bold text-emerald-800'>
@@ -316,7 +371,7 @@ export default function Feed() {
             <motion.div key={post.id} variants={fadeInUp}>
               <PostCard
                 post={post}
-                isLiked={likedPosts.has(post.id)}
+                liked_by_user={post.liked_by_user || false}
                 toggleLike={toggleLike}
               />
             </motion.div>
@@ -329,7 +384,7 @@ export default function Feed() {
         //   animate='animate'
         // >
         //   {posts.map((post, index) => {
-        //     const isLiked = likedPosts.has(post.id);
+        //     const liked_by_user = likedPosts.has(post.id);
         //     return (
         //       <motion.div key={index} variants={fadeInUp}>
         //         <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
@@ -427,15 +482,15 @@ export default function Feed() {
         //                 <div className='flex items-center gap-4'>
         //                   <span className='flex items-center gap-1'>
         //                     <Heart className='w-4 h-4 text-red-500' />
-        //                     {post?.likes
-        //                       ? post.likes +
-        //                         (isLiked && !post.isLiked
+        //                     {post?.likes_count
+        //                       ? post.likes_count +
+        //                         (liked_by_user && !post.liked_by_user
         //                           ? 1
-        //                           : isLiked || post.isLiked
+        //                           : liked_by_user || post.liked_by_user
         //                             ? 0
         //                             : 0)
         //                       : 0}{" "}
-        //                     likes
+        //                     likes_count
         //                   </span>
         //                   <span className='flex items-center gap-1'>
         //                     <TrendingUp className='w-4 h-4' />
@@ -452,16 +507,16 @@ export default function Feed() {
         //                   variant='ghost'
         //                   size='sm'
         //                   className={`flex-1 gap-2 transition-colors ${
-        //                     isLiked
+        //                     liked_by_user
         //                       ? "text-red-500 hover:text-red-600 hover:bg-red-50"
         //                       : "text-gray-600 hover:text-red-500 hover:bg-red-50"
         //                   }`}
         //                   onClick={() => toggleLike(post.id)}
         //                 >
         //                   <Heart
-        //                     className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+        //                     className={`w-4 h-4 ${liked_by_user ? "fill-current" : ""}`}
         //                   />
-        //                   {isLiked ? "Liked" : "Like"}
+        //                   {liked_by_user ? "Liked" : "Like"}
         //                 </Button>
         //                 <Button
         //                   variant='ghost'
