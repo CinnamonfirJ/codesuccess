@@ -1,18 +1,18 @@
-// app/api/posts/[postId]/comments/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { postId: string } }
+  request: NextRequest,
+  context: { params: { postId: string } }
 ) {
+  const { postId } = context.params;
+
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 
-  const res = await fetch(`${API_BASE_URL}/posts/${params.postId}/comments/`, {
+  const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments/`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -31,21 +31,23 @@ export async function GET(
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { postId: string } }
+  request: NextRequest,
+  context: { params: { postId: string } }
 ) {
-  const body = await req.json();
+  const { postId } = context.params;
+  const body = await request.json();
+
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 
-  const res = await fetch(`${API_BASE_URL}/posts/${params.postId}/comments/`, {
+  const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${access}`,
     },
     body: JSON.stringify({
-      post: parseInt(params.postId),
+      post: parseInt(postId),
       content: body.content,
       parent: body.parent || null,
     }),

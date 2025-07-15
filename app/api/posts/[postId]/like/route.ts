@@ -1,4 +1,3 @@
-// app/api/posts/[postId]/like/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -6,8 +5,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { postId: string } }
+  context: { params: { postId: string } }
 ) {
+  const { postId } = context.params;
+
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 
@@ -15,23 +16,33 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const res = await fetch(`${API_BASE_URL}/posts/${params.postId}/like/`, {
+  const res = await fetch(`${API_BASE_URL}/posts/${postId}/like/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${access}`,
     },
+    credentials: "include",
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error(`Failed to like post ${params.postId}`, {
+    console.error(`Failed to like post ${postId}`, {
       status: res.status,
       response: errorText,
     });
     return NextResponse.json({ error: errorText }, { status: res.status });
   }
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: 201 });
+  let data = {};
+  const contentType = res.headers.get("content-type");
+  if (contentType?.includes("application/json")) {
+    try {
+      data = await res.json();
+    } catch {
+      console.warn("Empty or invalid JSON in like response");
+    }
+  }
+
+  return NextResponse.json({ success: true, ...data }, { status: 201 });
 }

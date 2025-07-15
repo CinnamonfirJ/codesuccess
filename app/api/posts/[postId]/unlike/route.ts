@@ -1,4 +1,3 @@
-// app/api/posts/[postId]/like/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -21,17 +20,27 @@ export async function POST(
       "Content-Type": "application/json",
       Authorization: `Bearer ${access}`,
     },
+    credentials: "include",
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error(`Failed to like post ${params.postId}`, {
+    console.error(`Failed to unlike post ${params.postId}`, {
       status: res.status,
       response: errorText,
     });
     return NextResponse.json({ error: errorText }, { status: res.status });
   }
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: 201 });
+  let data = {};
+  const contentType = res.headers.get("content-type");
+  if (contentType?.includes("application/json")) {
+    try {
+      data = await res.json();
+    } catch {
+      console.warn("Empty or invalid JSON in unlike response");
+    }
+  }
+
+  return NextResponse.json({ success: true, ...data }, { status: 201 });
 }

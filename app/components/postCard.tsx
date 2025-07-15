@@ -54,7 +54,7 @@ type PostType = {
   isAffirmation?: boolean;
   liked_by_user?: boolean;
   likes_count?: number;
-  comments?: number;
+  comments_count?: number;
   shares?: number;
   timestamp?: string;
 };
@@ -312,8 +312,10 @@ export default function PostCard({
   };
 
   useEffect(() => {
-    fetchComments();
-  }, [showComments, post.id]);
+    if (showComments) {
+      fetchComments();
+    }
+  }, [showComments]);
 
   const handlePostComment = async () => {
     if (!newCommentContent.trim()) {
@@ -456,7 +458,7 @@ export default function PostCard({
                 likes
               </span>
             </div>
-            <span>{comments.length} comments</span>
+            <span>{post?.comments_count || "0"} comments</span>
           </div>
           <Separator className='mb-3' />
           <div className='flex justify-between'>
