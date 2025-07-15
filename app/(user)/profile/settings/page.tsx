@@ -68,7 +68,6 @@ export default function SettingsPage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // TypeScript now knows setAvatarFile can take a File object
       setAvatarFile(file);
       setAvatarUrl(URL.createObjectURL(file));
     }

@@ -36,7 +36,7 @@ type CommentType = {
   author_username: string;
   author_image: string;
   content: string;
-  created_at: string;
+  commented_at: string;
   parent?: number | null;
   replies?: CommentType[];
 };
@@ -110,14 +110,12 @@ const AudioAffirmation = () => {
 };
 
 interface CommentItemProps {
-  post: PostType;
   comment: CommentType;
   postId: number;
   onCommentPosted: () => void;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
-  post,
   comment,
   postId,
   onCommentPosted,
@@ -168,20 +166,20 @@ const CommentItem: React.FC<CommentItemProps> = ({
     <div className='flex items-start gap-3'>
       <Avatar className='border border-gray-100 w-8 h-8'>
         <AvatarImage
-          src={post.author_image || "/placeholder.svg"}
-          alt={post.author_full_name}
+          src={comment.author_image || "/placeholder.svg"}
+          alt={comment.author_username}
         />
         <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
-          {post.author_full_name.charAt(0).toUpperCase()}
+          {comment.author_username.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
         <p className='font-semibold text-gray-800 text-sm'>
-          {post.author_full_name}
+          {comment.author_username}
         </p>
         <p className='mt-1 text-gray-600 text-sm'>{comment.content}</p>
         <p className='mt-1 text-gray-400 text-xs'>
-          {moment(comment.created_at).format("MMMM Do YYYY, h:mm a")}
+          {moment(comment.commented_at).format("MMMM Do YYYY, h:mm a")}
         </p>
         <Button
           variant='ghost'
@@ -231,7 +229,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <div className='space-y-4 mt-4 ml-6 pl-4 border-gray-200 border-l'>
             {comment.replies.map((reply) => (
               <CommentItem
-                post={post}
                 key={reply.id}
                 comment={reply}
                 postId={postId}
@@ -316,8 +313,8 @@ export default function PostCard({
         return arr
           .sort(
             (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
+              new Date(b.commented_at).getTime() -
+              new Date(a.commented_at).getTime()
           )
           .map((comment) => ({
             ...comment,
@@ -614,7 +611,6 @@ export default function PostCard({
                 <div className='space-y-4'>
                   {comments.map((comment) => (
                     <CommentItem
-                      post={post}
                       key={comment.id}
                       comment={comment}
                       postId={post.id}
