@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react"; // Import useRef
 import {
   Heart,
   MessageSquare,
@@ -11,7 +11,7 @@ import {
   Send,
   Bookmark,
   Loader2,
-  // CornerDownRight, // Icon for replies
+  Trash2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -38,12 +38,13 @@ type CommentType = {
   content: string;
   created_at: string;
   parent?: number | null;
-  replies?: CommentType[]; // For nested comments
+  replies?: CommentType[];
 };
 
 type PostType = {
   id: number;
   body: string;
+  author: number;
   author_username: string;
   author_full_name: string;
   author_image: string;
@@ -62,7 +63,9 @@ type PostType = {
 interface PostCardProps {
   post: PostType;
   liked_by_user: boolean;
-  toggleLike: (postId: number) => void;
+  toggleLike: (postId: number) => Promise<void>;
+  currentUserId: string | null;
+  onPostDeleted: (postId: number) => void;
 }
 
 const AudioAffirmation = () => {
@@ -106,14 +109,15 @@ const AudioAffirmation = () => {
   );
 };
 
-// CommentItem component for recursive rendering of comments and replies
 interface CommentItemProps {
+  post: PostType;
   comment: CommentType;
   postId: number;
-  onCommentPosted: () => void; // Callback to refresh comments
+  onCommentPosted: () => void;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
+  post,
   comment,
   postId,
   onCommentPosted,
@@ -138,7 +142,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         body: JSON.stringify({
           post: postId,
           content: replyContent,
-          parent: comment.id, // Set the parent ID for the reply
+          parent: comment.id,
         }),
         credentials: "include",
       });
@@ -150,8 +154,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
       toast.success("Reply posted successfully!");
       setReplyContent("");
-      setShowReplyInput(false); // Hide reply input after posting
-      onCommentPosted(); // Refresh comments in parent PostCard
+      setShowReplyInput(false);
+      onCommentPosted();
     } catch (error: any) {
       console.error("Error posting reply:", error);
       toast.error(error.message || "Failed to post reply.");
@@ -164,16 +168,16 @@ const CommentItem: React.FC<CommentItemProps> = ({
     <div className='flex items-start gap-3'>
       <Avatar className='border border-gray-100 w-8 h-8'>
         <AvatarImage
-          src={comment.author_image || "/placeholder.svg"}
-          alt={comment.author_username}
+          src={post.author_image || "/placeholder.svg"}
+          alt={post.author_full_name}
         />
-        {/* <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
-          {comment.author_username.charAt(0).toUpperCase()}
-        </AvatarFallback> */}
+        <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
+          {post.author_full_name.charAt(0).toUpperCase()}
+        </AvatarFallback>
       </Avatar>
       <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
         <p className='font-semibold text-gray-800 text-sm'>
-          {comment.author_username}
+          {post.author_full_name}
         </p>
         <p className='mt-1 text-gray-600 text-sm'>{comment.content}</p>
         <p className='mt-1 text-gray-400 text-xs'>
@@ -223,11 +227,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
           </motion.div>
         )}
 
-        {/* Recursively render replies */}
         {comment.replies && comment.replies.length > 0 && (
           <div className='space-y-4 mt-4 ml-6 pl-4 border-gray-200 border-l'>
             {comment.replies.map((reply) => (
               <CommentItem
+                post={post}
                 key={reply.id}
                 comment={reply}
                 postId={postId}
@@ -241,17 +245,42 @@ const CommentItem: React.FC<CommentItemProps> = ({
   );
 };
 
-// Main PostCard component
 export default function PostCard({
   post,
   liked_by_user,
   toggleLike,
+  currentUserId,
+  onPostDeleted,
 }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [newCommentContent, setNewCommentContent] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false); // State for options menu
+  const optionsMenuRef = useRef<HTMLDivElement>(null); // Ref for detecting clicks outside
+
+  // Check if the current user is the author of the post
+  const isAuthor =
+    currentUserId !== null && post.author_full_name === currentUserId;
+
+  // Close options menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        optionsMenuRef.current &&
+        !optionsMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowOptionsMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [optionsMenuRef]);
 
   const fetchComments = async () => {
     setLoadingComments(true);
@@ -264,18 +293,13 @@ export default function PostCard({
       }
       const data: CommentType[] = await res.json();
 
-      console.log("Comments data: ", data);
-
-      // Build comment tree
       const commentsMap = new Map<number, CommentType>();
       const rootComments: CommentType[] = [];
 
-      // Initialize all comments in a map and ensure replies array exists
       data.forEach((comment) => {
         commentsMap.set(comment.id, { ...comment, replies: [] });
       });
 
-      // Populate replies and identify root comments
       data.forEach((comment) => {
         const currentComment = commentsMap.get(comment.id);
         if (currentComment) {
@@ -288,7 +312,6 @@ export default function PostCard({
         }
       });
 
-      // Sort root comments and their replies by creation date (newest first for example)
       const sortComments = (arr: CommentType[]) => {
         return arr
           .sort(
@@ -315,7 +338,7 @@ export default function PostCard({
     if (showComments) {
       fetchComments();
     }
-  }, [showComments]);
+  }, [showComments, post.id]);
 
   const handlePostComment = async () => {
     if (!newCommentContent.trim()) {
@@ -341,13 +364,55 @@ export default function PostCard({
 
       toast.success("Comment posted successfully!");
       setNewCommentContent("");
-      fetchComments(); // Re-fetch comments to show the new one
+      fetchComments();
     } catch (error: any) {
       console.error("Error posting comment:", error);
       toast.error(error.message || "Failed to post comment.");
     } finally {
       setPostingComment(false);
     }
+  };
+
+  const handleDeletePost = async () => {
+    setShowOptionsMenu(false); // Close the menu immediately
+    toast.promise(
+      new Promise(async (resolve, reject) => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/posts/${post.id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error(
+              `Failed to delete post: Status ${res.status}`,
+              errorData
+            );
+            reject(new Error(errorData.detail || "Failed to delete post."));
+            return;
+          }
+
+          onPostDeleted(post.id);
+          resolve("Post deleted successfully!");
+        } catch (error: any) {
+          console.error("Error deleting post:", error);
+          reject(
+            new Error(
+              error.message || "Could not delete post due to a network error."
+            )
+          );
+        } finally {
+          setIsDeleting(false);
+        }
+      }),
+      {
+        loading: "Deleting post...",
+        success: "Post deleted!",
+        error: (err) => err.message,
+      }
+    );
   };
 
   return (
@@ -382,21 +447,50 @@ export default function PostCard({
               </p>
             </div>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className='relative' ref={optionsMenuRef}>
+            {" "}
+            {/* Added ref here */}
             <Button
               variant='ghost'
               size='icon'
               className='hover:bg-gray-100 rounded-full'
-            >
-              <Bookmark className='w-4 h-4' />
-            </Button>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='hover:bg-gray-100 rounded-full'
+              onClick={() => setShowOptionsMenu(!showOptionsMenu)} // Toggle menu visibility
             >
               <MoreHorizontal className='w-5 h-5' />
             </Button>
+            {showOptionsMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.15 }}
+                className='right-0 z-10 absolute bg-white shadow-lg mt-2 border border-gray-200 rounded-md w-40 overflow-hidden'
+              >
+                <Button
+                  variant='ghost'
+                  className='justify-start hover:bg-gray-100 px-4 py-2 w-full text-gray-700 text-sm'
+                >
+                  <Bookmark className='mr-2 w-4 h-4' />
+                  Bookmark
+                </Button>
+                {isAuthor && (
+                  <Button
+                    variant='ghost'
+                    className='justify-start hover:bg-red-50 px-4 py-2 w-full text-red-600 text-sm'
+                    onClick={handleDeletePost}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <Loader2 className='mr-2 w-4 h-4 animate-spin' />
+                    ) : (
+                      <Trash2 className='mr-2 w-4 h-4' />
+                    )}
+                    Delete Post
+                  </Button>
+                )}
+                {/* Add other menu items here if needed */}
+              </motion.div>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -519,8 +613,8 @@ export default function PostCard({
               ) : (
                 <div className='space-y-4'>
                   {comments.map((comment) => (
-                    // Render top-level comments using CommentItem
                     <CommentItem
+                      post={post}
                       key={comment.id}
                       comment={comment}
                       postId={post.id}

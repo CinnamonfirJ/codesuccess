@@ -48,7 +48,6 @@ export default function SettingsPage() {
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  // Corrected: Explicitly define avatarFile to accept File or null
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
