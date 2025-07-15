@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
+import useFetchPosts from "@/hooks/usePost";
 
 export default function PostModal({
   open,
@@ -22,6 +23,7 @@ export default function PostModal({
   onOpenChange: (open: boolean) => void;
   type: "post" | "affirmation";
 }) {
+  const { refetch } = useFetchPosts();
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,7 @@ export default function PostModal({
       const data = await res.json();
       if (res.ok) {
         setContent("");
+        refetch();
         setMedia(null);
         setPreviewUrl(null);
         onOpenChange(false);

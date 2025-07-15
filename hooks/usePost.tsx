@@ -1,19 +1,27 @@
-"use client";
+import { useState, useEffect } from "react";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+export default function useFetchPosts() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-export function usePosts() {
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/posts", {
+        credentials: "include",
+      });
+      const data = await res.json();
+      setPosts(data);
+    } catch (err) {
+      console.error("Failed to load posts", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get("/api/posts", { withCredentials: true })
-      .then((res) => setPosts(res.data))
-      .catch((err) => console.error("Failed to load posts", err))
-      .finally(() => setLoading(false));
+    fetchPosts();
   }, []);
 
-  return { posts, loading };
+  return { posts, loading, refetch: fetchPosts };
 }

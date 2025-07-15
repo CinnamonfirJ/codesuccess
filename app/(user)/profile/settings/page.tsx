@@ -62,7 +62,7 @@ export default function SettingsPage() {
       setEmail(user.email || "");
       setBio(user.profile?.bio || "");
       setLocation(user.profile?.location || "");
-      setAvatarUrl(user.profile?.avatar_url || "");
+      setAvatarUrl(user.profile?.profile_image || "");
     }
   }, [user]);
 
@@ -88,7 +88,7 @@ export default function SettingsPage() {
       formData.append("profile.location", location);
 
       if (avatarFile) {
-        formData.append("profile.avatar", avatarFile);
+        formData.append("profile.profile_image", avatarFile);
       }
 
       const res = await fetch("/api/auth/update-user", {
