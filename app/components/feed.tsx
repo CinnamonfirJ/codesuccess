@@ -140,8 +140,6 @@ export default function Feed() {
         setPosts(posts);
         return;
       }
-
-      toast.success(isCurrentlyLiked ? "Post unliked!" : "Post liked!");
     } catch (error: any) {
       console.error(
         `Network or unexpected error while toggling like for post ${postId}:`,

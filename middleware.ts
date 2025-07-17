@@ -2,14 +2,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedPaths = ["/dashboard"];
-
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   const access = request.cookies.get("access")?.value;
 
-  const { pathname } = request.nextUrl;
-
-  const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
+  const isProtected = pathname.startsWith("/dashboard");
 
   if (isProtected && !access) {
     const loginUrl = new URL("/login", request.url);
