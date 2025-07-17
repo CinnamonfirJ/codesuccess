@@ -98,20 +98,20 @@ export default function Navbar({
           {/* Desktop Navigation Icons */}
           <div className='hidden md:flex items-center gap-1'>
             {/* Messages */}
-            <Button variant='ghost' size='icon' className='relative'>
+            {/* <Button variant='ghost' size='icon' className='relative'>
               <MessageSquare className='w-5 h-5' />
               <span className='-top-1 -right-1 absolute flex justify-center items-center bg-amber-600 rounded-full w-4 h-4 text-white text-xs'>
                 3
               </span>
-            </Button>
+            </Button> */}
 
             {/* Notifications */}
-            <Button variant='ghost' size='icon' className='relative'>
+            {/* <Button variant='ghost' size='icon' className='relative'>
               <Bell className='w-5 h-5' />
               <span className='-top-1 -right-1 absolute flex justify-center items-center bg-amber-600 rounded-full w-4 h-4 text-white text-xs'>
                 5
               </span>
-            </Button>
+            </Button> */}
           </div>
 
           {/* Profile Dropdown */}

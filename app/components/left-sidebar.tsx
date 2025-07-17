@@ -112,7 +112,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     Upcoming Advertise Your Business
                   </span>
                 </a>
-                {/* <a
+                <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
                 >
@@ -138,7 +138,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   <span className='text-gray-700 group-hover:text-purple-600'>
                     Share Your Determination
                   </span>
-                </a> */}
+                </a>
               </div>
             </ExpandableSection>
 

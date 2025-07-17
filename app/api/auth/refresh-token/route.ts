@@ -1,17 +1,13 @@
-// app/api/auth/refresh-token/route.ts
+// lib/auth/refreshToken.ts
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import cookie from "cookie";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL!;
-
-export async function GET() {
+export async function refreshAccessToken() {
   const cookieStore = await cookies();
   const refresh = cookieStore.get("refresh")?.value;
 
-  if (!refresh) {
-    return NextResponse.json({ error: "No refresh token" }, { status: 401 });
-  }
+  if (!refresh) return null;
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
   const res = await fetch(`${API_BASE_URL}/dj-rest-auth/token/refresh/`, {
     method: "POST",
@@ -21,26 +17,18 @@ export async function GET() {
     body: JSON.stringify({ refresh }),
   });
 
-  if (!res.ok) {
-    return NextResponse.json(
-      { error: "Failed to refresh token" },
-      { status: 403 }
-    );
-  }
+  if (!res.ok) return null;
 
   const data = await res.json();
-  const response = NextResponse.json({ success: true });
 
-  response.headers.set(
-    "Set-Cookie",
-    cookie.serialize("access", data.access, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60,
-    })
-  );
+  // Manually set cookie in response — won't work in server function here unless returned
+  cookieStore.set("access", data.access, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60,
+  });
 
-  return response;
+  return data.access;
 }

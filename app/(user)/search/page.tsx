@@ -1,11 +1,14 @@
-async function SearchPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const term = await (await searchParams).term;
+import SearchContent from "./search.content"; // Import the client component
 
-  return <div className='pt-12 md:pt-0'>SearchPage: {term}</div>;
+interface SearchPageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default SearchPage;
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const initialTerm = searchParams.term as string | undefined;
+
+  return (
+    // Pass the initial search term to the client component
+    <SearchContent initialTerm={initialTerm} />
+  );
+}
