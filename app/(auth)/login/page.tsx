@@ -37,10 +37,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [formData, setFormData] = useState({
-  //   email: "",
-  //   password: "",
-  // });
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 

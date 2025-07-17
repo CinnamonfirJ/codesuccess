@@ -30,18 +30,18 @@ async function getUser() {
 
     if (!refreshRes.ok) redirect("/login");
 
-    // Retry fetching user
+    const updatedCookieStore = await cookies();
+    const newAccess = updatedCookieStore.get("access")?.value;
+
     const retry = await fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
       headers: {
-        Authorization: `Bearer ${cookieStore.get("access")?.value}`,
+        Authorization: `Bearer ${newAccess}`,
       },
     });
 
     if (!retry.ok) redirect("/login");
     return await retry.json();
   }
-
-  return await res.json();
 }
 
 export default async function RootLayout({

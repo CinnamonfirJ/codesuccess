@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await res.json();
-  const response = NextResponse.json({ success: true });
+  const response = NextResponse.json({ data: data, success: true });
 
   response.cookies.set({
     name: "access",
