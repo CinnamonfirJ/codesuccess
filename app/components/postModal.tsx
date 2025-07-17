@@ -11,19 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import useFetchPosts from "@/hooks/usePost";
+import { Loader2, UploadCloud } from "lucide-react";
 
 export default function PostModal({
   open,
   onOpenChange,
   type,
+  onPostCreated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   type: "post" | "affirmation";
+  onPostCreated?: () => void; // Optional callback
 }) {
-  const { refetch } = useFetchPosts();
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,10 +56,10 @@ export default function PostModal({
       const data = await res.json();
       if (res.ok) {
         setContent("");
-        refetch();
         setMedia(null);
         setPreviewUrl(null);
         onOpenChange(false);
+        onPostCreated?.();
       } else {
         console.error("Error creating post:", data);
         alert("Failed to post. Try again.");
@@ -73,28 +73,37 @@ export default function PostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='p-6 max-w-md'>
+      <DialogContent className='space-y-4 bg-white shadow-lg p-6 rounded-2xl max-w-md'>
         <DialogHeader>
-          <DialogTitle className='mb-2 font-bold text-2xl'>
+          <DialogTitle className='font-semibold text-gray-800 text-2xl'>
             {type === "post" ? "Create Post" : "Create Affirmation"}
           </DialogTitle>
         </DialogHeader>
 
         <Textarea
-          placeholder="What's on your mind?"
+          placeholder='Share your thoughts...'
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className='min-h-[120px]'
+          className='border-gray-300 rounded-lg focus-visible:ring-emerald-500 min-h-[120px]'
         />
 
-        <Input
-          type='file'
-          accept='image/*,video/*,audio/*'
-          onChange={handleMediaChange}
-        />
+        <label
+          htmlFor='mediaUpload'
+          className='flex justify-center items-center gap-2 p-3 border-2 hover:border-emerald-400 border-dashed rounded-lg text-gray-600 transition-colors cursor-pointer'
+        >
+          <UploadCloud className='w-5 h-5' />
+          {media ? media.name : "Click to upload image, video or audio"}
+          <Input
+            id='mediaUpload'
+            type='file'
+            accept='image/*,video/*,audio/*'
+            className='hidden'
+            onChange={handleMediaChange}
+          />
+        </label>
 
         {previewUrl && (
-          <div className='mt-4 border border-gray-200 rounded-lg overflow-hidden'>
+          <div className='mt-3 border border-gray-200 rounded-lg overflow-hidden'>
             <Image
               src={previewUrl}
               alt='Preview'
@@ -106,7 +115,7 @@ export default function PostModal({
         )}
 
         <Button
-          className='bg-gradient-to-r from-emerald-500 to-blue-500 mt-4 w-full text-white'
+          className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 mt-4 w-full text-white transition-colors'
           onClick={handleSubmit}
           disabled={loading}
         >

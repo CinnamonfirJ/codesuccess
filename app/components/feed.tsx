@@ -51,6 +51,7 @@ export default function Feed() {
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [newPostTrigger, setNewPostTrigger] = useState(0);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -91,7 +92,7 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [newPostTrigger]);
 
   const toggleLike = async (postId: number) => {
     const postIndex = posts.findIndex((p) => p.id === postId);
@@ -162,7 +163,12 @@ export default function Feed() {
 
   return (
     <div className='space-y-6 mx-auto max-w-2xl'>
-      <PostModal open={openModal} onOpenChange={setOpenModal} type={type} />
+      <PostModal
+        open={openModal}
+        onOpenChange={setOpenModal}
+        type={type}
+        onPostCreated={() => setNewPostTrigger((prev) => prev + 1)}
+      />
 
       <motion.div variants={fadeInUp} initial='initial' animate='animate'>
         <Card className='bg-white shadow-lg border-0 overflow-hidden'>
