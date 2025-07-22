@@ -13,7 +13,23 @@ export async function POST(req: NextRequest) {
   });
 
   if (!res.ok) {
-    return NextResponse.json({ error: "Login failed" }, { status: 401 });
+    const errorData = await res.json();
+
+    // Extract the actual error message
+    let errorMessage = "An unknown error occurred.";
+    if (
+      errorData &&
+      errorData.non_field_errors &&
+      errorData.non_field_errors.length > 0
+    ) {
+      errorMessage = errorData.non_field_errors[0];
+    } else if (errorData && typeof errorData.detail === "string") {
+      errorMessage = errorData.detail;
+    } else if (errorData) {
+      errorMessage = JSON.stringify(errorData);
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: res.status });
   }
 
   const data = await res.json();

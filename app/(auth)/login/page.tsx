@@ -55,7 +55,24 @@ export default function LoginPage() {
       toast.success("Login successful!");
       router.push("/homepage");
     } else {
-      toast.error("Login failed.");
+      const errorData = await res.json();
+      console.log("Error: ", errorData);
+
+      // Extract the specific error message from non_field_errors
+      let errorMessage = "An unknown error occurred.";
+      if (
+        errorData &&
+        errorData.non_field_errors &&
+        errorData.non_field_errors.length > 0
+      ) {
+        errorMessage = errorData.non_field_errors[0];
+      } else if (errorData && typeof errorData.detail === "string") {
+        errorMessage = errorData.detail;
+      } else if (errorData) {
+        errorMessage = JSON.stringify(errorData.error);
+      }
+
+      toast.error(`Login failed: ${errorMessage}`);
       setIsLoading(false);
     }
   };

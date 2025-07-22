@@ -222,6 +222,7 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                     <h1 className='mb-2 font-bold text-gray-900 text-3xl'>
                       {hero.name || "Unknown Hero"}
                     </h1>
+
                     {hero.excellenceSection?.areaOfExcellence &&
                       hero.excellenceSection.areaOfExcellence.length > 0 && (
                         <div className='flex flex-wrap gap-2 mb-4'>
@@ -238,6 +239,9 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                         </div>
                       )}
 
+                    {/* Render description using PortableTextRenderer */}
+                    <PortableText value={hero.description || []} />
+
                     <div>
                       <PortableText
                         value={
@@ -246,9 +250,6 @@ export default function HeroDetailClient({ hero }: HeroDetailClientProps) {
                       />
                     </div>
                   </div>
-
-                  {/* Render description using PortableTextRenderer */}
-                  <PortableText value={hero.description || []} />
 
                   {hero._createdAt && (
                     <div className='flex items-center gap-2 text-gray-500 text-sm'>

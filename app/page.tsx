@@ -89,16 +89,40 @@ export default function LandingPage() {
             <span className='text-emerald-600'>Rise & Win.</span>
           </motion.h1>
 
-          <motion.p
-            className='mx-auto mt-8 max-w-3xl text-gray-700 text-xl md:text-2xl leading-relaxed'
+          <motion.div
+            className='mx-auto mt-10 px-4 max-w-4xl text-gray-800'
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            The only platform built specifically for Nigerian youth. Get
-            mentorship from industry leaders, access transformative courses, and
-            join a community that&apos;s changing the game.
-          </motion.p>
+            <p className='mb-6 font-semibold text-2xl md:text-3xl text-center leading-snug'>
+              Welcome to{" "}
+              <span className='font-bold text-primary'>CodeSuccex</span> — Where
+              Success Meets Inspiration!
+            </p>
+            <p className='mb-6 text-lg md:text-xl md:text-left text-center leading-relaxed'>
+              You&apos;ve just joined a powerful space built for dreamers,
+              doers, and everyday people who want more out of life. Here,
+              you&apos;ll find free courses, uplifting content, mentorship from
+              industry experts, and a supportive community that believes in your
+              potential.
+            </p>
+            <ul className='space-y-2 mb-6 pl-2 md:pl-0 text-lg md:text-xl text-left list-none'>
+              <li>
+                ✅ <span className='ml-2'>Learn</span>
+              </li>
+              <li>
+                ✅ <span className='ml-2'>Connect</span>
+              </li>
+              <li>
+                ✅ <span className='ml-2'>Grow</span>
+              </li>
+            </ul>
+            <p className='text-lg md:text-xl md:text-left text-center leading-relaxed'>
+              You&apos;re not just a member — you&apos;re part of a movement.{" "}
+              <strong>Let&apos;s rise together!</strong>
+            </p>
+          </motion.div>
 
           <motion.div
             className='flex sm:flex-row flex-col justify-center gap-6 mt-12'
@@ -209,8 +233,8 @@ export default function LandingPage() {
               <span className='text-emerald-600'>Succeed</span>
             </h2>
             <p className='mx-auto max-w-3xl text-gray-600 text-xl'>
-              We&apos;ve built the most comprehensive platform for Nigerian
-              youth development. Here&apos;s what makes us different.
+              We&apos;ve built the most comprehensive platform for personal
+              development. Here&apos;s what makes us different.
             </p>
           </div>
 
@@ -250,7 +274,7 @@ export default function LandingPage() {
                 icon: GraduationCap,
                 title: "Skills That Pay",
                 description:
-                  "Master in-demand skills through our practical courses. From entrepreneurship to digital marketing - learn what employers actually want.",
+                  "Master in-demand skills through our practical courses. From entrepreneurship to digital marketing - learn what actually works, what sets you apart, what leads to opportunities and growth.",
                 color: "from-purple-400 to-pink-500",
                 bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
               },

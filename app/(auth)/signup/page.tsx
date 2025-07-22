@@ -80,15 +80,33 @@ export default function SignupPage() {
       }),
     });
 
-    const data = await res.json();
+    // const data = await res.json();
 
     if (res.ok) {
       toast.success("Signup successful!");
       router.push("/homepage");
     } else {
-      toast.error(
-        "Signup failed." + (data.error?.non_field_errors || "Please try again.")
-      );
+      const errorData = await res.json();
+      console.log("Error: ", errorData);
+
+      // Extract the specific error message from non_field_errors
+      let errorMessage = "An unknown error occurred.";
+      if (
+        errorData &&
+        errorData.non_field_errors &&
+        errorData.non_field_errors.length > 0
+      ) {
+        errorMessage = errorData.non_field_errors[0];
+      } else if (errorData && typeof errorData.detail === "string") {
+        errorMessage = errorData.detail;
+      } else if (errorData) {
+        errorMessage = JSON.stringify(errorData.error);
+      }
+
+      toast.error(`Login failed: `);
+      setIsLoading(false);
+
+      toast.error(`Signup failed: ${errorMessage}`);
       setIsLoading(false);
     }
   };
