@@ -31,6 +31,7 @@ export default function RootLayout({
       <body className={lato.className}>
         <Toaster position='top-center' reverseOrder={false} />
         {children}
+
         {/* Footer */}
         <FooterSection />
       </body>
