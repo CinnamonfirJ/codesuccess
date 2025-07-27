@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={lato.className}>
-        <Toaster position='top-center' reverseOrder={false} />
+        <Toaster position='bottom-right' reverseOrder={false} />
         {children}
 
         {/* Footer */}
