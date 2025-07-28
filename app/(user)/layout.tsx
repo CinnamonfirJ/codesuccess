@@ -59,12 +59,10 @@ export default async function RootLayout({
   console.log(user);
 
   return (
-    <html lang='en'>
-      <body className='flex flex-col min-h-screen'>
-        <SidebarManager />
-        <main className='flex-1 mt-16 w-full'>{children}</main>
-        <SanityLiveWrapper />
-      </body>
-    </html>
+    <div className='flex flex-col min-h-screen'>
+      <SidebarManager />
+      <main className='flex-1 mt-16 w-full'>{children}</main>
+      <SanityLiveWrapper />
+    </div>
   );
 }

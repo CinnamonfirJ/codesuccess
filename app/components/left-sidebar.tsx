@@ -15,10 +15,28 @@ import type { GetCoursesQueryResult } from "@/sanity.types";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
+import { useEffect, useState } from "react";
+import { getAffirmations } from "@/sanity/lib/affirmations/getAffirmations";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
   onNavigate?: (path: string) => void;
+}
+
+interface Affirmation {
+  _id: string;
+  _createdAt?: string | null;
+  _updatedAt?: string | null;
+  title?: string | null;
+  category?: string | null;
+  description?: string | null;
+  subCategory?: string | null;
+  affirmationList?: string[] | null;
+  isChallenge?: boolean | null;
+  challengeDay?: number | null;
+  challengeTheme?: string | null;
+  dailyFocusActivity?: string | null;
+  reflectionQuestion?: string | null;
 }
 
 const fadeInUp = {
@@ -29,16 +47,26 @@ const fadeInUp = {
 
 export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
   const { user, isLoading } = useUser();
+  const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
+  const [isLoadingAffirmations, setIsLoadingAffirmations] = useState(true);
 
-  // useEffect(() => {
-  //   async function fetchUser() {
-  //     const user = await getUser();
-  //     setUser(user);
-  //     setLoading(false);
-  //   }
+  useEffect(() => {
+    async function fetchAffirmations() {
+      try {
+        const affirmationData = await getAffirmations();
+        setAffirmations(
+          Array.isArray(affirmationData) ? affirmationData.slice(0, 3) : []
+        );
+      } catch (error) {
+        console.error("Failed to fetch affirmations:", error);
+        setAffirmations([]);
+      } finally {
+        setIsLoadingAffirmations(false);
+      }
+    }
 
-  //   fetchUser();
-  // }, []);
+    fetchAffirmations();
+  }, []);
 
   return (
     <motion.div
@@ -151,15 +179,51 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
-                <a
-                  href='#'
+                {isLoadingAffirmations ? (
+                  <div className='space-y-3'>
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className='flex items-center gap-3 p-3 rounded-lg'
+                      >
+                        <div className='bg-gray-300 rounded-full w-2 h-2 animate-pulse'></div>
+                        <div className='flex-1'>
+                          <div className='bg-gray-300 mb-1 rounded h-4 animate-pulse'></div>
+                          <div className='bg-gray-200 rounded w-2/3 h-3 animate-pulse'></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : affirmations && affirmations.length > 0 ? (
+                  <Link
+                    href={`/affirmations/${affirmations[0]._id}`}
+                    className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
+                  >
+                    <div className='bg-pink-400 rounded-full w-2 h-2'></div>
+                    <span className='text-gray-700 group-hover:text-pink-600 truncate'>
+                      {/* Today&apos;s Affirmation:  */}
+                      {affirmations[0].title}
+                    </span>
+                  </Link>
+                ) : (
+                  <div className='p-3 text-center'>
+                    <div className='flex justify-center items-center bg-gray-100 mx-auto mb-2 rounded-full w-12 h-12'>
+                      <Heart className='w-6 h-6 text-gray-400' />
+                    </div>
+                    <p className='text-gray-500 text-sm'>
+                      No affirmations available
+                    </p>
+                  </div>
+                )}
+                <Link
+                  href='/affirmations'
                   className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
                 >
                   <div className='bg-pink-400 rounded-full w-2 h-2'></div>
                   <span className='text-gray-700 group-hover:text-pink-600'>
-                    Upcoming Today&apos;s Affirmations
+                    Browse All Affirmations
                   </span>
-                </a>
+                </Link>
                 {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
