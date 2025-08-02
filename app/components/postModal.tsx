@@ -25,9 +25,6 @@ export default function PostModal({
   onPostCreated?: () => void; // Optional callback
 }) {
   const [content, setContent] = useState("");
-  const maxChars = 255;
-
-  const isOverLimit = content.length > maxChars;
   const [media, setMedia] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -76,32 +73,19 @@ export default function PostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='bg-white shadow-lg p-6 rounded-2xl max-w-md'>
+      <DialogContent className='space-y-4 bg-white shadow-lg p-6 rounded-2xl max-w-md'>
         <DialogHeader>
           <DialogTitle className='font-semibold text-gray-800 text-2xl'>
             {type === "post" ? "Create Post" : "Create Affirmation"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className='w-full'>
-          <Textarea
-            placeholder='Share your thoughts...'
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className={`w-full p-2 rounded-lg border ${
-              isOverLimit ? "border-red-500" : "border-gray-300"
-            } focus-visible:ring-emerald-500 resize-none max-h-32`}
-            rows={5}
-          />
-          <div className='flex justify-between mt-1 text-sm'>
-            <p className='text-gray-500'>
-              You can only input {maxChars} characters
-            </p>
-            <p className={`${isOverLimit ? "text-red-500" : "text-gray-500"}`}>
-              {Math.max(0, maxChars - content.length)} characters left
-            </p>
-          </div>
-        </div>
+        <Textarea
+          placeholder='Share your thoughts...'
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className='border-gray-300 rounded-lg focus-visible:ring-emerald-500 min-h-[120px]'
+        />
 
         <label
           htmlFor='mediaUpload'
@@ -119,13 +103,13 @@ export default function PostModal({
         </label>
 
         {previewUrl && (
-          <div className='border border-gray-200 rounded-lg overflow-hidden'>
+          <div className='mt-3 border border-gray-200 rounded-lg overflow-hidden'>
             <Image
               src={previewUrl}
               alt='Preview'
               width={500}
               height={300}
-              className='w-full h-40 md:h-64 object-cover'
+              className='w-full h-auto object-cover'
             />
           </div>
         )}

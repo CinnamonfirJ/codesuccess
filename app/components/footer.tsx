@@ -10,7 +10,7 @@ const FooterSection = () => {
               CodeSuccex
             </h3>
             <p className='text-gray-400 leading-relaxed'>
-              Empowering Nigerian youth to unlock their potential and achieve
+              Empowering youth to unlock their potential and achieve
               extraordinary success.
             </p>
           </div>
@@ -109,7 +109,7 @@ const FooterSection = () => {
         <div className='pt-8 border-gray-800 border-t text-gray-400 text-center'>
           <p>
             &copy; 2025 CodeSuccex. All rights reserved. Built with ❤️ for
-            Nigerian youth.
+            youths across the world.
           </p>
         </div>
       </div>

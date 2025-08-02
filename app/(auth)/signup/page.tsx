@@ -80,11 +80,9 @@ export default function SignupPage() {
       }),
     });
 
-    // const data = await res.json();
-
     if (res.ok) {
       toast.success("Signup successful!");
-      router.push("/homepage");
+      router.push("/verify-email");
     } else {
       const errorData = await res.json();
       console.log("Error: ", errorData);

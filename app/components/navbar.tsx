@@ -64,7 +64,7 @@ export default function Navbar({
           </Button>
 
           {/* Logo */}
-          <div className='flex items-center gap-2'>
+          <Link href='/' className='flex items-center gap-2'>
             <div className='flex justify-center items-center rounded-lg w-8 h-8'>
               <Image
                 src='/logo.png' // Path to your image in the public directory
@@ -77,7 +77,7 @@ export default function Navbar({
             <h1 className='hidden sm:block font-bold text-navy text-xl'>
               CodeSuccex
             </h1>
-          </div>
+          </Link>
         </div>
 
         {/* Center Section - Search (Desktop) */}

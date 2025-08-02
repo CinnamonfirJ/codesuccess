@@ -74,7 +74,7 @@ export default function LandingPage() {
             transition={{ delay: 0.2, duration: 0.6 }}
           >
             <Badge className='bg-gradient-to-r from-emerald-500 to-blue-500 mb-6 px-2 md:px-4 py-2 font-medium text-white text-xs md:text-sm'>
-              🚀 Join 50,000+ Nigerian Youths Already Winning
+              🚀 150,000,000+ Success is Calling
             </Badge>
           </motion.div>
 
@@ -175,12 +175,15 @@ export default function LandingPage() {
 
       {/* Social Proof Stats */}
       <motion.section
-        className='bg-gradient-to-r from-emerald-500 to-blue-500 py-16 text-white'
+        className='flex flex-col justify-between items-center bg-gradient-to-r from-emerald-500 to-blue-500 py-16 text-white'
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
+        <Badge className='bg-pink-100 mb-4 px-4 py-2 text-pink-700'>
+          Our Target
+        </Badge>
         <motion.div
           className='gap-8 grid grid-cols-2 md:grid-cols-4 mx-auto px-6 max-w-6xl'
           variants={staggerContainer}
@@ -189,7 +192,7 @@ export default function LandingPage() {
           viewport={{ once: true }}
         >
           {[
-            { number: "50K+", label: "Active Members", icon: Users },
+            { number: "50M+", label: "Active Members", icon: Users },
             { number: "1,200+", label: "Expert Mentors", icon: Award },
             { number: "500+", label: "Success Stories", icon: TrendingUp },
             { number: "4.9/5", label: "User Rating", icon: Star },
@@ -420,13 +423,15 @@ export default function LandingPage() {
 
             <div className='flex sm:flex-row flex-col justify-center gap-6 mb-8'>
               <motion.div {...scaleOnHover}>
-                <Button
-                  size='lg'
-                  className='bg-white hover:bg-gray-100 shadow-xl px-8 py-4 font-semibold text-emerald-600 text-lg'
-                >
-                  Get Started Free Today
-                  <ArrowRight className='ml-2 w-5 h-5' />
-                </Button>
+                <Link href='/homepage'>
+                  <Button
+                    size='lg'
+                    className='bg-white hover:bg-gray-100 shadow-xl px-8 py-4 font-semibold text-emerald-600 text-lg'
+                  >
+                    Get Started Free Today
+                    <ArrowRight className='ml-2 w-5 h-5' />
+                  </Button>
+                </Link>
               </motion.div>
             </div>
 
