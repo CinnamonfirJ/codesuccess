@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 // import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Settings,
+  // Settings,
   BookOpen,
   // Award,
   Calendar,
@@ -15,12 +15,12 @@ import {
   Mail,
   // Phone,
   Edit,
-  Share2,
+  // Share2,
   // Download,
-  Users,
+  // Users,
   // Clock,
-  Trophy,
-  Zap,
+  // Trophy,
+  // Zap,
   ArrowLeft,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -46,86 +46,6 @@ const staggerContainer = {
 //   whileHover: { scale: 1.02 },
 //   whileTap: { scale: 0.98 },
 // };
-
-// Mock user data
-const userData = {
-  firstName: "Jane",
-  lastName: "Doe",
-  email: "jane.doe@example.com",
-  phone: "+234 801 234 5678",
-  location: "Lagos, Nigeria",
-  joinDate: "January 2024",
-  bio: "Aspiring software developer passionate about creating positive change through technology. Currently learning full-stack development and building projects that matter.",
-  avatar: "/muhammad-taha-ibrahim-boIrez2f5hs-unsplash.jpg",
-  stats: {
-    coursesCompleted: 12,
-    totalCourses: 15,
-    points: 2450,
-    rank: "Rising Star",
-    streak: 28,
-    certificates: 8,
-  },
-  achievements: [
-    {
-      id: 1,
-      title: "First Course Completed",
-      icon: BookOpen,
-      color: "emerald",
-      date: "2 weeks ago",
-    },
-    {
-      id: 2,
-      title: "7-Day Streak",
-      icon: Zap,
-      color: "yellow",
-      date: "1 week ago",
-    },
-    {
-      id: 3,
-      title: "Community Helper",
-      icon: Users,
-      color: "blue",
-      date: "3 days ago",
-    },
-    {
-      id: 4,
-      title: "Top Performer",
-      icon: Trophy,
-      color: "purple",
-      date: "Yesterday",
-    },
-  ],
-  recentActivity: [
-    {
-      id: 1,
-      action: "Completed",
-      item: "React Fundamentals",
-      type: "course",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      action: "Earned",
-      item: "JavaScript Expert Badge",
-      type: "achievement",
-      time: "1 day ago",
-    },
-    {
-      id: 3,
-      action: "Started",
-      item: "Node.js Masterclass",
-      type: "course",
-      time: "2 days ago",
-    },
-    {
-      id: 4,
-      action: "Joined",
-      item: "Web Development Study Group",
-      type: "community",
-      time: "3 days ago",
-    },
-  ],
-};
 
 export default function ProfilePage() {
   // const [activeTab, setActiveTab] = useState("overview")
@@ -171,16 +91,16 @@ export default function ProfilePage() {
               <h1 className='font-bold text-gray-900 text-3xl'>My Profile</h1>
             </div>
             <div className='flex items-center gap-4'>
-              <Button variant='outline' className='border-gray-300'>
+              {/* <Button variant='outline' className='border-gray-300'>
                 <Share2 className='mr-2 w-4 h-4' />
                 Share Profile
-              </Button>
-              <Link href='/profile/settings'>
+              </Button> */}
+              {/* <Link href='/profile/settings'>
                 <Button className='bg-gradient-to-r from-emerald-500 to-blue-500 text-white'>
                   <Settings className='mr-2 w-4 h-4' />
                   Settings
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </motion.div>
@@ -234,7 +154,8 @@ export default function ProfilePage() {
                     <div className='flex items-center gap-3 text-gray-600'>
                       <Calendar className='w-4 h-4' />
                       <span className='text-sm'>
-                        Joined {moment(userData.joinDate).format("MMM Do YY")}
+                        Joined{" "}
+                        {moment(user?.profile.joined_at).format("Do MMM YYYY")}
                       </span>
                     </div>
                   </div>

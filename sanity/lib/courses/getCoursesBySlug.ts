@@ -76,12 +76,34 @@ export async function getCoursesBySlug(slug: string) {
           ...sessionRef.session,
         })) || [],
     }));
+  } // New console log for the requested structured output
+
+  if (course.data) {
+    console.log(
+      "Course Content by Slug:",
+      JSON.stringify(
+        {
+          courseSlug: course.data.slug,
+          courseModules: course?.data?.modules?.map((module: any) => ({
+            moduleTitle: module.title,
+            moduleSlug: module.slug, // Assuming a module slug exists, otherwise, you can create one
+            sessions: module.studySessions.map((session: any) => ({
+              sessionId: session._id,
+              sessionTitle: session.title,
+              sessionKey: session._key, // Include other session fields you want to log
+            })),
+          })),
+        },
+        null,
+        2
+      )
+    );
   }
 
-  console.log(
-    "Full course data with preserved keys:",
-    JSON.stringify(course.data, null, 2)
-  );
+  // console.log(
+  //   "Full course data with preserved keys:",
+  //   JSON.stringify(course?.data, null, 2)
+  // );
 
   return course.data;
 }

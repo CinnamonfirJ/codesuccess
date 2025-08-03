@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"; // Import useRef
 import {
   Heart,
   MessageSquare,
-  Share2,
+  // Share2,
   MoreHorizontal,
   Play,
   Pause,
@@ -12,6 +12,7 @@ import {
   Bookmark,
   Loader2,
   Trash2,
+  Repeat, // Import the Repeat icon for retweets
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import moment from "moment";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"; // Ensure these are imported for the dropdown menu
 
 type CommentType = {
   id: number;
@@ -56,8 +63,11 @@ type PostType = {
   liked_by_user?: boolean;
   likes_count?: number;
   comments_count?: number;
-  shares?: number;
+  shares?: number; // This can represent retweet count
   timestamp?: string;
+  is_retweet?: boolean; // Indicates if this post *is* a retweet
+  is_qoute_retweet?: boolean; // Indicates if this post *is* a quote retweet
+  quote_text?: string; // The text of the quote if it's a quote retweet
 };
 
 interface PostCardProps {
@@ -66,6 +76,7 @@ interface PostCardProps {
   toggleLike: (postId: number) => Promise<void>;
   currentUserId: string | null;
   onPostDeleted: (postId: number) => void;
+  onRetweeted: (postId: number) => void; // New prop for retweet callback
 }
 
 const AudioAffirmation = () => {
@@ -248,6 +259,7 @@ export default function PostCard({
   toggleLike,
   currentUserId,
   onPostDeleted,
+  onRetweeted, // Destructure the new prop
 }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<CommentType[]>([]);
@@ -255,8 +267,10 @@ export default function PostCard({
   const [loadingComments, setLoadingComments] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false); // State for options menu
-  const optionsMenuRef = useRef<HTMLDivElement>(null); // Ref for detecting clicks outside
+  const [isRetweeting, setIsRetweeting] = useState(false); // State for retweet loading
+  // Removed hasUserRetweeted state as per request
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const optionsMenuRef = useRef<HTMLDivElement>(null);
 
   // Check if the current user is the author of the post
   const isAuthor =
@@ -412,6 +426,63 @@ export default function PostCard({
     );
   };
 
+  /**
+   * Handles the retweet action for a post.
+   * @param postId The ID of the post to retweet.
+   * @param isQuote Optional. True if it's a quote retweet, false for a regular retweet.
+   * @param quoteText Optional. The text for the quote retweet.
+   */
+  const handleRetweet = async (
+    postId: number,
+    isQuote: boolean = false,
+    quoteText: string = ""
+  ) => {
+    setIsRetweeting(true);
+    try {
+      const payload: {
+        parent_post: number;
+        is_retweet: boolean;
+        body?: string;
+      } = {
+        parent_post: postId,
+        is_retweet: true, // Always true for a retweet action
+      };
+
+      if (isQuote) {
+        payload.body = quoteText;
+      } else {
+        // Per user request: for a simple retweet, the body of the new retweet should be the original post's body.
+        // This means the retweet will essentially duplicate the original post's text.
+        payload.body = post.body;
+      }
+
+      const res = await fetch(`/api/posts/${postId}/retweets`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Failed to retweet:", errorData);
+        toast.error(errorData.detail || "Failed to retweet.");
+        return;
+      }
+
+      toast.success("Post retweeted successfully!");
+      // Removed setHasUserRetweeted(true) as per request
+      onRetweeted(post.id); // Call the callback to update the parent Feed component's state
+    } catch (error) {
+      console.error("Error retweeting:", error);
+      toast.error("An unexpected error occurred while retweeting.");
+    } finally {
+      setIsRetweeting(false);
+    }
+  };
+
   return (
     <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
       <CardHeader className='pb-3'>
@@ -445,13 +516,11 @@ export default function PostCard({
             </div>
           </div>
           <div className='relative' ref={optionsMenuRef}>
-            {" "}
-            {/* Added ref here */}
             <Button
               variant='ghost'
               size='icon'
               className='hover:bg-gray-100 rounded-full'
-              onClick={() => setShowOptionsMenu(!showOptionsMenu)} // Toggle menu visibility
+              onClick={() => setShowOptionsMenu(!showOptionsMenu)}
             >
               <MoreHorizontal className='w-5 h-5' />
             </Button>
@@ -485,7 +554,6 @@ export default function PostCard({
                     Delete Post
                   </Button>
                 )}
-                {/* Add other menu items here if needed */}
               </motion.div>
             )}
           </div>
@@ -530,6 +598,13 @@ export default function PostCard({
             />
           </motion.div>
         )}
+        {/* Display for quote retweets */}
+        {post.is_qoute_retweet && post.quote_text && (
+          <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
+            <p className='text-gray-700 italic'>&#34;{post.quote_text}&#34;</p>
+            <p className='mt-1 text-gray-500 text-sm'>Original post quoted</p>
+          </div>
+        )}
       </CardContent>
 
       <CardFooter className='pt-0'>
@@ -550,9 +625,11 @@ export default function PostCard({
               </span>
             </div>
             <span>{post?.comments_count || "0"} comments</span>
+            {/* Display shares/retweets count */}
+            {/* <span>{post?.shares || "0"} retweets</span> */}
           </div>
           <Separator className='mb-3' />
-          <div className='flex justify-between'>
+          <div className='flex justify-between mb-3'>
             <Button
               variant='ghost'
               size='sm'
@@ -566,7 +643,7 @@ export default function PostCard({
               <Heart
                 className={`w-4 h-4 ${liked_by_user ? "fill-current" : ""}`}
               />
-              {liked_by_user ? "Liked" : "Like"}
+              {/* {liked_by_user ? "Liked" : "Like"} */}
             </Button>
             <Button
               variant='ghost'
@@ -575,16 +652,35 @@ export default function PostCard({
               onClick={() => setShowComments(!showComments)}
             >
               <MessageSquare className='w-4 h-4' />
-              Comment
+              {/* Comment */}
             </Button>
+            {/* Retweet Button */}
             <Button
+              variant='ghost'
+              size='sm'
+              className={`flex-1 gap-2 transition-colors ${
+                post.is_retweet // Now using post.is_retweet for styling
+                  ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
+                  : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
+              }`}
+              onClick={() => handleRetweet(post.id)} // Call the new retweet handler
+              disabled={isRetweeting} // Disable while retweeting
+            >
+              {isRetweeting ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <Repeat className='w-4 h-4' />
+              )}
+              {/* Retweet */}
+            </Button>
+            {/* <Button
               variant='ghost'
               size='sm'
               className='flex-1 gap-2 hover:bg-emerald-50 text-gray-600 hover:text-emerald-500'
             >
               <Share2 className='w-4 h-4' />
               Share
-            </Button>
+            </Button> */}
           </div>
 
           {showComments && (

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Search,
+  // Search,
   Bell,
   MessageSquare,
   Menu,
@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Form from "next/form";
+// import Form from "next/form";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -64,7 +64,7 @@ export default function Navbar({
           </Button>
 
           {/* Logo */}
-          <Link href='/' className='flex items-center gap-2'>
+          <Link href='/homepage' className='flex items-center gap-2'>
             <div className='flex justify-center items-center rounded-lg w-8 h-8'>
               <Image
                 src='/logo.png' // Path to your image in the public directory
@@ -81,7 +81,7 @@ export default function Navbar({
         </div>
 
         {/* Center Section - Search (Desktop) */}
-        <Form action='/search' className='hidden md:flex flex-1 mx-8 max-w-md'>
+        {/* <Form action='/search' className='hidden md:flex flex-1 mx-8 max-w-md'>
           <div className='relative w-full'>
             <Search className='top-1/2 left-3 absolute w-4 h-4 text-gray-400 -translate-y-1/2 transform' />
             <Input
@@ -91,7 +91,7 @@ export default function Navbar({
               className='bg-gray-50 focus:bg-white pl-10 border-gray-200'
             />
           </div>
-        </Form>
+        </Form> */}
 
         {/* Right Section - Actions and Profile */}
         <div className='flex items-center gap-2'>
@@ -202,7 +202,7 @@ export default function Navbar({
       </div>
 
       {/* Mobile Search Bar */}
-      <Form action='/search' className='md:hidden px-4 pb-3'>
+      {/* <Form action='/search' className='md:hidden px-4 pb-3'>
         <div className='relative'>
           <Search className='top-1/2 left-3 absolute w-4 h-4 text-gray-400 -translate-y-1/2 transform' />
           <Input
@@ -212,7 +212,7 @@ export default function Navbar({
             className='bg-gray-50 pl-10 border-gray-200'
           />
         </div>
-      </Form>
+      </Form> */}
     </nav>
   );
 }

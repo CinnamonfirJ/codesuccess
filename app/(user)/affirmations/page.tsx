@@ -9,7 +9,7 @@ export default function AffirmationsPage() {
   return (
     <div className='bg-gradient-to-br from-slate-50 via-pink-50 to-rose-50 min-h-screen'>
       <div className='mx-auto px-6 py-8 container'>
-        <Link href='/'>
+        <Link href='/homepage'>
           <Button variant='ghost' className='gap-2'>
             <ArrowLeft className='w-4 h-4' />
             Back to Home

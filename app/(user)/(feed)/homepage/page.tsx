@@ -8,7 +8,7 @@ export default async function Home() {
   const courses = await getCourses();
 
   return (
-    <main className={`container mx-auto bg-background `}>
+    <main className={`container pt-8 mx-auto bg-background `}>
       {/* Desktop Layout */}
       <div className='flex md:flex-row flex-col'>
         {/* Left Sidebar - Hidden on mobile */}
@@ -17,7 +17,7 @@ export default async function Home() {
         </div>
 
         {/* Main Content */}
-        <div className='pt-10 md:pt-0 w-full md:w-2/4 lg:w-3/5 min-h-screen'>
+        <div className='w-full md:w-2/4 lg:w-3/5 min-h-screen'>
           <Feed />
           {/* <ComingSoon /> */}
         </div>

@@ -207,7 +207,7 @@ export default function SettingsPage() {
             animate='animate'
           >
             <motion.div variants={fadeInUp}>
-              <Card className='bg-white shadow-lg border-0'>
+              <Card className='bg-white shadow-lg py-6 border-0'>
                 <CardHeader className='pb-3'>
                   <h3 className='font-semibold text-gray-900 text-xl'>
                     General Account Settings

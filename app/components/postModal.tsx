@@ -73,7 +73,7 @@ export default function PostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='space-y-4 bg-white shadow-lg p-6 rounded-2xl max-w-md'>
+      <DialogContent className='space-y-2 bg-white shadow-lg p-6 rounded-2xl max-w-md'>
         <DialogHeader>
           <DialogTitle className='font-semibold text-gray-800 text-2xl'>
             {type === "post" ? "Create Post" : "Create Affirmation"}
@@ -109,13 +109,13 @@ export default function PostModal({
               alt='Preview'
               width={500}
               height={300}
-              className='w-full h-auto object-cover'
+              className='w-full h-40 object-cover'
             />
           </div>
         )}
 
         <Button
-          className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 mt-4 w-full text-white transition-colors'
+          className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 mt-2 w-full text-white transition-colors'
           onClick={handleSubmit}
           disabled={loading}
         >

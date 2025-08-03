@@ -5,10 +5,10 @@ async function getAllCourseSlugs() {
     const courses = await getCourses();
 
     if (courses && Array.isArray(courses)) {
-      const slugs = courses.map((course) => course.slug);
+      // const slugs = courses.map((course) => course.slug);
 
       console.log("Slugs of all courses:");
-      console.log(JSON.stringify(slugs, null, 2));
+      // console.log(JSON.stringify(slugs, null, 2));
     } else {
       console.log(
         "No course data found or unexpected data format from getCourses."

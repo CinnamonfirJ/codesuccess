@@ -179,6 +179,15 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
+                <Link
+                  href='/affirmations'
+                  className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
+                >
+                  <div className='bg-pink-400 rounded-full w-2 h-2'></div>
+                  <span className='text-gray-700 group-hover:text-pink-600'>
+                    Browse All Affirmations
+                  </span>
+                </Link>
                 {isLoadingAffirmations ? (
                   <div className='space-y-3'>
                     {[1, 2, 3].map((i) => (
@@ -215,15 +224,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     </p>
                   </div>
                 )}
-                <Link
-                  href='/affirmations'
-                  className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-pink-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-pink-600'>
-                    Browse All Affirmations
-                  </span>
-                </Link>
+
                 {/* <a
                   href='#'
                   className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
@@ -263,7 +264,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
-                {courses && courses.length > 0 ? (
+                {/* {courses && courses.length > 0 ? (
                   <CourseLink
                     key={courses[0]._id}
                     course={courses[0]}
@@ -279,9 +280,9 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                       No courses available
                     </p>
                   </div>
-                )}
+                )} */}
 
-                {/* {courses && courses.length > 0 ? (
+                {courses && courses.length > 0 ? (
                   courses.map((course) => (
                     <CourseLink
                       key={course._id}
@@ -299,7 +300,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                       No courses available
                     </p>
                   </div>
-                )} */}
+                )}
               </div>
             </ExpandableSection>
 

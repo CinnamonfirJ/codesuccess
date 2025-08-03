@@ -161,6 +161,11 @@ export default function Feed() {
     toast.success("Post deleted successfully!");
   };
 
+  // New function to handle post retweet from PostCard
+  const handlePostRetweet = () => {
+    setNewPostTrigger((prev) => prev + 1); // Will trigger useEffect to re-fetch
+  };
+
   return (
     <div className='space-y-6 mx-auto max-w-2xl'>
       <PostModal
@@ -173,7 +178,7 @@ export default function Feed() {
       <motion.div variants={fadeInUp} initial='initial' animate='animate'>
         <Card className='bg-white shadow-lg border-0 overflow-hidden'>
           <CardHeader className='pb-3'>
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-2'>
               <Avatar className='border-2 border-emerald-200'>
                 <AvatarImage
                   src={
@@ -193,14 +198,14 @@ export default function Feed() {
                 }}
                 className='flex-1 bg-gradient-to-r from-gray-50 hover:from-gray-100 to-gray-100 hover:to-gray-200 px-6 py-3 border border-gray-200 rounded-full transition-all cursor-pointer'
               >
-                <span className='text-gray-500'>
+                <span className='text-gray-500 truncate'>
                   Share something positive...
                 </span>
               </div>
             </div>
           </CardHeader>
 
-          <CardFooter className='flex md:flex-row flex-col justify-between items-start md:items-center px-2 md:px-6 pt-0 pb-4 w-full'>
+          <CardFooter className='flex sm:flex-row flex-col justify-between items-center px-2 md:px-6 pt-0 pb-4 w-full'>
             <div className='flex justify-between px-2 md:px-6'>
               <Button
                 variant='ghost'
@@ -235,10 +240,10 @@ export default function Feed() {
                 Affirmation
               </Button>
             </div>
-            <div className='mt-2 md:mt-0 w-full'>
+            <div className='mt-2 md:mt-0 max-sm:w-full'>
               <Button
                 size='sm'
-                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 text-white'
+                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 max-sm:w-full text-white'
                 onClick={() => {
                   setType("post");
                   setOpenModal(true);
@@ -271,6 +276,7 @@ export default function Feed() {
                 toggleLike={toggleLike}
                 currentUserId={`${user?.first_name} ${user?.last_name}` || null}
                 onPostDeleted={handlePostDeleted} // Pass deletion callback
+                onRetweeted={handlePostRetweet}
               />
             </motion.div>
           ))}

@@ -61,7 +61,7 @@ export default async function RootLayout({
   return (
     <div className='flex flex-col min-h-screen'>
       <SidebarManager />
-      <main className='flex-1 mt-16 w-full'>{children}</main>
+      <main className='flex-1 mt-8 w-full'>{children}</main>
       <SanityLiveWrapper />
     </div>
   );
