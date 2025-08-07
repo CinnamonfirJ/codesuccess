@@ -1,75 +1,71 @@
 // app/api/me/route.ts
+
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import api from "@/lib/axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export async function GET() {
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
   const refresh = cookieStore.get("refresh")?.value;
 
-  // No tokens at all = unauthenticated
   if (!access && !refresh) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Function to fetch user
   async function fetchUser(token: string) {
-    return fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
+    return api.get("/dj-rest-auth/user/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
   }
 
-  let res = access ? await fetchUser(access) : undefined;
+  try {
+    // First attempt with current access token
+    const res = await fetchUser(access!);
+    return NextResponse.json(res.data);
+  } catch (error: any) {
+    const status = error?.response?.status;
 
-  // If access token expired, try refresh
-  if (!res || res.status === 401) {
-    if (!refresh) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Access expired or unauthorized
+    if (status === 401 && refresh) {
+      try {
+        const refreshRes = await api.post("/dj-rest-auth/token/refresh/", {
+          refresh,
+        });
+
+        const newAccess = refreshRes.data.access;
+
+        // Try fetching user again
+        const res = await fetchUser(newAccess);
+
+        // Set new access token in cookies
+        const response = NextResponse.json(res.data);
+        response.cookies.set("access", newAccess, {
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 60, // 1 hour
+        });
+
+        return response;
+      } catch {
+        return NextResponse.json({ error: "Refresh failed" }, { status: 401 });
+      }
     }
 
-    const refreshRes = await fetch(
-      `${API_BASE_URL}/dj-rest-auth/token/refresh/`,
+    // Other error
+    return NextResponse.json(
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refresh }),
+        error: error?.response?.data || "Unauthorized",
+      },
+      {
+        status: status || 500,
       }
     );
-
-    if (!refreshRes.ok) {
-      return NextResponse.json({ error: "Refresh failed" }, { status: 401 });
-    }
-
-    const refreshData = await refreshRes.json();
-    const newAccess = refreshData.access;
-
-    // Try fetching user again with new token
-    res = await fetchUser(newAccess);
-
-    if (!res.ok) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userData = await res.json();
-
-    const response = NextResponse.json(userData);
-    response.cookies.set("access", newAccess, {
-      httpOnly: true,
-      path: "/",
-      secure: true,
-      sameSite: "lax",
-    });
-
-    return response;
   }
-
-  // Access token worked
-  const data = await res.json();
-  return NextResponse.json(data);
 }

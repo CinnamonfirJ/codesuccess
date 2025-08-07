@@ -71,12 +71,11 @@ export async function POST(
     );
   }
 
-  // The API expects `parent_post` and `is_retweet`.
-  // If it's a quote retweet, `body` will also be present.
   const payload = {
-    parent_post: parseInt(postId), // Ensure parent_post is a number
+    origina_post_id: parseInt(postId), // Ensure parent_post is a number
     body: body.body || "", // Optional, for quote retweets
     is_retweet: body.is_retweet, // Should be true for a retweet
+    quote: body.quote_text,
   };
 
   try {

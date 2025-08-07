@@ -161,6 +161,12 @@ export default function Feed() {
     toast.success("Post deleted successfully!");
   };
 
+  const handlePostUpdated = (updatedPost: PostType) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+    );
+  };
+
   // New function to handle post retweet from PostCard
   const handlePostRetweet = () => {
     setNewPostTrigger((prev) => prev + 1); // Will trigger useEffect to re-fetch
@@ -277,6 +283,7 @@ export default function Feed() {
                 currentUserId={`${user?.first_name} ${user?.last_name}` || null}
                 onPostDeleted={handlePostDeleted} // Pass deletion callback
                 onRetweeted={handlePostRetweet}
+                onPostUpdated={handlePostUpdated}
               />
             </motion.div>
           ))}

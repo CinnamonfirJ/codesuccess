@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import api from "@/lib/axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-// GET method for a single post (if you have one, otherwise ignore/remove)
+// ✅ GET method for a single post using Axios
 export async function GET(
   req: NextRequest,
   { params }: { params: { postId: string } }
@@ -12,40 +11,24 @@ export async function GET(
   const access = cookieStore.get("access")?.value;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${params.postId}/`, {
+    const res = await api.get(`/posts/${params.postId}/`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
-      credentials: "include",
-      cache: "no-store",
     });
 
-    if (!res.ok) {
-      const errorDetails = await res.text();
-      console.error(
-        `Failed to fetch post from backend API. Status: ${res.status}, Message: ${res.statusText}, Details: ${errorDetails}`
-      );
-      return NextResponse.json(
-        {
-          error: `Failed to fetch post: ${res.statusText}`,
-          details: errorDetails,
-        },
-        { status: res.status }
-      );
-    }
-
-    const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(res.data);
   } catch (error: any) {
-    console.error("Error in /api/posts/[postId] GET handler:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
-      { status: 500 }
-    );
+    console.error("GET post failed:", error);
+
+    const errorData = error?.response?.data || "Failed to fetch post";
+    const status = error?.response?.status || 500;
+
+    return NextResponse.json({ error: errorData }, { status });
   }
 }
 
-// DELETE method for deleting a post
+// ✅ DELETE method using Axios
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { postId: string } }
@@ -54,49 +37,70 @@ export async function DELETE(
   const access = cookieStore.get("access")?.value;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${params.postId}/`, {
-      method: "DELETE",
+    const res = await api.delete(`/posts/${params.postId}/`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
-      credentials: "include",
     });
 
+    // Axios auto-parses JSON, but a 204 No Content will have no body
     if (res.status === 204) {
-      return new NextResponse(null, { status: 204 }); // No content
+      return new NextResponse(null, { status: 204 });
     }
 
-    let data;
-    try {
-      data = await res.json();
-    } catch (jsonError: any) {
-      const rawText = await res.text();
-      console.error(
-        `Failed to parse JSON response from backend for DELETE API. Status: ${res.status}, Raw Text: ${rawText}, Error: ${jsonError.message}`
-      );
-      return NextResponse.json(
-        {
-          error: "Backend returned non-JSON response or empty body for error",
-          details: rawText,
-        },
-        { status: res.status }
-      );
-    }
-
-    if (!res.ok) {
-      console.error(
-        `Backend DELETE API failed: Status ${res.status}, Data:`,
-        data
-      );
-      return NextResponse.json({ error: data }, { status: res.status });
-    }
-
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json(res.data, { status: 200 });
   } catch (error: any) {
-    console.error("Error in /api/posts/[postId] DELETE handler:", error);
+    console.error("DELETE post failed:", error);
+
+    const errorData = error?.response?.data || "Failed to delete post";
+    const status = error?.response?.status || 500;
+
+    return NextResponse.json({ error: errorData }, { status });
+  }
+}
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { postId: string } }
+) {
+  const cookieStore = await cookies();
+  const access = cookieStore.get("access")?.value;
+
+  const contentType = req.headers.get("content-type");
+  let body: any;
+
+  if (contentType?.includes("application/json")) {
+    body = await req.json();
+  } else if (contentType?.includes("multipart/form-data")) {
+    body = await req.formData();
+  } else {
     return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
-      { status: 500 }
+      { error: "Unsupported content type" },
+      { status: 400 }
+    );
+  }
+
+  // const postId = req.nextUrl.searchParams.get("id");
+
+  // if (!postId) {
+  //   return NextResponse.json({ error: "Missing post ID" }, { status: 400 });
+  // }
+
+  try {
+    const res = await api.put(`/posts/${params.postId}/`, body, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+        ...(body instanceof FormData
+          ? { "Content-Type": "multipart/form-data" }
+          : { "Content-Type": "application/json" }),
+      },
+    });
+
+    return NextResponse.json(res.data, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.response?.data || "Update failed" },
+      { status: error?.response?.status || 500 }
     );
   }
 }
