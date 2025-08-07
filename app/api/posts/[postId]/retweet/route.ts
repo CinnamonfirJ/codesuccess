@@ -56,9 +56,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { postId: string } }
+  { params }: { params: { postId: string } }
 ) {
-  const { postId } = context.params;
+  const { postId } = params;
   const body = await request.json(); // Expecting JSON body for retweet/quote retweet
 
   const cookieStore = await cookies();
@@ -72,14 +72,14 @@ export async function POST(
   }
 
   const payload = {
-    origina_post_id: parseInt(postId), // Ensure parent_post is a number
+    parent_post: parseInt(postId), // Ensure parent_post is a number
     body: body.body || "", // Optional, for quote retweets
     is_retweet: body.is_retweet, // Should be true for a retweet
-    quote: body.quote_text,
+    quote_text: body.quote_text,
   };
 
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${postId}/retweets/`, {
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}/retweet/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,16 +89,26 @@ export async function POST(
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
-
+    // if (!res.ok) {
+    //   console.error(
+    //     `Backend POST API for retweet failed: Status ${res.status}, Data:`,
+    //     data
+    //   );
+    //   return NextResponse.json({ error: data }, { status: res.status });
+    // }
     if (!res.ok) {
+      // If the response is not OK, read it as text to get the full HTML error page
+      const errorDetails = await res.text();
       console.error(
-        `Backend POST API for retweet failed: Status ${res.status}, Data:`,
-        data
+        `Backend POST API failed: Status ${res.status}, Details: ${errorDetails}`
       );
-      return NextResponse.json({ error: data }, { status: res.status });
+      // You can return a generic error or the details from the backend
+      return NextResponse.json(
+        { error: "Backend API failed", details: errorDetails },
+        { status: res.status }
+      );
     }
-
+    const data = await res.json();
     return NextResponse.json(data, { status: 201 }); // 201 Created
   } catch (error: any) {
     console.error("Error in /api/posts/[postId]/retweets POST handler:", error);

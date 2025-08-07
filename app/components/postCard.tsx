@@ -234,10 +234,10 @@ export default function PostCard({
 
       if (isQuote) {
         payload.is_qoute_retweet = true;
-        payload.body = quoteText;
+        payload.quote_text = quoteText;
       }
 
-      const res = await fetch(`/api/posts/${postId}/retweets`, {
+      const res = await fetch(`/api/posts/${postId}/retweet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
