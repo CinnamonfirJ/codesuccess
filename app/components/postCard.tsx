@@ -48,7 +48,7 @@ type OriginalPostType = {
   author_full_name: string;
   author_image: string;
   body: string;
-  created_at: string;
+  // created_at: string;
   media?: string;
   retweet_count?: number;
 };
@@ -469,6 +469,22 @@ export default function PostCard({
                 <p className='text-gray-700 italic whitespace-pre-wrap'>
                   &#34;{post.parent_post_data.body}&#34;
                 </p>
+
+                {post?.parent_post_data?.media && (
+                  <motion.div
+                    className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Image
+                      src={post?.parent_post_data.media || "/placeholder.svg"}
+                      alt='Post content'
+                      className='w-full h-auto object-cover'
+                      width={600}
+                      height={400}
+                    />
+                  </motion.div>
+                )}
               </div>
             </>
           )}
