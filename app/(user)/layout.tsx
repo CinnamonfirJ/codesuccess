@@ -1,53 +1,57 @@
-// app/layout.tsx (or app/dashboard/layout.tsx if it's only for protected routes)
+// app/layout.tsx
 import type { ReactNode } from "react";
 import SanityLiveWrapper from "../components/SanityLiveWrapper";
 import SidebarManager from "../components/SidebarManager";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import api from "@/lib/axios"; // ✅ Import your existing API instance
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL!;
 
 async function getUser() {
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
+  const refresh = cookieStore.get("refresh")?.value;
 
   if (!access) redirect("/login");
 
-  const userRes = await fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
-    headers: {
-      Authorization: `Bearer ${access}`,
-    },
-    cache: "no-store",
-  });
+  try {
+    const res = await api.get("/dj-rest-auth/user/", {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    });
 
-  if (userRes.ok) {
-    return await userRes.json();
+    return res.data;
+  } catch {
+    // Attempt refresh
+    const refreshRes = await fetch(`${SITE_URL}/api/auth/refresh-token`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Cookie: `refresh=${refresh ?? ""}`,
+      },
+    });
+
+    if (!refreshRes.ok) redirect("/login");
+
+    const cookieStore = await cookies();
+    const newAccess = cookieStore.get("access")?.value;
+    if (!newAccess) redirect("/login");
+
+    try {
+      const retryRes = await api.get("/dj-rest-auth/user/", {
+        headers: {
+          Authorization: `Bearer ${newAccess}`,
+        },
+      });
+
+      return retryRes.data;
+    } catch {
+      redirect("/login");
+    }
   }
-
-  // Try to refresh token
-  const refreshRes = await fetch(`${SITE_URL}/api/auth/refresh-token`, {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      Cookie: `refresh=${cookieStore.get("refresh")?.value ?? ""}`,
-    },
-  });
-
-  if (!refreshRes.ok) redirect("/login");
-
-  const newAccess = cookieStore.get("access")?.value;
-
-  const retry = await fetch(`${API_BASE_URL}/dj-rest-auth/user/`, {
-    headers: {
-      Authorization: `Bearer ${newAccess}`,
-    },
-    cache: "no-store",
-  });
-
-  if (!retry.ok) redirect("/login");
-
-  return await retry.json();
 }
 
 export default async function RootLayout({

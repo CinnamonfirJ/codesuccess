@@ -1,9 +1,9 @@
 // app/api/posts/[postId]/retweets/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import api from "@/lib/axios"; // your axios instance
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function GET(
   request: NextRequest,
@@ -21,35 +21,22 @@ export async function GET(
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${postId}/retweets/`, {
+    const res = await api.get(`/posts/${postId}/retweets/`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
-      credentials: "include",
-      cache: "no-store", // Ensure fresh data
     });
 
-    if (!res.ok) {
-      const errorDetails = await res.text();
-      console.error(
-        `Failed to fetch retweets from backend API. Status: ${res.status}, Message: ${res.statusText}, Details: ${errorDetails}`
-      );
-      return NextResponse.json(
-        {
-          error: `Failed to fetch retweets: ${res.statusText}`,
-          details: errorDetails,
-        },
-        { status: res.status }
-      );
-    }
-
-    const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(res.data);
   } catch (error: any) {
     console.error("Error in /api/posts/[postId]/retweets GET handler:", error);
+
     return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
-      { status: 500 }
+      {
+        error: "Failed to fetch retweets",
+        details: error.response?.data || error.message,
+      },
+      { status: error.response?.status || 500 }
     );
   }
 }
@@ -59,7 +46,7 @@ export async function POST(
   { params }: { params: { postId: string } }
 ) {
   const { postId } = params;
-  const body = await request.json(); // Expecting JSON body for retweet/quote retweet
+  const body = await request.json();
 
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
@@ -72,49 +59,29 @@ export async function POST(
   }
 
   const payload = {
-    parent_post: parseInt(postId), // Ensure parent_post is a number
-    body: body.body || "", // Optional, for quote retweets
-    is_retweet: body.is_retweet, // Should be true for a retweet
+    parent_post: parseInt(postId),
+    body: body.body || "",
+    is_retweet: body.is_retweet,
     quote_text: body.quote_text,
   };
 
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${postId}/retweet/`, {
-      method: "POST",
+    const res = await api.post(`/posts/${postId}/retweet/`, payload, {
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${access}`,
       },
-      credentials: "include",
-      body: JSON.stringify(payload),
     });
 
-    // if (!res.ok) {
-    //   console.error(
-    //     `Backend POST API for retweet failed: Status ${res.status}, Data:`,
-    //     data
-    //   );
-    //   return NextResponse.json({ error: data }, { status: res.status });
-    // }
-    if (!res.ok) {
-      // If the response is not OK, read it as text to get the full HTML error page
-      const errorDetails = await res.text();
-      console.error(
-        `Backend POST API failed: Status ${res.status}, Details: ${errorDetails}`
-      );
-      // You can return a generic error or the details from the backend
-      return NextResponse.json(
-        { error: "Backend API failed", details: errorDetails },
-        { status: res.status }
-      );
-    }
-    const data = await res.json();
-    return NextResponse.json(data, { status: 201 }); // 201 Created
+    return NextResponse.json(res.data, { status: 201 });
   } catch (error: any) {
     console.error("Error in /api/posts/[postId]/retweets POST handler:", error);
+
     return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
-      { status: 500 }
+      {
+        error: "Failed to create retweet",
+        details: error.response?.data || error.message,
+      },
+      { status: error.response?.status || 500 }
     );
   }
 }

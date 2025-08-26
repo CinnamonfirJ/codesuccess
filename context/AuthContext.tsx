@@ -1,64 +1,46 @@
-// context/AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { getAccessToken, setAccessToken } from "@/lib/auth/tokenStore";
+import { refreshAccessToken } from "@/lib/auth/refreshClient";
+import api from "@/lib/axios";
 
-type User = {
-  pk: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  profile?: {
-    avatar?: string;
-    bio?: string;
-    location?: string;
-  };
-} | null;
-
-type AuthContextType = {
-  user: User;
-  setUser: (user: User) => void;
-  isLoading: boolean;
-};
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  setUser: () => {},
-  isLoading: true,
-});
-
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/pages/api/user", { credentials: "include" });
+    async function restoreSession() {
+      const access = getAccessToken();
 
-        if (!res.ok) {
-          setUser(null);
-          setIsLoading(false);
-          return;
+      if (!access) {
+        try {
+          const newToken = await refreshAccessToken(); // 👈 this hits /api/auth/refresh-token
+          if (newToken) {
+            setAccessToken(newToken);
+
+            // Optional: preload user data
+            const res = await api.get("/dj-rest-auth/user/");
+            console.log("Restored user:", res.data);
+
+            // Optional: redirect or reload page
+            // router.refresh();
+          }
+        } catch (err) {
+          console.log("Auto login failed", err);
         }
-
-        const data = await res.json();
-        setUser(data);
-      } catch {
-        setUser(null);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    fetchUser();
+      setLoading(false);
+    }
+
+    restoreSession();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  if (loading) return null; // ⏳ Optional: show spinner
 
-export const useAuth = () => useContext(AuthContext);
+  return <>{children}</>;
+}

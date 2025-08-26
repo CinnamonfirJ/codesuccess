@@ -8,7 +8,6 @@ import {
   MoreHorizontal,
   Play,
   Pause,
-  // Send,
   Bookmark,
   Loader2,
   Trash2,
@@ -151,7 +150,7 @@ export default function PostCard({
   const { user } = useUser();
 
   const isAuthor =
-    currentUserId !== null && post.author_full_name === currentUserId;
+    currentUserId !== null && String(post.author) === String(currentUserId);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -270,7 +269,7 @@ export default function PostCard({
         <div className='flex justify-between items-center'>
           <div className='flex items-center gap-3'>
             <Link
-              href={`/profile/${post.author_username}`}
+              href={`/profile/${post.author}`}
               onClick={(e) => e.stopPropagation()}
             >
               <Avatar className='border-2 border-gray-200'>
@@ -287,7 +286,7 @@ export default function PostCard({
             </Link>
             <div>
               <Link
-                href={`/profile/${post.author_username}`}
+                href={`/profile/${post.author}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className='flex items-center gap-2'>
@@ -431,6 +430,7 @@ export default function PostCard({
                       <AvatarImage
                         src={
                           post?.parent_post_data.author_image ||
+                          "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
                         alt={post?.parent_post_data?.author_full_name}
