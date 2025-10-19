@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import api from "@/lib/axios";
 
-// ✅ GET method for a single post using Axios
+// GET method for a single post using Axios
 export async function GET(
   req: NextRequest,
   { params }: { params: { postId: string } }
@@ -28,7 +28,7 @@ export async function GET(
   }
 }
 
-// ✅ DELETE method using Axios
+// DELETE method using Axios
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { postId: string } }

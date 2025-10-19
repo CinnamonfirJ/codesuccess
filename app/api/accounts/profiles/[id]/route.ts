@@ -1,30 +1,67 @@
-// api/accounts/profiles/[id]/route.ts
+// app/api/accounts/profiles/[id]/route.ts
+
 import { cookies } from "next/headers";
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import api from "@/lib/axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_2!;
 
-export async function GET(
-  _req: NextRequest,
-  ctx: { params: { id: string } | Promise<{ id: string }> }
-) {
-  const p = await ctx.params;
-  const id = p.id;
-
+export async function GET(_req: Request, ctx: { params: { id: string } }) {
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
+  const refresh = cookieStore.get("refresh")?.value;
 
-  const upstream = await fetch(`${API_BASE_URL}/accounts/profiles/${id}/`, {
-    method: "GET",
-    headers: {
-      ...(access ? { Authorization: `Bearer ${access}` } : {}),
-      "Content-Type": "application/json",
-    },
-    cache: "no-store",
-  });
+  if (!access && !refresh) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
-  const text = await upstream.text();
-  const data = text ? JSON.parse(text) : null;
-  return NextResponse.json(data, { status: upstream.status });
+  async function fetchProfile(token: string) {
+    return api.get(`${API_BASE_URL}/accounts/profile/${ctx.params.id}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  try {
+    // First attempt with current access token
+    const res = await fetchProfile(access!);
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error: any) {
+    const status = error?.response?.status;
+
+    // Access expired or unauthorized → try refresh
+    if (status === 401 && refresh) {
+      try {
+        const refreshRes = await api.post("/dj-rest-auth/token/refresh/", {
+          refresh,
+        });
+
+        const newAccess = refreshRes.data.access;
+
+        // Try fetching profile again
+        const res = await fetchProfile(newAccess);
+
+        // Set new access token in cookies
+        const response = NextResponse.json(res.data, { status: res.status });
+        response.cookies.set("access", newAccess, {
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 60, // 1 hour
+        });
+
+        return response;
+      } catch {
+        return NextResponse.json({ error: "Refresh failed" }, { status: 401 });
+      }
+    }
+
+    // Other error
+    return NextResponse.json(
+      { error: error?.response?.data || "Failed to fetch profile" },
+      { status: status || 500 }
+    );
+  }
 }

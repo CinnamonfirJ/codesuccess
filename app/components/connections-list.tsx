@@ -4,11 +4,16 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
 
-export type MiniRelation = { profile_id: number | string; username: string };
+type UserLike = {
+  profile_id?: number | string;
+  profile_image?: string | null;
+  id?: number | string;
+  username: string;
+};
 
 type Props = {
   title?: string;
-  items: MiniRelation[];
+  items: UserLike[];
   myFollowingIds: Set<number | string>;
   onFollowingChange: (id: number | string, nowFollowing: boolean) => void;
 };
@@ -22,23 +27,29 @@ export function ConnectionsList({
   return (
     <div className='space-y-3'>
       {title ? <p className='font-medium text-gray-900'>{title}</p> : null}
+
       {(items ?? []).map((f) => {
-        const id = String(f.profile_id);
+        // pick the best identifier available
+        const id = f.profile_id ?? f.id ?? f.username;
+        const idStr = String(id);
+
         const isFollowing =
-          myFollowingIds.has(id) || myFollowingIds.has(Number(id));
+          myFollowingIds.has(idStr) || myFollowingIds.has(Number(idStr));
+
         const initials = (f.username?.[0] || "U").toUpperCase();
+
         return (
           <div
-            key={`${f.profile_id}-${f.username}`}
+            key={`${idStr}-${f.username}`}
             className='flex justify-between items-center hover:bg-gray-50 p-2 rounded-lg'
           >
             <Link
-              href={`/profile/${encodeURIComponent(String(f.profile_id))}`}
+              href={`/profile/${encodeURIComponent(idStr)}`}
               className='flex items-center gap-3'
             >
               <Avatar className='w-8 h-8'>
                 <AvatarImage
-                  src={`/placeholder.svg?height=32&width=32&query=${encodeURIComponent(f.username || "user")}`}
+                  src={f.profile_image || "/placeholder.svg"}
                   alt={f.username}
                 />
                 <AvatarFallback>{initials}</AvatarFallback>
@@ -51,13 +62,14 @@ export function ConnectionsList({
             </Link>
 
             <FollowButton
-              targetId={id}
+              targetId={idStr}
               initialFollowed={isFollowing}
-              onToggled={(next) => onFollowingChange(id, next)}
+              onToggled={(next) => onFollowingChange(idStr, next)}
             />
           </div>
         );
       })}
+
       {(!items || items.length === 0) && (
         <p className='text-muted-foreground text-sm'>No users found.</p>
       )}

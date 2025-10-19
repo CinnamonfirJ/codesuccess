@@ -291,6 +291,7 @@ export default function PostDetailsPage() {
   const [postingComment, setPostingComment] = useState(false);
 
   // States for retweet functionality
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isRetweeting, setIsRetweeting] = useState(false);
   const [showRetweetOptions, setShowRetweetOptions] = useState(false);
   const [quoteRetweetText, setQuoteRetweetText] = useState("");
@@ -305,8 +306,6 @@ export default function PostDetailsPage() {
   // States for Edit Post functionality (now passed to EditPostModal)
   const [showEditDialog, setShowEditDialog] = useState(false);
 
-  // Derive currentUserId directly from the user object from useUser hook
-  // This ensures it's reactive to authentication state and avoids unused state setter
   const currentUserId = user ? `${user.first_name} ${user.last_name}` : null;
 
   // Fetch Post Details
@@ -415,6 +414,48 @@ export default function PostDetailsPage() {
       fetchComments();
     }
   }, [postId, fetchComments]);
+
+  const handleDeletePost = async () => {
+    setShowOptionsMenu(false);
+    toast.promise(
+      new Promise(async (resolve, reject) => {
+        setIsDeleting(true);
+        try {
+          const res = await fetch(`/api/posts/${postId}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error(
+              `Failed to delete post: Status ${res.status}`,
+              errorData
+            );
+            reject(new Error(errorData.detail || "Failed to delete post."));
+            return;
+          }
+
+          // onPostDeleted(post.id);
+          resolve("Post deleted successfully!");
+        } catch (error: any) {
+          console.error("Error deleting post:", error);
+          reject(
+            new Error(
+              error.message || "Could not delete post due to a network error."
+            )
+          );
+        } finally {
+          setIsDeleting(false);
+        }
+      }),
+      {
+        loading: "Deleting post...",
+        success: "Post deleted!",
+        error: (err) => err.message,
+      }
+    );
+  };
 
   const handlePostComment = async () => {
     if (!newCommentContent.trim()) {
@@ -688,14 +729,17 @@ export default function PostDetailsPage() {
                       <Button
                         variant='ghost'
                         className='justify-start hover:bg-red-50 px-4 py-2 w-full text-red-600 text-sm'
-                        onClick={() => {
-                          // Implement delete logic here for the details page if needed
-                          toast.error(
-                            "Delete functionality not yet implemented on details page."
-                          );
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePost();
                         }}
+                        disabled={isDeleting}
                       >
-                        <Trash2 className='mr-2 w-4 h-4' />
+                        {isDeleting ? (
+                          <Loader2 className='mr-2 w-4 h-4 animate-spin' />
+                        ) : (
+                          <Trash2 className='mr-2 w-4 h-4' />
+                        )}
                         Delete Post
                       </Button>
                     </>
@@ -1061,9 +1105,9 @@ export default function PostDetailsPage() {
           postId={post.id}
           initialBody={post.body}
           initialMediaUrl={post.media}
-          onPostUpdated={(updatedPost) => {
-            setPost(updatedPost); // Update the main post state with the new data
-          }}
+          // onPostUpdated={(updatedPost) => {
+          //   setPost(updatedPost); // Update the main post state with the new data
+          // }}
         />
       )}
     </div>

@@ -109,13 +109,13 @@ export default function LandingPage() {
             </p>
             <ul className='space-y-2 mb-6 pl-2 md:pl-0 text-lg md:text-xl text-left list-none'>
               <li>
-                ✅ <span className='ml-2'>Learn</span>
+                <span className='ml-2'>Learn</span>
               </li>
               <li>
-                ✅ <span className='ml-2'>Connect</span>
+                <span className='ml-2'>Connect</span>
               </li>
               <li>
-                ✅ <span className='ml-2'>Grow</span>
+                <span className='ml-2'>Grow</span>
               </li>
             </ul>
             <p className='text-lg md:text-xl md:text-left text-center leading-relaxed'>

@@ -65,6 +65,7 @@ type PostType = {
   tags?: string[];
   isAffirmation?: boolean;
   liked_by_user?: boolean;
+  retweeted_by_user?: boolean;
   likes_count?: number;
   comments_count?: number;
   shares?: number;
@@ -79,11 +80,12 @@ type PostType = {
 interface PostCardProps {
   post: PostType;
   liked_by_user: boolean;
+  retweeted_by_user: boolean;
   toggleLike: (postId: number) => Promise<void>;
   currentUserId: string | null;
-  onPostDeleted: (postId: number) => void;
-  onRetweeted: (postId: number) => void;
-  onPostUpdated: (updatedPost: PostType) => void;
+  // onPostDeleted: (postId: number) => void;
+  // onRetweeted: (postId: number) => void;
+  // onPostUpdated: (updatedPost: PostType) => void;
 }
 
 const AudioAffirmation = () => {
@@ -133,11 +135,12 @@ const AudioAffirmation = () => {
 export default function PostCard({
   post,
   liked_by_user,
+  retweeted_by_user,
   toggleLike,
   currentUserId,
-  onPostDeleted,
-  onRetweeted,
-  onPostUpdated,
+  // onPostDeleted,
+  // onRetweeted,
+  // onPostUpdated,
 }: PostCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRetweeting, setIsRetweeting] = useState(false);
@@ -150,7 +153,7 @@ export default function PostCard({
   const { user } = useUser();
 
   const isAuthor =
-    currentUserId !== null && String(post.author) === String(currentUserId);
+    currentUserId !== null && post?.author_full_name === currentUserId;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -189,7 +192,7 @@ export default function PostCard({
             return;
           }
 
-          onPostDeleted(post.id);
+          // onPostDeleted(post.id);
           resolve("Post deleted successfully!");
         } catch (error: any) {
           console.error("Error deleting post:", error);
@@ -253,7 +256,7 @@ export default function PostCard({
       }
 
       toast.success("Post retweeted successfully!");
-      onRetweeted(post.id);
+      // onRetweeted(post.id);
     } catch (error) {
       console.error("Error retweeting:", error);
       toast.error("An unexpected error occurred while retweeting.");
@@ -533,7 +536,7 @@ export default function PostCard({
               variant='ghost'
               size='sm'
               className={`flex-1 gap-2 transition-colors ${
-                post?.is_retweet
+                retweeted_by_user
                   ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
                   : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
               }`}
@@ -548,7 +551,9 @@ export default function PostCard({
               ) : (
                 <div className='flex items-center gap-1'>
                   {post?.retweet_count || "0"}
-                  <Repeat className='w-4 h-4' />
+                  <Repeat
+                    className={`w-4 h-4 ${retweeted_by_user ? "fill-current text-emerald-500" : ""} `}
+                  />
                 </div>
               )}
             </Button>
@@ -563,7 +568,7 @@ export default function PostCard({
           postId={post.id}
           initialBody={post.body}
           initialMediaUrl={post.media}
-          onPostUpdated={onPostUpdated}
+          // onPostUpdated={onPostUpdated}
         />
       )}
 

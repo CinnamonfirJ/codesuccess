@@ -27,18 +27,23 @@ import {
 } from "lucide-react";
 
 import { useUser } from "@/hooks/useUser";
-import {
-  ConnectionsList,
-  MiniRelation,
-} from "@/app/components/connections-list";
+import { ConnectionsList } from "@/app/components/connections-list";
 import { FollowButton } from "@/app/components/follow-button";
 
+// --- animation configs ---
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.6 },
 };
 const staggerContainer = { animate: { transition: { staggerChildren: 0.1 } } };
+
+// --- flexible type for followers/following ---
+type UserLike = {
+  profile_id?: number | string;
+  id?: number | string;
+  username: string;
+};
 
 type RemoteProfile = {
   id: number | string;
@@ -48,14 +53,13 @@ type RemoteProfile = {
   first_name: string;
   last_name: string;
   bio: string | null;
-  followers: MiniRelation[];
-  following: MiniRelation[];
+  followers: UserLike[];
+  following: UserLike[];
 };
 
 export default function ProfilePage() {
   const params = useParams<{ id: string }>();
-  const id = params?.id; // can be "me", a numeric id, or a username
-  // const router = useRouter()
+  const id = params?.id;
 
   const { user: currentUser } = useUser();
   const [profile, setProfile] = useState<RemoteProfile | null>(null);
@@ -63,7 +67,6 @@ export default function ProfilePage() {
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingOpen, setFollowingOpen] = useState(false);
 
-  // Keep a set of "who I follow" so buttons render correctly everywhere
   const [myFollowingIds, setMyFollowingIds] = useState<Set<number | string>>(
     new Set()
   );
@@ -73,7 +76,7 @@ export default function ProfilePage() {
     return id === "me" || String(currentUser.profile.id) === String(id);
   }, [id, currentUser]);
 
-  // Load viewed profile (me branch uses useUser; others use API and id can be username or numeric)
+  // --- Load viewed profile ---
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -100,10 +103,7 @@ export default function ProfilePage() {
 
         const res = await fetch(
           `/api/accounts/profiles/${encodeURIComponent(String(id))}`,
-          {
-            credentials: "include",
-            cache: "no-store",
-          }
+          { credentials: "include", cache: "no-store" }
         );
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data: RemoteProfile = await res.json();
@@ -118,7 +118,7 @@ export default function ProfilePage() {
     loadProfile();
   }, [id, currentUser]);
 
-  // Load my following list (used to compute followedByMe and render follow buttons)
+  // --- Load my following set ---
   useEffect(() => {
     let active = true;
     async function loadMyFollowing() {
@@ -128,12 +128,15 @@ export default function ProfilePage() {
           cache: "no-store",
         });
         if (!res.ok) throw new Error();
-        const arr = (await res.json()) as MiniRelation[];
+        const arr = (await res.json()) as UserLike[];
         if (active) {
           const set = new Set<number | string>();
           for (const m of arr) {
-            set.add(String(m.profile_id));
-            set.add(Number(m.profile_id));
+            const pid = m.profile_id ?? m.id;
+            if (pid) {
+              set.add(String(pid));
+              set.add(Number(pid));
+            }
           }
           setMyFollowingIds(set);
         }
@@ -147,7 +150,7 @@ export default function ProfilePage() {
     };
   }, []);
 
-  // Am I following the viewed profile?
+  // --- Am I following this profile? ---
   const followedByMe = useMemo(() => {
     if (!profile) return false;
     return (
@@ -156,13 +159,11 @@ export default function ProfilePage() {
     );
   }, [profile, myFollowingIds]);
 
-  // When follow state for the viewed profile toggles
+  // --- When follow/unfollow main profile ---
   function onToggleViewed(next: boolean) {
     if (!profile) return;
     setMyFollowingIds((prev) => {
       const copy = new Set(prev);
-      copy.add(String(profile.id)); // we'll add or remove after
-      copy.add(Number(profile.id));
       if (next) {
         copy.add(String(profile.id));
         copy.add(Number(profile.id));
@@ -172,25 +173,26 @@ export default function ProfilePage() {
       }
       return copy;
     });
-    // Reflect count change if we know our id
+
+    // update followers list
     if (currentUser?.profile?.id) {
       const myIdStr = String(currentUser.profile.id);
-      const meMini: MiniRelation = {
+      const meEntry: UserLike = {
         profile_id: myIdStr,
         username: currentUser.username || currentUser.first_name || "me",
       };
       setProfile((p) => {
         if (!p) return p;
         const exists = p.followers.some(
-          (f) => String(f.profile_id) === myIdStr
+          (f) => String(f.profile_id ?? f.id) === myIdStr
         );
         if (next && !exists)
-          return { ...p, followers: [...(p.followers || []), meMini] };
+          return { ...p, followers: [...(p.followers || []), meEntry] };
         if (!next && exists)
           return {
             ...p,
             followers: p.followers.filter(
-              (f) => String(f.profile_id) !== myIdStr
+              (f) => String(f.profile_id ?? f.id) !== myIdStr
             ),
           };
         return p;
@@ -198,7 +200,7 @@ export default function ProfilePage() {
     }
   }
 
-  // When a list item toggles follow/unfollow
+  // --- When follow/unfollow from list ---
   function onFollowingChange(targetId: number | string, nowFollowing: boolean) {
     setMyFollowingIds((prev) => {
       const copy = new Set(prev);
@@ -211,12 +213,11 @@ export default function ProfilePage() {
       }
       return copy;
     });
-    // If it's my own profile and I unfollow someone from "Following", remove it locally
     if (isOwnProfile && profile && !nowFollowing) {
       setProfile({
         ...profile,
         following: (profile.following || []).filter(
-          (f) => String(f.profile_id) !== String(targetId)
+          (f) => String(f.profile_id ?? f.id) !== String(targetId)
         ),
       });
     }
@@ -257,7 +258,7 @@ export default function ProfilePage() {
 
             {!isOwnProfile && (
               <FollowButton
-                targetId={profile.id}
+                targetId={profile.username}
                 targetImage={profile.profile_image}
                 initialFollowed={followedByMe}
                 onToggled={onToggleViewed}

@@ -42,7 +42,7 @@ interface EditPostModalProps {
   postId: number;
   initialBody: string;
   initialMediaUrl?: string;
-  onPostUpdated: (updatedPost: PostType) => void;
+  // onPostUpdated: (updatedPost: PostType) => void;
 }
 
 export default function EditPostModal({
@@ -51,7 +51,7 @@ export default function EditPostModal({
   postId,
   initialBody,
   initialMediaUrl,
-  onPostUpdated,
+  // onPostUpdated,
 }: EditPostModalProps) {
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<File | null>(null);
@@ -95,7 +95,7 @@ export default function EditPostModal({
         setMedia(null);
         setPreviewUrl(null);
         onOpenChange(false);
-        onPostUpdated(data);
+        // onPostUpdated(data);
       } else {
         console.error("Error updating post:", data);
         alert("Failed to update post. Try again.");

@@ -1,23 +1,22 @@
-// app/api/accounts/me/followers/route.ts
-import { cookies } from "next/headers";
+// app/api/accounts/me/following/route.ts
+
 import { NextResponse } from "next/server";
+import api from "@/lib/axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_2!;
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const access = cookieStore.get("access")?.value;
+  try {
+    const res = await api.get(`${API_BASE_URL}/accounts/me/followers/`);
 
-  const upstream = await fetch(`${API_BASE_URL}/api/accounts/me/followers/`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(access ? { Authorization: `Bearer ${access}` } : {}),
-    },
-    cache: "no-store",
-  });
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error: any) {
+    const status = error?.response?.status || 500;
+    const message =
+      error?.response?.data?.error ||
+      error?.response?.data ||
+      "Failed to fetch following list";
 
-  const text = await upstream.text();
-  const data = text ? JSON.parse(text) : null;
-  return NextResponse.json(data, { status: upstream.status });
+    return NextResponse.json({ error: message }, { status });
+  }
 }

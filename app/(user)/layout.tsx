@@ -4,7 +4,7 @@ import SanityLiveWrapper from "../components/SanityLiveWrapper";
 import SidebarManager from "../components/SidebarManager";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import api from "@/lib/axios"; // ✅ Import your existing API instance
+import api from "@/lib/axios"; // Import your existing API instance
 
 // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL!;

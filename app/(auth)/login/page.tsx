@@ -49,7 +49,7 @@ export default async function LoginPage() {
   const user = await getUser();
 
   if (user) {
-    redirect("/homepage"); // ✅ already logged in → send to homepage
+    redirect("/homepage"); // already logged in → send to homepage
   }
 
   return <LoginForm />;

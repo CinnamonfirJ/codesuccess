@@ -1,32 +1,28 @@
-// api/accounts/profiles/[id]/unfollow/route.ts
-import { cookies } from "next/headers";
+// app/api/accounts/profiles/[id]/unfollow/route.ts
 import { NextResponse, type NextRequest } from "next/server";
+import api from "@/lib/axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_2!;
 
-export async function POST(
-  req: NextRequest,
-  ctx: { params: { id: string } } | { params: Promise<{ id: string }> }
-) {
-  const { id } = await (ctx as any).params;
-  const cookieStore = await cookies();
-  const access = cookieStore.get("access")?.value;
-  const body = await req.json().catch(() => ({}));
+export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
+  try {
+    const { id } = ctx.params;
+    const body = await req.json().catch(() => ({}));
 
-  const upstream = await fetch(
-    `${API_BASE_URL}/api/accounts/profiles/${encodeURIComponent(String(id))}/unfollow/`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(access ? { Authorization: `Bearer ${access}` } : {}),
-      },
-      body: JSON.stringify(body ?? {}),
-      cache: "no-store",
-    }
-  );
+    // api will handle access token + refresh automatically
+    const res = await api.post(
+      `${API_BASE_URL}/accounts/profile/${encodeURIComponent(String(id))}/unfollow/`,
+      body
+    );
 
-  const text = await upstream.text();
-  const data = text ? JSON.parse(text) : null;
-  return NextResponse.json(data, { status: upstream.status });
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error: any) {
+    const status = error?.response?.status || 500;
+    const message =
+      error?.response?.data?.error ||
+      error?.response?.data ||
+      "Failed to unfollow profile";
+
+    return NextResponse.json({ error: message }, { status });
+  }
 }

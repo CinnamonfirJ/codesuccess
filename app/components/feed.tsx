@@ -25,6 +25,7 @@ type PostType = {
   tags?: string[];
   isAffirmation?: boolean;
   liked_by_user?: boolean;
+  retweeted_by_user?: boolean;
   likes_count?: number;
   comments_count?: number; // Ensure comments_count is present
   shares?: number;
@@ -51,7 +52,7 @@ export default function Feed() {
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
   const [posts, setPosts] = useState<PostType[]>([]);
-  const [newPostTrigger, setNewPostTrigger] = useState(0);
+  // const [newPostTrigger, setNewPostTrigger] = useState(0);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -76,6 +77,7 @@ export default function Feed() {
             author_full_name: post.author_full_name || "Unknown User",
             author_image: post.author_image || "/placeholder.svg",
             liked_by_user: post.liked_by_user || false,
+            retweeted_by_user: post.retweeted_by_user || false,
             likes_count: post.likes_count || 0,
             comments_count: post.comments_count || 0,
             timestamp: moment(post.created_at).fromNow(),
@@ -92,7 +94,7 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
-  }, [newPostTrigger]);
+  }, []);
 
   const toggleLike = async (postId: number) => {
     const postIndex = posts.findIndex((p) => p.id === postId);
@@ -105,11 +107,13 @@ export default function Feed() {
 
     const currentPost = posts[postIndex];
     const isCurrentlyLiked = currentPost.liked_by_user;
+    const isCurrentlyRetweeted = currentPost.retweeted_by_user;
 
     const updatedPosts = [...posts];
     updatedPosts[postIndex] = {
       ...currentPost,
       liked_by_user: !isCurrentlyLiked,
+      retweeted_by_user: !isCurrentlyRetweeted,
       likes_count: isCurrentlyLiked
         ? (currentPost.likes_count || 0) - 1
         : (currentPost.likes_count || 0) + 1,
@@ -153,24 +157,24 @@ export default function Feed() {
     }
   };
 
-  // New function to handle post deletion from PostCard
-  const handlePostDeleted = (deletedPostId: number) => {
-    setPosts((prevPosts) =>
-      prevPosts.filter((post) => post.id !== deletedPostId)
-    );
-    toast.success("Post deleted successfully!");
-  };
+  // // New function to handle post deletion from PostCard
+  // const handlePostDeleted = (deletedPostId: number) => {
+  //   setPosts((prevPosts) =>
+  //     prevPosts.filter((post) => post.id !== deletedPostId)
+  //   );
+  //   toast.success("Post deleted successfully!");
+  // };
 
-  const handlePostUpdated = (updatedPost: PostType) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
-    );
-  };
+  // const handlePostUpdated = (updatedPost: PostType) => {
+  //   setPosts((prevPosts) =>
+  //     prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+  //   );
+  // };
 
-  // New function to handle post retweet from PostCard
-  const handlePostRetweet = () => {
-    setNewPostTrigger((prev) => prev + 1); // Will trigger useEffect to re-fetch
-  };
+  // // New function to handle post retweet from PostCard
+  // const handlePostRetweet = () => {
+  //   setNewPostTrigger((prev) => prev + 1); // Will trigger useEffect to re-fetch
+  // };
 
   return (
     <div className='space-y-6 mx-auto max-w-2xl'>
@@ -178,7 +182,7 @@ export default function Feed() {
         open={openModal}
         onOpenChange={setOpenModal}
         type={type}
-        onPostCreated={() => setNewPostTrigger((prev) => prev + 1)}
+        // onPostCreated={() => setNewPostTrigger((prev) => prev + 1)}
       />
 
       <motion.div variants={fadeInUp} initial='initial' animate='animate'>
@@ -279,11 +283,12 @@ export default function Feed() {
               <PostCard
                 post={post}
                 liked_by_user={post.liked_by_user || false}
+                retweeted_by_user={post.retweeted_by_user || false}
                 toggleLike={toggleLike}
                 currentUserId={`${user?.first_name} ${user?.last_name}` || null}
-                onPostDeleted={handlePostDeleted} // Pass deletion callback
-                onRetweeted={handlePostRetweet}
-                onPostUpdated={handlePostUpdated}
+                // onPostDeleted={handlePostDeleted} // Pass deletion callback
+                // onRetweeted={handlePostRetweet}
+                // onPostUpdated={handlePostUpdated}
               />
             </motion.div>
           ))}
