@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-// import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -33,10 +32,8 @@ import moment from "moment";
 import {
   Dialog,
   DialogContent,
-  // DialogDescription,
   DialogHeader,
   DialogTitle,
-  // DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
 import EditPostModal from "./editPostModal";
@@ -61,6 +58,7 @@ type PostType = {
   author_full_name: string;
   author_image: string;
   media?: string;
+  media_type?: string;
   created_at: string;
   updated_at: string;
   tags?: string[];
@@ -408,7 +406,7 @@ export default function PostCard({
 
           {post.isAffirmation && <AudioAffirmation />}
 
-          {post.media && (
+          {/* {post.media && (
             <motion.div
               className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
               whileHover={{ scale: 1.02 }}
@@ -422,7 +420,43 @@ export default function PostCard({
                 height={400}
               />
             </motion.div>
-          )}
+          )} */}
+          {post.media && (
+  <motion.div
+    className="mt-4 border border-gray-200 rounded-xl overflow-hidden"
+    whileHover={{ scale: 1.02 }}
+    transition={{ duration: 0.2 }}
+  >
+    {post.media_type?.startsWith("image") && (
+      <Image
+        src={post.media}
+        alt="Post media"
+        className="w-full h-auto object-cover"
+        width={600}
+        height={400}
+      />
+    )}
+
+    {post.media_type?.startsWith("video") && (
+      <div className="bg-black w-full h-64 flex justify-center items-center">
+        <video
+        controls
+        src={post.media}
+        className="w-full h-64 object-cover bg-black"
+      />
+      </div>
+    )}
+
+    {post.media_type?.startsWith("audio") && (
+      <audio
+        controls
+        src={post.media}
+        className="w-full w-full"
+      />
+    )}
+  </motion.div>
+)}
+
 
           {post.parent_post_data && (
             <>

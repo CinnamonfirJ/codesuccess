@@ -38,6 +38,7 @@ export async function GET() {
         });
 
         const newAccess = refreshRes.data.access;
+        const newRefresh = refreshRes.data.refresh;
 
         // Try fetching user again
         const res = await fetchUser(newAccess);
@@ -51,6 +52,16 @@ export async function GET() {
           sameSite: "lax",
           maxAge: 60 * 60, // 1 hour
         });
+
+        if (newRefresh) {
+        response.cookies.set("refresh", newRefresh, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 7, // e.g., 7 days
+        });
+      }
 
         return response;
       } catch {

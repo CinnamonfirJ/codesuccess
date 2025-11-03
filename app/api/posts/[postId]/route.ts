@@ -5,13 +5,14 @@ import api from "@/lib/axios";
 // GET method for a single post using Axios
 export async function GET(
   req: NextRequest,
-  { params }: { params: { postId: string } }
+  context: { params: Promise<{ postId: string }> }
 ) {
+  const { postId } = await context.params;
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 
   try {
-    const res = await api.get(`/posts/${params.postId}/`, {
+    const res = await api.get(`/posts/${postId}/`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },

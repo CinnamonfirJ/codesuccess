@@ -15,7 +15,7 @@ export async function GET(
   request: NextRequest,
   context: { params: { postId: string; retweetId: string } }
 ) {
-  const { postId, retweetId } = context.params;
+  const { postId, retweetId } = await context.params;
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 

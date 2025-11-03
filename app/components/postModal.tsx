@@ -102,7 +102,7 @@ export default function PostModal({
           />
         </label>
 
-        {previewUrl && (
+        {/* {previewUrl && (
           <div className='mt-3 border border-gray-200 rounded-lg overflow-hidden'>
             <Image
               src={previewUrl}
@@ -112,7 +112,38 @@ export default function PostModal({
               className='w-full h-40 object-cover'
             />
           </div>
-        )}
+        )} */}
+
+        {previewUrl && (
+  <div className="mt-3 border border-gray-200 rounded-lg overflow-hidden">
+    {media?.type.startsWith("image/") && (
+      <Image
+        src={previewUrl}
+        alt="Image Preview"
+        width={500}
+        height={300}
+        className="w-full h-40 object-cover"
+      />
+    )}
+
+    {media?.type.startsWith("video/") && (
+      <video
+        controls
+        src={previewUrl}
+        className="w-full h-40 object-cover bg-black"
+      />
+    )}
+
+    {media?.type.startsWith("audio/") && (
+      <audio
+        controls
+        src={previewUrl}
+        className="w-full bg-gray-100"
+      />
+    )}
+  </div>
+)}
+
 
         <Button
           className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 mt-2 w-full text-white transition-colors'

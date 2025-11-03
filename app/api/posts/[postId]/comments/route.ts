@@ -7,7 +7,7 @@ export async function GET(
   request: NextRequest,
   context: { params: { postId: string } }
 ) {
-  const { postId } = context.params;
+  const { postId } = await await context.params;
 
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
@@ -34,7 +34,7 @@ export async function POST(
   request: NextRequest,
   context: { params: { postId: string } }
 ) {
-  const { postId } = context.params;
+  const { postId } = await context.params;
   const body = await request.json();
 
   const cookieStore = await cookies();
