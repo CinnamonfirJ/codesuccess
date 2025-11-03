@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import EditPostModal from "./editPostModal";
 import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 type OriginalPostType = {
   id: number;
@@ -151,6 +152,8 @@ export default function PostCard({
   const [quoteRetweetText, setQuoteRetweetText] = useState("");
   const optionsMenuRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
+  const router = useRouter();
+
 
   const isAuthor =
     currentUserId !== null && post?.author_full_name === currentUserId;
@@ -373,8 +376,8 @@ export default function PostCard({
         </div>
       </CardHeader>
 
-      <Link href={`/posts/${post.id}`} className='block'>
-        <CardContent className='pb-3'>
+      {/* <Link href={`/posts/${post.id}`} className='block'> */}
+        <CardContent className='pb-3 cursor-pointer' onClick={() => router.push(`/posts/${post.id}`)}>
           <p
             className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
           >
@@ -492,7 +495,7 @@ export default function PostCard({
             </>
           )}
         </CardContent>
-      </Link>
+      {/* </Link> */}
 
       <CardFooter className='pt-0'>
         <div className='w-full'>

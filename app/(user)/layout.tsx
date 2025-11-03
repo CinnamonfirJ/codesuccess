@@ -60,7 +60,7 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const user = await getUser();
-  console.log(user);
+  console.log(user?.first_name);
 
   return (
     <div className='flex flex-col min-h-screen'>
