@@ -111,6 +111,7 @@ const FooterSection = () => {
             &copy; 2025 CodeSuccex. All rights reserved. Built with ❤️ for
             youths across the world.
           </p>
+          <p>Naija Resilients Edutainment.</p>
         </div>
       </div>
     </footer>

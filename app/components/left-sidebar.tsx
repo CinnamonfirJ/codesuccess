@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
 import { ExpandableSection } from "./ExpandableSection";
 import CourseLink from "./courseLink";
 import type { GetCoursesQueryResult } from "@/sanity.types";
@@ -17,6 +16,7 @@ import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { useEffect, useState } from "react";
 import { getAffirmations } from "@/sanity/lib/affirmations/getAffirmations";
+import PostModal from "./postModal";
 
 interface LeftSidebarProps {
   courses: GetCoursesQueryResult;
@@ -50,6 +50,20 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoadingAffirmations, setIsLoadingAffirmations] = useState(true);
 
+  // Modal controls
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedPostType, setSelectedPostType] = useState<string>("");
+
+  const postTypes = [
+    "Advertise your Biz",
+    "Share a new goal",
+    "Share your Journey",
+    "Share your determination",
+    "Share something encouraging",
+    "Share your Joy",
+    "Nominate a hero",
+  ];
+
   useEffect(() => {
     async function fetchAffirmations() {
       try {
@@ -64,9 +78,13 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
         setIsLoadingAffirmations(false);
       }
     }
-
     fetchAffirmations();
   }, []);
+
+  function handleOpenPostType(type: string) {
+    setSelectedPostType(type);
+    setOpenModal(true);
+  }
 
   return (
     <motion.div
@@ -85,14 +103,13 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                 alt='User'
               />
               <AvatarFallback className='bg-white/20 font-bold text-white text-xl'>
-                {user?.first_name[0]}
-                {user?.last_name[0]}
+                {user?.first_name?.[0]}
+                {user?.last_name?.[0]}
               </AvatarFallback>
             </Avatar>
             <h2 className='mb-2 font-bold text-xl'>
               {user?.first_name} {user?.last_name}
             </h2>
-            {/* <Badge className='bg-white/20 mb-3 text-white'>Rising Star</Badge> */}
             <p className='text-emerald-100 text-sm leading-relaxed'>
               {isLoading && "Loading..."}
               {user?.profile?.bio ||
@@ -100,28 +117,13 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
             </p>
           </div>
         </CardHeader>
-        {/* <CardContent className='p-4'>
-          <div className='gap-4 grid grid-cols-3 text-center'>
-            <div>
-              <div className='font-bold text-emerald-600 text-lg'>12</div>
-              <div className='text-gray-600 text-xs'>Courses</div>
-            </div>
-            <div>
-              <div className='font-bold text-blue-600 text-lg'>89%</div>
-              <div className='text-gray-600 text-xs'>Progress</div>
-            </div>
-            <div>
-              <div className='font-bold text-purple-600 text-lg'>156</div>
-              <div className='text-gray-600 text-xs'>Points</div>
-            </div>
-          </div>
-        </CardContent> */}
       </Card>
 
       {/* Navigation Sections */}
       <Card className='bg-white shadow-lg border-0'>
         <CardContent className='p-0'>
           <div className='divide-y divide-gray-100'>
+            {/* About Me Section with Post Types */}
             <ExpandableSection
               title='About Me'
               icon={
@@ -131,45 +133,22 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-purple-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-purple-600'>
-                    Upcoming Advertise Your Business
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-purple-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-purple-600'>
-                    Share a New Goal
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-purple-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-purple-600'>
-                    Share Your Journey
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-purple-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-purple-600'>
-                    Share Your Determination
-                  </span>
-                </a>
+                {postTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => handleOpenPostType(type)}
+                    className='group flex items-center gap-3 hover:bg-purple-50 p-3 rounded-lg w-full text-left transition-colors'
+                  >
+                    <div className='bg-purple-400 rounded-full w-2 h-2'></div>
+                    <span className='text-gray-700 group-hover:text-purple-600'>
+                      {type}
+                    </span>
+                  </button>
+                ))}
               </div>
             </ExpandableSection>
 
+            {/* Daily Affirmations */}
             <ExpandableSection
               title='Daily Affirmations'
               icon={
@@ -188,6 +167,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     Browse All Affirmations
                   </span>
                 </Link>
+
                 {isLoadingAffirmations ? (
                   <div className='space-y-3'>
                     {[1, 2, 3].map((i) => (
@@ -210,7 +190,6 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                   >
                     <div className='bg-pink-400 rounded-full w-2 h-2'></div>
                     <span className='text-gray-700 group-hover:text-pink-600 truncate'>
-                      {/* Today&apos;s Affirmation:  */}
                       {affirmations[0].title}
                     </span>
                   </Link>
@@ -224,37 +203,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     </p>
                   </div>
                 )}
-
-                {/* <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-pink-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-pink-600'>
-                    Browse by Theme
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-pink-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-pink-600'>
-                    Audio Affirmations
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-pink-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-pink-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-pink-600'>
-                    Create Your Own
-                  </span>
-                </a> */}
               </div>
             </ExpandableSection>
 
+            {/* Start CodeSuccex Section */}
             <ExpandableSection
               title='Start CodeSuccex'
               icon={
@@ -264,24 +216,6 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               }
             >
               <div className='space-y-2'>
-                {/* {courses && courses.length > 0 ? (
-                  <CourseLink
-                    key={courses[0]._id}
-                    course={courses[0]}
-                    onClick={() => onNavigate?.(`/courses/${courses[0].slug}`)}
-                    href={`/courses/${courses[0].slug}`}
-                  />
-                ) : (
-                  <div className='p-3 text-center'>
-                    <div className='flex justify-center items-center bg-gray-100 mx-auto mb-2 rounded-full w-12 h-12'>
-                      <BookOpen className='w-6 h-6 text-gray-400' />
-                    </div>
-                    <p className='text-gray-500 text-sm'>
-                      No courses available
-                    </p>
-                  </div>
-                )} */}
-
                 {courses && courses.length > 0 ? (
                   courses.map((course) => (
                     <CourseLink
@@ -304,6 +238,7 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
               </div>
             </ExpandableSection>
 
+            {/* Safe Peer Space */}
             <ExpandableSection
               title='Safe Peer Space'
               icon={
@@ -322,27 +257,10 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                     Join a Group Upcoming
                   </span>
                 </a>
-                {/* <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-blue-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-blue-600'>
-                    Create a Group
-                  </span>
-                </a>
-                <a
-                  href='#'
-                  className='group flex items-center gap-3 hover:bg-blue-50 p-3 rounded-lg transition-colors'
-                >
-                  <div className='bg-blue-400 rounded-full w-2 h-2'></div>
-                  <span className='text-gray-700 group-hover:text-blue-600'>
-                    My Groups
-                  </span>
-                </a> */}
               </div>
             </ExpandableSection>
 
+            {/* Reading Lists */}
             <ExpandableSection
               title='Reading Lists'
               icon={
@@ -366,6 +284,14 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Post Modal */}
+      <PostModal
+        open={openModal}
+        onOpenChange={setOpenModal}
+        type={selectedPostType}
+        onPostCreated={() => console.log("Post created")}
+      />
     </motion.div>
   );
 }

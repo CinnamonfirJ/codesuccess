@@ -45,7 +45,6 @@ type OriginalPostType = {
   author_full_name: string;
   author_image: string;
   body: string;
-  // created_at: string;
   media?: string;
   retweet_count?: number;
 };
@@ -74,6 +73,7 @@ type PostType = {
   quote_text?: string;
   retweet_count?: string;
   parent_post_data?: OriginalPostType;
+  postType?: string;
 };
 
 interface PostCardProps {
@@ -82,10 +82,49 @@ interface PostCardProps {
   retweeted_by_user: boolean;
   toggleLike: (postId: number) => Promise<void>;
   currentUserId: string | null;
-  // onPostDeleted: (postId: number) => void;
-  // onRetweeted: (postId: number) => void;
-  // onPostUpdated: (updatedPost: PostType) => void;
 }
+
+// Post type color configurations
+const POST_TYPE_STYLES: Record<
+  string,
+  { gradient: string; text: string; bgColor: string }
+> = {
+  "Advertise your Biz": {
+    gradient: "bg-gradient-to-r from-purple-500 to-pink-500",
+    text: "text-purple-700",
+    bgColor: "bg-purple-50",
+  },
+  "Share a new goal": {
+    gradient: "bg-gradient-to-r from-blue-500 to-cyan-500",
+    text: "text-blue-700",
+    bgColor: "bg-blue-50",
+  },
+  "Share your Journey": {
+    gradient: "bg-gradient-to-r from-green-500 to-emerald-500",
+    text: "text-green-700",
+    bgColor: "bg-green-50",
+  },
+  "Share your determination": {
+    gradient: "bg-gradient-to-r from-red-500 to-orange-500",
+    text: "text-red-700",
+    bgColor: "bg-red-50",
+  },
+  "Share something encouraging": {
+    gradient: "bg-gradient-to-r from-yellow-400 to-amber-500",
+    text: "text-yellow-700",
+    bgColor: "bg-yellow-50",
+  },
+  "Share your Joy": {
+    gradient: "bg-gradient-to-r from-pink-500 to-rose-500",
+    text: "text-pink-700",
+    bgColor: "bg-pink-50",
+  },
+  "Nominate a hero": {
+    gradient: "bg-gradient-to-r from-indigo-500 to-purple-600",
+    text: "text-indigo-700",
+    bgColor: "bg-indigo-50",
+  },
+};
 
 const AudioAffirmation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -137,9 +176,6 @@ export default function PostCard({
   retweeted_by_user,
   toggleLike,
   currentUserId,
-  // onPostDeleted,
-  // onRetweeted,
-  // onPostUpdated,
 }: PostCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRetweeting, setIsRetweeting] = useState(false);
@@ -152,9 +188,11 @@ export default function PostCard({
   const { user } = useUser();
   const router = useRouter();
 
-
   const isAuthor =
     currentUserId !== null && post?.author_full_name === currentUserId;
+
+  // Get post type styling
+  const postTypeStyle = post.postType ? POST_TYPE_STYLES[post.postType] : null;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -193,7 +231,6 @@ export default function PostCard({
             return;
           }
 
-          // onPostDeleted(post.id);
           resolve("Post deleted successfully!");
         } catch (error: any) {
           console.error("Error deleting post:", error);
@@ -257,7 +294,6 @@ export default function PostCard({
       }
 
       toast.success("Post retweeted successfully!");
-      // onRetweeted(post.id);
     } catch (error) {
       console.error("Error retweeting:", error);
       toast.error("An unexpected error occurred while retweeting.");
@@ -269,6 +305,20 @@ export default function PostCard({
 
   return (
     <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
+      {/* Post Type Banner */}
+      {postTypeStyle && (
+        <div
+          className={`${postTypeStyle.gradient} px-4 py-2 flex items-center justify-between`}
+        >
+          <span className='font-semibold text-white text-sm tracking-wide'>
+            {post.postType}
+          </span>
+          <div className='bg-white bg-opacity-20 px-3 py-1 rounded-full'>
+            <span className='font-medium text-white text-xs'>Featured</span>
+          </div>
+        </div>
+      )}
+
       <CardHeader className='pb-3'>
         <div className='flex justify-between items-center'>
           <div className='flex items-center gap-3'>
@@ -374,162 +424,142 @@ export default function PostCard({
         </div>
       </CardHeader>
 
-      {/* <Link href={`/posts/${post.id}`} className='block'> */}
-        <CardContent className='pb-3 cursor-pointer' onClick={() => router.push(`/posts/${post.id}`)}>
+      <CardContent
+        className='pb-3 cursor-pointer'
+        onClick={() => router.push(`/posts/${post.id}`)}
+      >
+        <p
+          className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
+        >
+          {post.body}
+        </p>
+
+        {post.quote_text && (
           <p
             className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
           >
-            {post.body}
+            {post.quote_text}
           </p>
+        )}
 
-          {post.quote_text && (
-            <p
-              className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
-            >
-              {post.quote_text}
-            </p>
-          )}
+        {post.tags && (
+          <div className='flex flex-wrap gap-2 mt-3'>
+            {post.tags.map((tag, idx) => (
+              <Badge
+                key={idx}
+                variant='outline'
+                className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
+              >
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
-          {post.tags && (
-            <div className='flex flex-wrap gap-2 mt-3'>
-              {post.tags.map((tag, idx) => (
-                <Badge
-                  key={idx}
-                  variant='outline'
-                  className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          )}
+        {post.isAffirmation && <AudioAffirmation />}
 
-          {post.isAffirmation && <AudioAffirmation />}
-
-          {/* {post.media && (
-            <motion.div
-              className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
+        {post.media && (
+          <motion.div
+            className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          >
+            {post.media_type?.startsWith("image") && (
               <Image
-                src={post.media || "/placeholder.svg"}
-                alt='Post content'
+                src={post.media}
+                alt='Post media'
                 className='w-full h-auto object-cover'
                 width={600}
                 height={400}
               />
-            </motion.div>
-          )} */}
-          {post.media && (
-  <motion.div
-    className="mt-4 border border-gray-200 rounded-xl overflow-hidden"
-    whileHover={{ scale: 1.02 }}
-    transition={{ duration: 0.2 }}
-  >
-    {post.media_type?.startsWith("image") && (
-      <Image
-        src={post.media}
-        alt="Post media"
-        className="w-full h-auto object-cover"
-        width={600}
-        height={400}
-      />
-    )}
+            )}
 
-    {post.media_type?.startsWith("video") && (
-      <div className="bg-black w-full h-64 flex justify-center items-center">
-        <video
-        controls
-        src={post.media}
-        className="w-full h-64 object-cover bg-black"
-      />
-      </div>
-    )}
+            {post.media_type?.startsWith("video") && (
+              <div className='flex justify-center items-center bg-black w-full h-64'>
+                <video
+                  controls
+                  src={post.media}
+                  className='bg-black w-full h-64 object-cover'
+                />
+              </div>
+            )}
 
-    {post.media_type?.startsWith("audio") && (
-      <audio
-        controls
-        src={post.media}
-        className="w-full w-full"
-      />
-    )}
-  </motion.div>
-)}
+            {post.media_type?.startsWith("audio") && (
+              <audio controls src={post.media} className='w-full' />
+            )}
+          </motion.div>
+        )}
 
-
-          {post.parent_post_data && (
-            <>
-              <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
-                <div className='flex items-center gap-3'>
+        {post.parent_post_data && (
+          <>
+            <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
+              <div className='flex items-center gap-3'>
+                <Link
+                  href={`/profile/${post?.parent_post_data?.author}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Avatar className='border-2 border-gray-200'>
+                    <AvatarImage
+                      src={
+                        post?.parent_post_data.author_image ||
+                        "/placeholder.svg"
+                      }
+                      alt={post?.parent_post_data?.author_full_name}
+                    />
+                    <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
+                      {post?.parent_post_data?.author_full_name
+                        ? post?.parent_post_data?.author_full_name
+                            .charAt(0)
+                            .toUpperCase()
+                        : "L"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <div>
                   <Link
-                    href={`/profile/${post?.parent_post_data?.author_full_name}`}
+                    href={`/profile/${post?.parent_post_data?.author}`}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Avatar className='border-2 border-gray-200'>
-                      <AvatarImage
-                        src={
-                          post?.parent_post_data.author_image ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg"
-                        }
-                        alt={post?.parent_post_data?.author_full_name}
-                      />
-                      <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                        {post?.parent_post_data?.author_full_name
-                          ? post?.parent_post_data?.author_full_name
-                              .charAt(0)
-                              .toUpperCase()
-                          : "L"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className='flex items-center gap-2'>
+                      <p className='font-semibold text-gray-900'>
+                        {post?.parent_post_data?.author_full_name}
+                      </p>
+                      {post?.parent_post_data?.author_full_name && (
+                        <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
+                          <span className='text-white text-xs'>✓</span>
+                        </div>
+                      )}
+                    </div>
                   </Link>
-                  <div>
-                    <Link
-                      href={`/profile/${post?.parent_post_data?.author_full_name}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className='flex items-center gap-2'>
-                        <p className='font-semibold text-gray-900'>
-                          {post?.parent_post_data?.author_full_name}
-                        </p>
-                        {post?.parent_post_data?.author_full_name && (
-                          <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
-                            <span className='text-white text-xs'>✓</span>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <p className='text-gray-500 text-sm'>
-                      {moment(post.created_at).fromNow()}
-                    </p>
-                  </div>
+                  <p className='text-gray-500 text-sm'>
+                    {moment(post.created_at).fromNow()}
+                  </p>
                 </div>
-
-                <p className='text-gray-700 italic whitespace-pre-wrap'>
-                  &#34;{post.parent_post_data.body}&#34;
-                </p>
-
-                {post?.parent_post_data?.media && (
-                  <motion.div
-                    className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Image
-                      src={post?.parent_post_data.media || "/placeholder.svg"}
-                      alt='Post content'
-                      className='w-full h-auto object-cover'
-                      width={600}
-                      height={400}
-                    />
-                  </motion.div>
-                )}
               </div>
-            </>
-          )}
-        </CardContent>
-      {/* </Link> */}
+
+              <p className='text-gray-700 italic whitespace-pre-wrap'>
+                &#34;{post.parent_post_data.body}&#34;
+              </p>
+
+              {post?.parent_post_data?.media && (
+                <motion.div
+                  className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Image
+                    src={post?.parent_post_data.media || "/placeholder.svg"}
+                    alt='Post content'
+                    className='w-full h-auto object-cover'
+                    width={600}
+                    height={400}
+                  />
+                </motion.div>
+              )}
+            </div>
+          </>
+        )}
+      </CardContent>
 
       <CardFooter className='pt-0'>
         <div className='w-full'>
@@ -605,7 +635,6 @@ export default function PostCard({
           postId={post.id}
           initialBody={post.body}
           initialMediaUrl={post.media}
-          // onPostUpdated={onPostUpdated}
         />
       )}
 
@@ -688,7 +717,7 @@ export default function PostCard({
                   src={user?.profile?.profile_image || "/placeholder.svg"}
                 />
                 <AvatarFallback>
-                  {`${user.first_name[0]}${user.last_name[0]}`}
+                  {user && `${user.first_name[0]}${user.last_name[0]}`}
                 </AvatarFallback>
               </Avatar>
               <textarea
@@ -714,7 +743,6 @@ export default function PostCard({
                   </span>
                   <span className='ml-1 text-gray-500 text-sm'>
                     @{post.author_full_name}
-                    {/* @{post.author_username} */}
                   </span>
                 </div>
               </div>

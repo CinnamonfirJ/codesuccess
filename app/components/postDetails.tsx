@@ -658,7 +658,7 @@ export default function PostDetailsPage() {
         <CardHeader className='pb-3'>
           <div className='flex justify-between items-center'>
             <div className='flex items-center gap-3'>
-              <Link href={`/profile/${post.author_username}`}>
+              <Link href={`/profile/${post.author}`}>
                 <Avatar className='border-2 border-gray-200'>
                   <AvatarImage
                     src={post.author_image || "/placeholder.svg"}
@@ -672,7 +672,7 @@ export default function PostDetailsPage() {
                 </Avatar>
               </Link>
               <div>
-                <Link href={`/profile/${post.author_username}`}>
+                <Link href={`/profile/${post.author}`}>
                   <div className='flex items-center gap-2'>
                     <p className='font-semibold text-gray-900'>
                       {post.author_full_name}
@@ -798,49 +798,44 @@ export default function PostDetailsPage() {
             </motion.div>
           )} */}
 
-{post.media && (
-  <motion.div
-    className="mt-4 border border-gray-200 rounded-xl overflow-hidden"
-    whileHover={{ scale: 1.02 }}
-    transition={{ duration: 0.2 }}
-  >
-    {post.media_type?.startsWith("image") && (
-      <Image
-        src={post.media}
-        alt="Post media"
-        className="w-full h-auto object-cover"
-        width={600}
-        height={400}
-      />
-    )}
+          {post.media && (
+            <motion.div
+              className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              {post.media_type?.startsWith("image") && (
+                <Image
+                  src={post.media}
+                  alt='Post media'
+                  className='w-full h-auto object-cover'
+                  width={600}
+                  height={400}
+                />
+              )}
 
-    {post.media_type?.startsWith("video") && (
-      <div className="bg-black w-full h-64 flex justify-center items-center">
-        <video
-        controls
-        src={post.media}
-        className="w-full h-64 object-cover bg-black"
-      />
-      </div>
-    )}
+              {post.media_type?.startsWith("video") && (
+                <div className='flex justify-center items-center bg-black w-full h-64'>
+                  <video
+                    controls
+                    src={post.media}
+                    className='bg-black w-full h-64 object-cover'
+                  />
+                </div>
+              )}
 
-    {post.media_type?.startsWith("audio") && (
-      <audio
-        controls
-        src={post.media}
-        className="w-full w-full"
-      />
-    )}
-  </motion.div>
-)}
-
+              {post.media_type?.startsWith("audio") && (
+                <audio controls src={post.media} className='w-full w-full' />
+              )}
+            </motion.div>
+          )}
 
           {post.parent_post_data && (
             <>
               <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
                 <div className='flex items-center gap-3'>
                   <Link
-                    href={`/profile/${post?.parent_post_data?.author_full_name}`}
+                    href={`/profile/${post?.parent_post_data?.author}`}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Avatar className='border-2 border-gray-200'>
@@ -862,7 +857,7 @@ export default function PostDetailsPage() {
                   </Link>
                   <div>
                     <Link
-                      href={`/profile/${post?.parent_post_data?.author_full_name}`}
+                      href={`/profile/${post?.parent_post_data?.author}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className='flex items-center gap-2'>
