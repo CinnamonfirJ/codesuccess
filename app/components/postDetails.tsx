@@ -1,342 +1,83 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Heart,
-  MessageSquare,
   MoreHorizontal,
-  Play,
-  Pause,
-  Send,
   Bookmark,
   Loader2,
   Trash2,
-  Repeat,
-  Quote,
   ArrowLeft,
-  Edit, // Import the Edit icon
+  Edit,
+  Heart,
+  MessageSquare,
+  Repeat,
+  Send,
+  Quote,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import moment from "moment";
 import {
-  Dialog, // Keep Dialog for Retweet Options
+  Dialog,
   DialogContent,
-  // DialogDescription,
   DialogHeader,
   DialogTitle,
-  // DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
-import { useUser } from "@/hooks/useUser"; // Assuming this hook provides user data
+
+import { useUser } from "@/hooks/useUser";
+import { usePost } from "@/hooks/features/usePost";
+import { AudioAffirmation } from "./post/AudioAffirmation";
+import { CommentItem } from "./post/CommentItem";
 import EditPostModal from "./editPostModal";
-import { DialogClose } from "@radix-ui/react-dialog";
-
-// Define the types needed for the post and comments
-type CommentType = {
-  id: number;
-  post: number;
-  author: number;
-  author_username: string;
-  author_image: string;
-  content: string;
-  commented_at: string;
-  parent?: number | null;
-  replies?: CommentType[];
-};
-
-type OriginalPostType = {
-  id: number;
-  author_full_name: string;
-  author_image: string;
-  body: string;
-  created_at: string;
-  media?: string;
-  retweet_count?: number;
-};
-
-type PostType = {
-  id: number;
-  body: string;
-  author: number;
-  author_username: string;
-  author_full_name: string;
-  author_image: string;
-  media?: string;
-  media_type?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  isAffirmation?: boolean;
-  liked_by_user?: boolean;
-  likes_count?: number;
-  comments_count?: number;
-  shares?: number;
-  timestamp?: string;
-  is_retweet?: boolean;
-  is_qoute_retweet?: boolean;
-  quote_text?: string;
-  scheduled_at?: string; // Added for edit feature
-  retweet_count?: string; // Added for edit feature
-  parent_post_data?: OriginalPostType;
-};
-
-// --- Reusable Components (extracted from PostCard for this page) ---
-
-const AudioAffirmation = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  return (
-    <motion.div
-      className='flex items-center bg-gradient-to-r from-emerald-50 to-blue-50 my-4 p-4 border border-emerald-200 rounded-xl'
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Button
-        variant='outline'
-        size='icon'
-        className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-lg mr-4 border-0 rounded-full w-12 h-12 text-white'
-        onClick={() => setIsPlaying(!isPlaying)}
-      >
-        {isPlaying ? (
-          <Pause className='w-5 h-5' />
-        ) : (
-          <Play className='w-5 h-5' />
-        )}
-      </Button>
-      <div className='flex-1'>
-        <div className='bg-gray-200 mb-2 rounded-full h-2'>
-          <motion.div
-            className='bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full h-2'
-            initial={{ width: "0%" }}
-            animate={{ width: isPlaying ? "33%" : "33%" }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-        <div className='flex justify-between text-gray-600 text-xs'>
-          <span>0:45</span>
-          <span className='font-medium'>Daily Affirmation</span>
-          <span>2:30</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-interface CommentItemProps {
-  comment: CommentType;
-  postId: number;
-  onCommentPosted: () => void;
-}
-
-const CommentItem: React.FC<CommentItemProps> = ({
-  comment,
-  postId,
-  onCommentPosted,
-}) => {
-  const [showReplyInput, setShowReplyInput] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [postingReply, setPostingReply] = useState(false);
-
-  const handlePostReply = async () => {
-    if (!replyContent.trim()) {
-      toast.error("Reply cannot be empty.");
-      return;
-    }
-
-    setPostingReply(true);
-    try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          post: postId,
-          content: replyContent,
-          parent: comment.id,
-        }),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to post reply");
-      }
-
-      toast.success("Reply posted successfully!");
-      setReplyContent("");
-      setShowReplyInput(false);
-      onCommentPosted();
-    } catch (error: any) {
-      console.error("Error posting reply:", error);
-      toast.error(error.message || "Failed to post reply.");
-    } finally {
-      setPostingReply(false);
-    }
-  };
-
-  return (
-    <div className='flex items-start gap-3'>
-      <Avatar className='border border-gray-100 w-8 h-8'>
-        <AvatarImage
-          src={comment.author_image || "/placeholder.svg"}
-          alt={comment.author_username}
-        />
-        <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
-          {comment.author_username.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
-        <p className='font-semibold text-gray-800 text-sm'>
-          {comment.author_username}
-        </p>
-        <p className='mt-1 text-gray-600 text-sm'>{comment.content}</p>
-        <p className='mt-1 text-gray-400 text-xs'>
-          {moment(comment.commented_at).format("MMMM Do YYYY, h:mm a")}
-        </p>
-        <Button
-          variant='ghost'
-          size='sm'
-          className='hover:bg-blue-100 mt-2 px-2 py-1 rounded-md text-blue-600 text-xs'
-          onClick={() => setShowReplyInput(!showReplyInput)}
-        >
-          Reply
-        </Button>
-
-        {showReplyInput && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className='flex items-center gap-2 mt-3'
-          >
-            <Input
-              type='text'
-              placeholder={`Reply to ${comment.author_username}...`}
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              className='flex-1 border-gray-300 focus:border-emerald-500 rounded-full focus:ring-emerald-500 text-sm'
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && !postingReply) {
-                  handlePostReply();
-                }
-              }}
-            />
-            <Button
-              size='icon'
-              className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 rounded-full w-8 h-8 text-white'
-              onClick={handlePostReply}
-              disabled={postingReply}
-            >
-              {postingReply ? (
-                <Loader2 className='w-4 h-4 animate-spin' />
-              ) : (
-                <Send className='w-4 h-4' />
-              )}
-            </Button>
-          </motion.div>
-        )}
-
-        {comment.replies && comment.replies.length > 0 && (
-          <div className='space-y-4 mt-4 ml-6 pl-4 border-gray-200 border-l'>
-            {comment.replies.map((reply) => (
-              <CommentItem
-                key={reply.id}
-                comment={reply}
-                postId={postId}
-                onCommentPosted={onCommentPosted}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- Post Details Page Component ---
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function PostDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const postId = Array.isArray(params.postId)
     ? params.postId[0]
-    : params.postId;
+    : params.postId ?? null;
 
-  // Use the useUser hook to get the current authenticated user
   const { user } = useUser();
+  const queryClient = useQueryClient();
 
-  const [post, setPost] = useState<PostType | null>(null);
-  const [loadingPost, setLoadingPost] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    post,
+    isLoadingPost,
+    postError,
+    comments,
+    isLoadingComments,
+    toggleLike,
+    addComment,
+    isAddingComment,
+    deletePost,
+    isDeletingPost,
+    retweet,
+    isRetweeting,
+  } = usePost(postId);
 
-  const [comments, setComments] = useState<CommentType[]>([]);
-  const [loadingComments, setLoadingComments] = useState(false);
   const [newCommentContent, setNewCommentContent] = useState("");
-  const [postingComment, setPostingComment] = useState(false);
-
-  // States for retweet functionality
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isRetweeting, setIsRetweeting] = useState(false);
   const [showRetweetOptions, setShowRetweetOptions] = useState(false);
-  const [quoteRetweetText, setQuoteRetweetText] = useState("");
-  const [likedByUser, setLikedByUser] = useState(false);
-
   const [showQuoteRetweetDialog, setShowQuoteRetweetDialog] = useState(false);
+  const [quoteRetweetText, setQuoteRetweetText] = useState("");
 
-  // States for options menu
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const optionsMenuRef = useRef<HTMLDivElement>(null);
-
-  // States for Edit Post functionality (now passed to EditPostModal)
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   const currentUserId = user ? `${user.first_name} ${user.last_name}` : null;
-
-  // Fetch Post Details
-  useEffect(() => {
-    const fetchPost = async () => {
-      if (!postId) return;
-
-      setLoadingPost(true);
-      setError(null);
-      try {
-        const res = await fetch(`/api/posts/${postId}`, {
-          credentials: "include",
-        });
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.detail || "Failed to fetch post");
-        }
-        const data: PostType = await res.json();
-        setPost(data);
-        setLikedByUser(data.liked_by_user || false);
-      } catch (err: any) {
-        console.error("Error fetching post:", err);
-        setError(err.message || "Could not load post.");
-      } finally {
-        setLoadingPost(false);
-      }
-    };
-
-    fetchPost();
-  }, [postId]);
+  const isAuthor =
+    currentUserId !== null && post?.author_full_name === currentUserId;
 
   // Close options menu when clicking outside
   useEffect(() => {
@@ -353,107 +94,18 @@ export default function PostDetailsPage() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [optionsMenuRef]);
-
-  // Fetch Comments for the Post
-  const fetchComments = useCallback(async () => {
-    if (!postId) return;
-
-    setLoadingComments(true);
-    try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch comments");
-      }
-      const data: CommentType[] = await res.json();
-
-      const commentsMap = new Map<number, CommentType>();
-      const rootComments: CommentType[] = [];
-
-      data.forEach((comment) => {
-        commentsMap.set(comment.id, { ...comment, replies: [] });
-      });
-
-      data.forEach((comment) => {
-        const currentComment = commentsMap.get(comment.id);
-        if (currentComment) {
-          if (comment.parent && commentsMap.has(comment.parent)) {
-            const parentComment = commentsMap.get(comment.parent);
-            parentComment?.replies?.push(currentComment);
-          } else {
-            rootComments.push(currentComment); // Corrected this line
-          }
-        }
-      });
-
-      const sortComments = (arr: CommentType[]) => {
-        return arr
-          .sort(
-            (a, b) =>
-              new Date(b.commented_at).getTime() -
-              new Date(a.commented_at).getTime()
-          )
-          .map((comment) => ({
-            ...comment,
-            replies: comment.replies ? sortComments(comment.replies) : [],
-          }));
-      };
-
-      setComments(sortComments(rootComments));
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-      toast.error("Failed to load comments.");
-    } finally {
-      setLoadingComments(false);
-    }
-  }, [postId]);
-
-  useEffect(() => {
-    if (postId) {
-      fetchComments();
-    }
-  }, [postId, fetchComments]);
+  }, []);
 
   const handleDeletePost = async () => {
     setShowOptionsMenu(false);
     toast.promise(
-      new Promise(async (resolve, reject) => {
-        setIsDeleting(true);
-        try {
-          const res = await fetch(`/api/posts/${postId}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
-
-          if (!res.ok) {
-            const errorData = await res.json();
-            console.error(
-              `Failed to delete post: Status ${res.status}`,
-              errorData
-            );
-            reject(new Error(errorData.detail || "Failed to delete post."));
-            return;
-          }
-
-          // onPostDeleted(post.id);
-          resolve("Post deleted successfully!");
-        } catch (error: any) {
-          console.error("Error deleting post:", error);
-          reject(
-            new Error(
-              error.message || "Could not delete post due to a network error."
-            )
-          );
-        } finally {
-          setIsDeleting(false);
-        }
+      deletePost().then(() => {
+        router.back();
       }),
       {
         loading: "Deleting post...",
         success: "Post deleted!",
-        error: (err) => err.message,
+        error: "Failed to delete post",
       }
     );
   };
@@ -463,154 +115,44 @@ export default function PostDetailsPage() {
       toast.error("Comment cannot be empty.");
       return;
     }
-    if (!postId) {
-      toast.error("Post ID is missing.");
-      return;
-    }
-
-    setPostingComment(true);
+    
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: newCommentContent,
-          post: parseInt(postId as string),
-        }),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to post comment");
-      }
-
-      toast.success("Comment posted successfully!");
+      await addComment({ content: newCommentContent });
       setNewCommentContent("");
-      fetchComments(); // Re-fetch comments to show the new one
+      toast.success("Comment posted successfully!");
     } catch (error: any) {
-      console.error("Error posting comment:", error);
       toast.error(error.message || "Failed to post comment.");
-    } finally {
-      setPostingComment(false);
     }
   };
 
-  // Toggle Like function
-  const toggleLike = async (postId: number) => {
-    // Optimistic UI update
-    setLikedByUser((prev) => !prev);
-    setPost((prevPost) => {
-      if (!prevPost) return null;
-      return {
-        ...prevPost,
-        likes_count: likedByUser
-          ? (prevPost.likes_count || 0) - 1
-          : (prevPost.likes_count || 0) + 1,
-      };
-    });
-
-    try {
-      const res = await fetch(`/api/posts/${postId}/like`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        // Revert optimistic update if API call fails
-        setLikedByUser((prev) => !prev);
-        setPost((prevPost) => {
-          if (!prevPost) return null;
-          return {
-            ...prevPost,
-            likes_count: likedByUser
-              ? (prevPost.likes_count || 0) + 1
-              : (prevPost.likes_count || 0) - 1,
-          };
-        });
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to toggle like");
-      }
-    } catch (error: any) {
-      console.error("Error toggling like:", error);
-      toast.error(error.message || "Failed to toggle like.");
-    }
-  };
-
-  // Handle Retweet function
   const handleRetweet = async (
-    postId: number,
     isQuote: boolean = false,
-    quoteText: string = ""
+    text: string = ""
   ) => {
-    setIsRetweeting(true);
+    if (!post) return;
+    
+    // Close dialogs first
     setShowRetweetOptions(false);
-    try {
-      if (!post) {
-        toast.error("Original post data not available for retweet.");
-        setIsRetweeting(false);
-        return;
-      }
+    setShowQuoteRetweetDialog(false);
 
-      const payload: {
-        parent_post: number;
-        is_retweet: boolean;
-        body?: string;
-        is_qoute_retweet?: boolean;
-        quote_text?: string;
-      } = {
-        parent_post: postId,
-        is_retweet: false,
+    try {
+      const payload = {
+        parent_post: post.id,
+        is_retweet: !isQuote,
+        is_qoute_retweet: isQuote,
+        quote_text: isQuote ? text : undefined,
+        body: post.body,
       };
 
-      if (isQuote) {
-        payload.body = post.body;
-        payload.is_qoute_retweet = true;
-        payload.quote_text = quoteText;
-      } else {
-        payload.body = post.body;
-        payload.is_qoute_retweet = false;
-      }
-
-      const res = await fetch(`/api/posts/${postId}/retweets`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Failed to retweet:", errorData);
-        toast.error(errorData.detail || "Failed to retweet.");
-        return;
-      }
-
-      toast.success("Post retweeted successfully!");
-      setPost((prevPost) => {
-        if (prevPost) {
-          return { ...prevPost, shares: (prevPost.shares || 0) + 1 };
-        }
-        return prevPost;
-      });
+      await retweet(payload);
+      toast.success("Post retweeted!");
+      if (isQuote) setQuoteRetweetText("");
     } catch (error) {
-      console.error("Error retweeting:", error);
-      toast.error("An unexpected error occurred while retweeting.");
-    } finally {
-      setIsRetweeting(false);
-      setQuoteRetweetText("");
+      toast.error("Failed to retweet.");
     }
   };
 
-  // Check if the current user is the author of the post
-  const isAuthor =
-    currentUserId !== null && post?.author_full_name === currentUserId;
-
-  if (loadingPost) {
+  if (isLoadingPost) {
     return (
       <div className='flex justify-center items-center h-screen'>
         <Loader2 className='w-8 h-8 text-gray-500 animate-spin' />
@@ -619,21 +161,12 @@ export default function PostDetailsPage() {
     );
   }
 
-  if (error) {
+  if (postError || !post) {
     return (
       <div className='flex flex-col justify-center items-center h-screen text-red-600'>
-        <p className='font-semibold text-lg'>Error: {error}</p>
-        <Button onClick={() => router.back()} className='mt-4'>
-          Go Back
-        </Button>
-      </div>
-    );
-  }
-
-  if (!post) {
-    return (
-      <div className='flex flex-col justify-center items-center h-screen text-gray-600'>
-        <p className='font-semibold text-lg'>Post not found.</p>
+        <p className='font-semibold text-lg'>
+          {postError ? "Error loading post" : "Post not found"}
+        </p>
         <Button onClick={() => router.back()} className='mt-4'>
           Go Back
         </Button>
@@ -644,322 +177,317 @@ export default function PostDetailsPage() {
   return (
     <div className='mx-auto px-4 max-w-2xl container'>
       {/* Back Button */}
-      <Button
-        variant='ghost'
-        className='mb-4 text-gray-600 hover:text-blue-500'
-        onClick={() => router.back()}
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <ArrowLeft className='mr-2 w-5 h-5' />
-        Back to Feed
-      </Button>
+        <Button
+          variant='ghost'
+          className='mb-6 pl-0 text-gray-500 hover:text-gray-900 group'
+          onClick={() => router.back()}
+        >
+          <div className="bg-gray-100 group-hover:bg-gray-200 mr-2 p-2 rounded-full transition-colors">
+            <ArrowLeft className='w-4 h-4' />
+          </div>
+          <span className="font-medium">Back to Feed</span>
+        </Button>
+      </motion.div>
 
       {/* Post Card - Full Details */}
-      <Card className='bg-white shadow-lg border-0 overflow-hidden'>
-        <CardHeader className='pb-3'>
-          <div className='flex justify-between items-center'>
-            <div className='flex items-center gap-3'>
-              <Link href={`/profile/${post.author}`}>
-                <Avatar className='border-2 border-gray-200'>
-                  <AvatarImage
-                    src={post.author_image || "/placeholder.svg"}
-                    alt={post.author_full_name}
-                  />
-                  <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                    {post.author_full_name
-                      ? post.author_full_name.charAt(0).toUpperCase()
-                      : "L"}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-              <div>
-                <Link href={`/profile/${post.author}`}>
-                  <div className='flex items-center gap-2'>
-                    <p className='font-semibold text-gray-900'>
-                      {post.author_full_name}
-                    </p>
-                    {post.author_full_name && (
-                      <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
-                        <span className='text-white text-xs'>✓</span>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-                <p className='text-gray-500 text-sm'>
-                  {moment(post.created_at).format("MMMM Do YYYY, h:mm a")}
-                </p>
-              </div>
-            </div>
-            <div className='relative' ref={optionsMenuRef}>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='hover:bg-gray-100 rounded-full'
-                onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-              >
-                <MoreHorizontal className='w-5 h-5' />
-              </Button>
-              {showOptionsMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  transition={{ duration: 0.15 }}
-                  className='right-0 z-10 absolute bg-white shadow-lg mt-2 border border-gray-200 rounded-md w-40 overflow-hidden'
-                >
-                  <Button
-                    variant='ghost'
-                    className='justify-start hover:bg-gray-100 px-4 py-2 w-full text-gray-700 text-sm'
-                  >
-                    <Bookmark className='mr-2 w-4 h-4' />
-                    Bookmark
-                  </Button>
-                  {isAuthor && (
-                    <>
-                      <Button
-                        variant='ghost'
-                        className='justify-start hover:bg-blue-50 px-4 py-2 w-full text-blue-600 text-sm'
-                        onClick={() => {
-                          setShowOptionsMenu(false); // Close options menu
-                          setShowEditDialog(true); // Open edit dialog
-                          // The EditPostModal will now handle its own state initialization from props
-                        }}
-                      >
-                        <Edit className='mr-2 w-4 h-4' />
-                        Edit Post
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        className='justify-start hover:bg-red-50 px-4 py-2 w-full text-red-600 text-sm'
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePost();
-                        }}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? (
-                          <Loader2 className='mr-2 w-4 h-4 animate-spin' />
-                        ) : (
-                          <Trash2 className='mr-2 w-4 h-4' />
-                        )}
-                        Delete Post
-                      </Button>
-                    </>
-                  )}
-                </motion.div>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className='pb-3'>
-          <p
-            className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
-          >
-            {post.body}
-          </p>
-
-          {post.quote_text && (
-            <p
-              className={`leading-relaxed whitespace-pre-wrap ${post.isAffirmation ? "text-lg font-medium text-gray-800 italic" : "text-gray-800"}`}
-            >
-              {post.quote_text}
-            </p>
-          )}
-
-          {post.tags && (
-            <div className='flex flex-wrap gap-2 mt-3'>
-              {post.tags.map((tag, idx) => (
-                <Badge
-                  key={idx}
-                  variant='outline'
-                  className='bg-gray-50 px-2 py-1 border-gray-200 text-gray-600 text-xs'
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {post.isAffirmation && <AudioAffirmation />}
-
-          {/* {post.media && (
-            <motion.div
-              className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Image
-                src={post.media || "/placeholder.svg"}
-                alt='Post content'
-                className='w-full h-auto object-cover'
-                width={600}
-                height={400}
-              />
-            </motion.div>
-          )} */}
-
-          {post.media && (
-            <motion.div
-              className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              {post.media_type?.startsWith("image") && (
-                <Image
-                  src={post.media}
-                  alt='Post media'
-                  className='w-full h-auto object-cover'
-                  width={600}
-                  height={400}
-                />
-              )}
-
-              {post.media_type?.startsWith("video") && (
-                <div className='flex justify-center items-center bg-black w-full h-64'>
-                  <video
-                    controls
-                    src={post.media}
-                    className='bg-black w-full h-64 object-cover'
-                  />
-                </div>
-              )}
-
-              {post.media_type?.startsWith("audio") && (
-                <audio controls src={post.media} className='w-full w-full' />
-              )}
-            </motion.div>
-          )}
-
-          {post.parent_post_data && (
-            <>
-              <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
-                <div className='flex items-center gap-3'>
-                  <Link
-                    href={`/profile/${post?.parent_post_data?.author}`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Avatar className='border-2 border-gray-200'>
-                      <AvatarImage
-                        src={
-                          post?.parent_post_data.author_image ||
-                          "/placeholder.svg"
-                        }
-                        alt={post?.parent_post_data?.author_full_name}
-                      />
-                      <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                        {post?.parent_post_data?.author_full_name
-                          ? post?.parent_post_data?.author_full_name
-                              .charAt(0)
-                              .toUpperCase()
-                          : "L"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div>
-                    <Link
-                      href={`/profile/${post?.parent_post_data?.author}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className='flex items-center gap-2'>
-                        <p className='font-semibold text-gray-900'>
-                          {post?.parent_post_data?.author_full_name}
-                        </p>
-                        {post?.parent_post_data?.author_full_name && (
-                          <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
-                            <span className='text-white text-xs'>✓</span>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <p className='text-gray-500 text-sm'>
-                      {moment(post.created_at).fromNow()}
-                    </p>
-                  </div>
-                </div>
-
-                <p className='text-gray-700 italic whitespace-pre-wrap'>
-                  &#34;{post.parent_post_data.body}&#34;
-                </p>
-
-                {post?.parent_post_data?.media && (
-                  <motion.div
-                    className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Image
-                      src={post?.parent_post_data.media || "/placeholder.svg"}
-                      alt='Post content'
-                      className='w-full h-auto object-cover'
-                      width={600}
-                      height={400}
-                    />
-                  </motion.div>
-                )}
-              </div>
-            </>
-          )}
-        </CardContent>
-
-        <CardFooter className='pt-0'>
-          <div className='w-full'>
-            <div className='flex justify-between items-center mb-3 text-gray-500 text-sm'>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className='bg-white shadow-xl shadow-gray-100/50 border-gray-100 overflow-hidden'>
+          <CardHeader className='pb-4'>
+            <div className='flex justify-between items-start'>
               <div className='flex items-center gap-4'>
-                <span className='flex items-center gap-1'>
-                  <Heart className='w-4 h-4 text-red-500' />
-                  {post?.likes_count} likes
-                </span>
+                <Link href={`/profile/${post.author}`}>
+                  <Avatar className='border-2 border-emerald-100 w-12 h-12 cursor-pointer transition-transform hover:scale-105'>
+                    <AvatarImage
+                      src={post.author_image || "/placeholder.svg"}
+                      alt={post.author_full_name}
+                    />
+                    <AvatarFallback className='bg-gradient-to-br from-emerald-50 to-emerald-100 font-bold text-emerald-700 text-lg'>
+                      {post.author_full_name
+                        ? post.author_full_name.charAt(0).toUpperCase()
+                        : "L"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <div>
+                  <Link href={`/profile/${post.author}`} className="group">
+                    <div className='flex items-center gap-2'>
+                      <h3 className='group-hover:text-emerald-600 font-bold text-gray-900 text-lg transition-colors'>
+                        {post.author_full_name}
+                      </h3>
+                      {post.author_full_name && (
+                        <div className='flex justify-center items-center bg-blue-500 rounded-full w-4 h-4 text-white'>
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5">
+                             <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                           </svg>
+                        </div>
+                      )}
+                    </div>
+                    <p className='font-medium text-gray-500 text-sm'>
+                      @{post.author_username || post.author_full_name.toLowerCase().replace(/\s/g, '')}
+                    </p>
+                  </Link>
+                </div>
               </div>
-              <span>{post?.comments_count || "0"} comments</span>
-              <span>{post?.shares || "0"} retweets</span>
+              
+              <div className='flex items-center gap-2'>
+                  <span className='text-gray-400 text-sm whitespace-nowrap'>
+                    {moment(post.created_at).fromNow()}
+                  </span>
+                  <div className='relative' ref={optionsMenuRef}>
+                    <Button
+                        variant='ghost'
+                        size='icon'
+                        className='text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full'
+                        onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                    >
+                        <MoreHorizontal className='w-5 h-5' />
+                    </Button>
+                    <AnimatePresence>
+                        {showOptionsMenu && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10, x: -50 }}
+                            animate={{ opacity: 1, scale: 1, y: 0, x: -130 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            transition={{ duration: 0.15 }}
+                            className='z-20 absolute bg-white shadow-xl shadow-gray-200/50 mt-2 border border-gray-100 rounded-xl w-48 overflow-hidden origin-top-right'
+                        >
+                            <div className="p-1">
+                                <Button
+                                variant='ghost'
+                                className='justify-start hover:bg-gray-50 px-3 py-2 w-full font-medium text-gray-700 text-sm'
+                                >
+                                <Bookmark className='mr-2 w-4 h-4 text-gray-500' />
+                                Save Post
+                                </Button>
+                                {isAuthor && (
+                                <>
+                                    <div className="bg-gray-100 my-1 h-px" />
+                                    <Button
+                                    variant='ghost'
+                                    className='justify-start hover:bg-blue-50 px-3 py-2 w-full font-medium text-blue-600 text-sm'
+                                    onClick={() => {
+                                        setShowOptionsMenu(false);
+                                        setShowEditDialog(true);
+                                    }}
+                                    >
+                                    <Edit className='mr-2 w-4 h-4' />
+                                    Edit
+                                    </Button>
+                                    <Button
+                                    variant='ghost'
+                                    className='justify-start hover:bg-red-50 px-3 py-2 w-full font-medium text-red-600 text-sm'
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeletePost();
+                                    }}
+                                    disabled={isDeletingPost}
+                                    >
+                                    {isDeletingPost ? (
+                                        <Loader2 className='mr-2 w-4 h-4 animate-spin' />
+                                    ) : (
+                                        <Trash2 className='mr-2 w-4 h-4' />
+                                    )}
+                                    Delete
+                                    </Button>
+                                </>
+                                )}
+                            </div>
+                        </motion.div>
+                        )}
+                    </AnimatePresence>
+                  </div>
+              </div>
             </div>
-            <Separator className='mb-3' />
-            <div className='flex justify-between'>
-              <Button
-                variant='ghost'
-                size='sm'
-                className={`flex-1 gap-2 transition-colors ${
-                  likedByUser
-                    ? "text-red-500 hover:text-red-600 hover:bg-red-50"
-                    : "text-gray-600 hover:text-red-500 hover:bg-red-50"
-                }`}
-                onClick={() => toggleLike(post.id)}
-              >
-                <Heart
-                  className={`w-4 h-4 ${likedByUser ? "fill-current" : ""}`}
-                />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
-                onClick={() => {
-                  /* No action needed here, comments are already visible */
-                }}
-              >
-                <MessageSquare className='w-4 h-4' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                className={`flex-1 gap-2 transition-colors ${
-                  post?.is_retweet
-                    ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
-                    : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
-                }`}
-                onClick={() => setShowRetweetOptions(true)}
-                disabled={isRetweeting}
-              >
-                {isRetweeting ? (
-                  <Loader2 className='w-4 h-4 animate-spin' />
-                ) : (
-                  <Repeat className='w-4 h-4' />
+          </CardHeader>
+
+          <CardContent className='pb-4'>
+            <div className="space-y-4">
+                <p
+                    className={`leading-relaxed whitespace-pre-wrap ${
+                    post.isAffirmation 
+                        ? "text-2xl font-serif text-emerald-800 italic text-center py-6 px-4 bg-emerald-50/50 rounded-2xl" 
+                        : "text-gray-800 text-lg"
+                    }`}
+                >
+                    {post.body}
+                </p>
+
+                {post.quote_text && (
+                    <blockquote className="border-emerald-500 bg-gray-50 p-4 border-l-4 rounded-r-xl italic text-gray-700 leading-relaxed">
+                    "{post.quote_text}"
+                    </blockquote>
                 )}
-              </Button>
+
+                {post.tags && (
+                    <div className='flex flex-wrap gap-2 pt-2'>
+                    {post.tags.map((tag, idx) => (
+                        <Badge
+                        key={idx}
+                        variant='secondary'
+                        className='bg-blue-50 hover:bg-blue-100 px-3 py-1 text-blue-600 text-sm cursor-pointer transition-colors'
+                        >
+                        #{tag}
+                        </Badge>
+                    ))}
+                    </div>
+                )}
+
+                {post.isAffirmation && <AudioAffirmation />}
+                
+                {post.media && (
+                    <motion.div
+                    className='mt-4 rounded-2xl overflow-hidden'
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ duration: 0.3 }}
+                    >
+                    {post.media_type?.startsWith("image") && (
+                        <Image
+                        src={post.media}
+                        alt='Post media'
+                        className='shadow-sm w-full h-auto object-cover'
+                        width={800}
+                        height={600}
+                        priority
+                        />
+                    )}
+
+                    {post.media_type?.startsWith("video") && (
+                        <div className='flex justify-center items-center bg-black w-full h-[400px]'>
+                        <video
+                            controls
+                            src={post.media}
+                            className='bg-black w-full h-full object-contain'
+                        />
+                        </div>
+                    )}
+
+                    {post.media_type?.startsWith("audio") && (
+                        <div className="bg-gray-50 p-4 rounded-xl">
+                            <audio controls src={post.media} className='w-full' />
+                        </div>
+                    )}
+                    </motion.div>
+                )}
+                
+                {/* Parent Post (Quoted) */}
+                {post.parent_post_data && (
+                    <div className='bg-white hover:bg-gray-50 mt-4 border border-gray-200 rounded-xl overflow-hidden transition-colors cursor-pointer'>
+                        <div className='p-4'>
+                            <div className='flex items-center gap-3 mb-2'>
+                                <Avatar className='w-8 h-8'>
+                                    <AvatarImage
+                                    src={
+                                        post?.parent_post_data.author_image ||
+                                        "/placeholder.svg"
+                                    }
+                                    />
+                                    <AvatarFallback>
+                                    {post?.parent_post_data?.author_full_name?.[0] || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span className='font-semibold text-gray-900 text-sm'>
+                                    {post?.parent_post_data?.author_full_name}
+                                </span>
+                                <span className='text-gray-500 text-xs'>
+                                    • {moment(post.parent_post_data.created_at).fromNow()}
+                                </span>
+                            </div>
+
+                            <p className='text-gray-800 text-sm line-clamp-3'>
+                                {post.parent_post_data.body}
+                            </p>
+                        </div>
+
+                        {post?.parent_post_data?.media && (
+                            <div className="h-48 relative">
+                                <Image
+                                    src={post?.parent_post_data.media}
+                                    alt='Quoted content'
+                                    className='w-full h-full object-cover'
+                                    fill
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
-          </div>
-        </CardFooter>
-      </Card>
+          </CardContent>
+
+          <CardFooter className='bg-gray-50/50 p-2 sm:p-4'>
+            <div className='w-full'>
+              <div className='flex justify-between items-center mb-4 px-2'>
+                <div className='flex items-center gap-4 text-sm'>
+                  <span className='flex items-center gap-1 font-medium text-gray-600 hover:text-red-500 transition-colors cursor-pointer'>
+                    <span className="bg-red-100 p-1 rounded-full">
+                        <Heart className='w-3 h-3 text-red-500 fill-current' />
+                    </span>
+                    {post?.likes_count} likes
+                  </span>
+                </div>
+                <div className="flex gap-4 text-sm text-gray-500">
+                    <span className="hover:text-gray-900 transition-colors cursor-pointer">{post?.comments_count || "0"} comments</span>
+                    <span className="hover:text-gray-900 transition-colors cursor-pointer">{post?.shares || "0"} retweets</span>
+                </div>
+              </div>
+              
+              <div className='grid grid-cols-3 gap-2'>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className={`group flex items-center justify-center gap-2 h-10 rounded-lg transition-all ${
+                    post.liked_by_user
+                      ? "text-red-500 bg-red-50 hover:bg-red-100"
+                      : "text-gray-600 hover:text-red-500 hover:bg-red-50"
+                  }`}
+                  onClick={() => toggleLike()}
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-transform group-hover:scale-110 ${post.liked_by_user ? "fill-current" : ""}`}
+                  />
+                  <span className="font-medium">Like</span>
+                </Button>
+                
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='group flex justify-center items-center gap-2 hover:bg-blue-50 rounded-lg h-10 text-gray-600 hover:text-blue-500 transition-all'
+                >
+                  <MessageSquare className='w-5 h-5 transition-transform group-hover:scale-110' />
+                  <span className="font-medium">Comment</span>
+                </Button>
+                
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className={`group flex items-center justify-center gap-2 h-10 rounded-lg transition-all ${
+                    post?.is_retweet
+                      ? "text-emerald-500 bg-emerald-50 hover:bg-emerald-100"
+                      : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
+                  }`}
+                  onClick={() => setShowRetweetOptions(true)}
+                  disabled={isRetweeting}
+                >
+                  {isRetweeting ? (
+                    <Loader2 className='w-5 h-5 animate-spin' />
+                  ) : (
+                    <Repeat className='w-5 h-5 transition-transform group-hover:scale-110' />
+                  )}
+                  <span className="font-medium">Repost</span>
+                </Button>
+              </div>
+            </div>
+          </CardFooter>
+        </Card>
+      </motion.div>
 
       {/* Comments Section */}
       <div className='mt-8 pt-4 border-gray-200 border-t'>
@@ -972,7 +500,7 @@ export default function PostDetailsPage() {
             onChange={(e) => setNewCommentContent(e.target.value)}
             className='flex-1 border-gray-300 focus:border-emerald-500 rounded-full focus:ring-emerald-500'
             onKeyPress={(e) => {
-              if (e.key === "Enter" && !postingComment) {
+              if (e.key === "Enter" && !isAddingComment) {
                 handlePostComment();
               }
             }}
@@ -981,9 +509,9 @@ export default function PostDetailsPage() {
             size='icon'
             className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 rounded-full text-white'
             onClick={handlePostComment}
-            disabled={postingComment}
+            disabled={isAddingComment}
           >
-            {postingComment ? (
+            {isAddingComment ? (
               <Loader2 className='w-4 h-4 animate-spin' />
             ) : (
               <Send className='w-4 h-4' />
@@ -991,12 +519,12 @@ export default function PostDetailsPage() {
           </Button>
         </div>
 
-        {loadingComments ? (
+        {isLoadingComments ? (
           <div className='flex justify-center items-center py-4'>
             <Loader2 className='w-5 h-5 text-gray-500 animate-spin' />
             <span className='ml-2 text-gray-500'>Loading comments...</span>
           </div>
-        ) : comments.length === 0 ? (
+        ) : !comments || comments.length === 0 ? (
           <p className='text-gray-500 text-sm text-center'>
             No comments yet. Be the first to comment!
           </p>
@@ -1006,8 +534,8 @@ export default function PostDetailsPage() {
               <CommentItem
                 key={comment.id}
                 comment={comment}
-                postId={parseInt(postId as string)} // Explicitly cast postId to string
-                onCommentPosted={fetchComments}
+                postId={parseInt(postId as string)}
+                onCommentPosted={() => queryClient.invalidateQueries({ queryKey: ["post", postId, "comments"] })}
               />
             ))}
           </div>
@@ -1023,7 +551,7 @@ export default function PostDetailsPage() {
               className='justify-start gap-2 p-6 rounded-xl w-full text-lg'
               onClick={(e) => {
                 e.stopPropagation();
-                handleRetweet(post.id);
+                handleRetweet(false); // Simple retweet
               }}
               disabled={isRetweeting}
             >
@@ -1075,7 +603,7 @@ export default function PostDetailsPage() {
               className='px-6 rounded-full font-bold'
               onClick={(e) => {
                 e.stopPropagation();
-                handleRetweet(post.id, true, quoteRetweetText);
+                handleRetweet(true, quoteRetweetText);
               }}
               disabled={isRetweeting || !quoteRetweetText.trim()}
             >
@@ -1093,7 +621,7 @@ export default function PostDetailsPage() {
                   src={user?.profile?.profile_image || "/placeholder.svg"}
                 />
                 <AvatarFallback>
-                  {`${user.first_name[0]}${user.last_name[0]}`}
+                  {`${user?.first_name?.[0] || ""}${user?.last_name?.[0] || ""}`}
                 </AvatarFallback>
               </Avatar>
               <textarea
@@ -1119,7 +647,6 @@ export default function PostDetailsPage() {
                   </span>
                   <span className='ml-1 text-gray-500 text-sm'>
                     @{post.author_full_name}
-                    {/* @{post.author_username} */}
                   </span>
                 </div>
               </div>
@@ -1131,17 +658,21 @@ export default function PostDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Post Modal - using the new component */}
-      {post && ( // Only render if post data is available
+      {/* Edit Post Modal */}
+      {post && (
         <EditPostModal
           open={showEditDialog}
-          onOpenChange={setShowEditDialog}
+          onOpenChange={(isOpen) => {
+              setShowEditDialog(isOpen);
+              if (!isOpen) {
+                  // When closing, if it was successful, we might want to invalidate queries
+                  // Ideally EditPostModal takes a callback for success
+                  queryClient.invalidateQueries({ queryKey: ["post", postId] });
+              }
+          }}
           postId={post.id}
           initialBody={post.body}
           initialMediaUrl={post.media}
-          // onPostUpdated={(updatedPost) => {
-          //   setPost(updatedPost); // Update the main post state with the new data
-          // }}
         />
       )}
     </div>

@@ -1,36 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ImageIcon, Target, Sparkles, Send } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ImageIcon, Target, Sparkles, Send, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import PostModal from "./postModal";
 import toast from "react-hot-toast";
-import moment from "moment";
-import { useUser } from "@/hooks/useUser"; // Assuming this hook provides user data
+import { useUser } from "@/hooks/useUser";
 import PostCard from "./postCard";
-
-type PostType = {
-  id: number;
-  body: string;
-  author: number; // Assuming this is the author's ID
-  author_username: string;
-  author_full_name: string;
-  author_image: string;
-  media?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  isAffirmation?: boolean;
-  liked_by_user?: boolean;
-  retweeted_by_user?: boolean;
-  likes_count?: number;
-  comments_count?: number; // Ensure comments_count is present
-  shares?: number;
-  timestamp?: string;
-};
+import { useQueryClient } from "@tanstack/react-query";
+import { usePosts } from "@/hooks/features/usePosts";
+import { PostType } from "@/app/types/post";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -47,149 +29,75 @@ const staggerContainer = {
 };
 
 export default function Feed() {
-  const { user } = useUser(); // Get user data from your hook
-  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
   const [openModal, setOpenModal] = useState(false);
   const [type, setType] = useState<"post" | "affirmation">("post");
-  const [posts, setPosts] = useState<PostType[]>([]);
-  // const [newPostTrigger, setNewPostTrigger] = useState(0);
+  const queryClient = useQueryClient();
 
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/posts", {
-        credentials: "include",
-      });
-      const data = await res.json();
-      setLoading(false);
-      console.log("Fetched posts:", data);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = usePosts();
 
-      const formattedPosts = data
-        .map((post: any) => {
-          if (typeof post.id !== "number" || isNaN(post.id)) {
-            console.error("Post data missing or invalid 'id':", post);
-            return null;
-          }
-          return {
-            ...post,
-            author: post.author, // Ensure author ID is passed
-            author_username: post.author_username || "Unknown",
-            author_full_name: post.author_full_name || "Unknown User",
-            author_image: post.author_image || "/placeholder.svg",
-            liked_by_user: post.liked_by_user || false,
-            retweeted_by_user: post.retweeted_by_user || false,
-            likes_count: post.likes_count || 0,
-            comments_count: post.comments_count || 0,
-            timestamp: moment(post.created_at).fromNow(),
-          };
-        })
-        .filter(Boolean);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-      setPosts(formattedPosts);
-    } catch (err) {
-      console.error("Failed to load posts", err);
-      toast.error("Failed to load posts.");
-    }
-  };
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (target.isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage]
+  );
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    const element = observerTarget.current;
+    if (!element) return;
 
-  const toggleLike = async (postId: number) => {
-    const postIndex = posts.findIndex((p) => p.id === postId);
-    if (postIndex === -1) {
-      console.warn(
-        `Attempted to toggle like for non-existent post ID: ${postId}`
-      );
-      return;
-    }
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0,
+    });
 
-    const currentPost = posts[postIndex];
-    const isCurrentlyLiked = currentPost.liked_by_user;
-    const isCurrentlyRetweeted = currentPost.retweeted_by_user;
+    observer.observe(element);
 
-    const updatedPosts = [...posts];
-    updatedPosts[postIndex] = {
-      ...currentPost,
-      liked_by_user: !isCurrentlyLiked,
-      retweeted_by_user: !isCurrentlyRetweeted,
-      likes_count: isCurrentlyLiked
-        ? (currentPost.likes_count || 0) - 1
-        : (currentPost.likes_count || 0) + 1,
+    return () => {
+      if (element) observer.unobserve(element);
     };
-    setPosts(updatedPosts);
+  }, [handleObserver]);
 
-    const apiUrl = isCurrentlyLiked
-      ? `/api/posts/${postId}/unlike`
-      : `/api/posts/${postId}/like`;
-
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error(
-          `API call failed for ${apiUrl}: Status ${res.status}`,
-          errorData
-        );
-        toast.error(
-          errorData.detail || "Failed to update like status. Please try again."
-        );
-        setPosts(posts);
-        return;
-      }
-    } catch (error: any) {
-      console.error(
-        `Network or unexpected error while toggling like for post ${postId}:`,
-        error
-      );
-      toast.error(
-        error.message || "Could not update like status due to a network error."
-      );
-      setPosts(posts);
-    }
-  };
-
-  // // New function to handle post deletion from PostCard
-  // const handlePostDeleted = (deletedPostId: number) => {
-  //   setPosts((prevPosts) =>
-  //     prevPosts.filter((post) => post.id !== deletedPostId)
-  //   );
-  //   toast.success("Post deleted successfully!");
-  // };
-
-  // const handlePostUpdated = (updatedPost: PostType) => {
-  //   setPosts((prevPosts) =>
-  //     prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
-  //   );
-  // };
-
-  // // New function to handle post retweet from PostCard
-  // const handlePostRetweet = () => {
-  //   setNewPostTrigger((prev) => prev + 1); // Will trigger useEffect to re-fetch
-  // };
+  // Flatten the pages into a single array of posts
+  const posts = data?.pages.flatMap((page) => page) || [];
 
   return (
-    <div className='space-y-6 mx-auto max-w-2xl'>
+    <div className='space-y-8 mx-auto py-8 max-w-2xl'>
       <PostModal
         open={openModal}
-        onOpenChange={setOpenModal}
+        onOpenChange={(isOpen) => {
+            setOpenModal(isOpen);
+            if (!isOpen) {
+                queryClient.invalidateQueries({ queryKey: ["posts"] });
+            }
+        }}
         type={type}
-        // onPostCreated={() => setNewPostTrigger((prev) => prev + 1)}
       />
 
-      <motion.div variants={fadeInUp} initial='initial' animate='animate'>
-        <Card className='bg-white shadow-lg border-0 overflow-hidden'>
-          <CardHeader className='pb-3'>
-            <div className='flex items-center gap-2'>
-              <Avatar className='border-2 border-emerald-200'>
+      <motion.div 
+        variants={fadeInUp} 
+        initial='initial' 
+        animate='animate'
+        className="transform transition-all duration-300 hover:scale-[1.01]"
+      >
+        <Card className='bg-white shadow-xl shadow-gray-100/50 border-gray-100 overflow-hidden'>
+          <CardHeader className='pb-4'>
+            <div className='flex items-center gap-3'>
+              <Avatar className='border-2 border-emerald-100 w-12 h-12 transition-transform hover:scale-105'>
                 <AvatarImage
                   src={
                     user?.profile?.profile_image ||
@@ -198,7 +106,7 @@ export default function Feed() {
                   alt='User'
                 />
                 <AvatarFallback className='bg-emerald-100 font-bold text-emerald-800'>
-                  JD
+                  {user?.first_name?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div
@@ -206,21 +114,21 @@ export default function Feed() {
                   setType("post");
                   setOpenModal(true);
                 }}
-                className='flex-1 bg-gradient-to-r from-gray-50 hover:from-gray-100 to-gray-100 hover:to-gray-200 px-6 py-3 border border-gray-200 rounded-full transition-all cursor-pointer'
+                className='flex-1 bg-gray-50 hover:bg-gray-100/80 px-6 py-3 border border-gray-200 focus-within:border-emerald-500 rounded-full transition-all cursor-pointer group'
               >
-                <span className='text-gray-500 truncate'>
+                <span className='text-gray-500 group-hover:text-gray-700 truncate transition-colors'>
                   Share something positive...
                 </span>
               </div>
             </div>
           </CardHeader>
 
-          <CardFooter className='flex sm:flex-row flex-col justify-between items-center px-2 md:px-6 pt-0 pb-4 w-full'>
-            <div className='flex justify-between px-2 md:px-6'>
+          <CardFooter className='flex sm:flex-row flex-col justify-between items-center px-4 md:px-6 pt-0 pb-4 w-full'>
+            <div className='flex justify-between gap-4 w-full sm:w-auto'>
               <Button
                 variant='ghost'
                 size='sm'
-                className='hover:bg-emerald-50 text-gray-600 hover:text-emerald-600'
+                className='flex-1 hover:bg-emerald-50 text-gray-600 hover:text-emerald-600'
                 onClick={() => {
                   setType("post");
                   setOpenModal(true);
@@ -232,7 +140,7 @@ export default function Feed() {
               <Button
                 variant='ghost'
                 size='sm'
-                className='hover:bg-blue-50 text-gray-600 hover:text-blue-600'
+                className='flex-1 hover:bg-blue-50 text-gray-600 hover:text-blue-600'
                 disabled
               >
                 <Target className='mr-2 w-4 h-4' />
@@ -241,7 +149,7 @@ export default function Feed() {
               <Button
                 variant='ghost'
                 size='sm'
-                className='hover:bg-purple-50 text-gray-600 hover:text-purple-600'
+                className='flex-1 hover:bg-purple-50 text-gray-600 hover:text-purple-600'
                 onClick={() => {
                   toast("Affirmations coming soon 🌟", { icon: "✨" });
                 }}
@@ -250,10 +158,10 @@ export default function Feed() {
                 Affirmation
               </Button>
             </div>
-            <div className='mt-2 md:mt-0 max-sm:w-full'>
+            <div className='mt-4 sm:mt-0 w-full sm:w-auto'>
               <Button
                 size='sm'
-                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 max-sm:w-full text-white'
+                className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-md hover:shadow-lg w-full sm:w-auto text-white transition-all transform hover:-translate-y-0.5'
                 onClick={() => {
                   setType("post");
                   setOpenModal(true);
@@ -267,31 +175,52 @@ export default function Feed() {
         </Card>
       </motion.div>
 
-      {loading ? (
-        <p className='text-gray-500 text-center'>Loading feed...</p>
+      {isLoading ? (
+        <div className="flex flex-col justify-center items-center py-12">
+            <Loader2 className='mb-4 w-10 h-10 text-emerald-500 animate-spin' />
+            <span className='font-medium text-gray-500'>Loading your positive feed...</span>
+        </div>
+      ) : isError ? (
+          <div className="bg-red-50 p-6 rounded-xl text-center text-red-500">
+              <p className="font-semibold">Unable to load posts.</p>
+              <Button variant="outline" onClick={() => window.location.reload()} className="mt-2 text-red-600 border-red-200">
+                  Try Again
+              </Button>
+          </div>
       ) : posts.length === 0 ? (
-        <p className='text-gray-500 text-center'>No posts yet. Be the first!</p>
+        <div className="py-12 text-center">
+            <div className="bg-gray-100 mx-auto mb-4 p-4 rounded-full w-16 h-16 flex items-center justify-center">
+                <Send className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="font-bold text-gray-900 text-lg">No posts yet</h3>
+            <p className='text-gray-500'>Be the first to share something amazing!</p>
+        </div>
       ) : (
         <motion.div
-          className='space-y-6'
+          className='space-y-8'
           variants={staggerContainer}
           initial='initial'
           animate='animate'
         >
-          {posts.map((post) => (
+          {posts.map((post: PostType) => (
             <motion.div key={post.id} variants={fadeInUp}>
-              <PostCard
-                post={post}
-                liked_by_user={post.liked_by_user || false}
-                retweeted_by_user={post.retweeted_by_user || false}
-                toggleLike={toggleLike}
-                currentUserId={`${user?.first_name} ${user?.last_name}` || null}
-                // onPostDeleted={handlePostDeleted} // Pass deletion callback
-                // onRetweeted={handlePostRetweet}
-                // onPostUpdated={handlePostUpdated}
-              />
+              <PostCard post={post} />
             </motion.div>
           ))}
+          
+          {/* Intersection Observer Sentinel */}
+          <div ref={observerTarget} className="flex justify-center py-8">
+            {isFetchingNextPage && (
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            )}
+            {!hasNextPage && posts.length > 0 && (
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <div className="w-12 h-px bg-gray-200"></div>
+                  <span>You're all caught up!</span>
+                  <div className="w-12 h-px bg-gray-200"></div>
+              </div>
+            )}
+          </div>
         </motion.div>
       )}
     </div>

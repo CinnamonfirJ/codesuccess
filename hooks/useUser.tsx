@@ -1,18 +1,22 @@
 // hooks/useUser.ts
 "use client";
 
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    credentials: "include",
-  }).then((res) => {
-    if (!res.ok) throw new Error("Failed to fetch");
-    return res.json();
-  });
+// Fetcher function using plain axios (cookies handling is automatic for same-origin)
+const fetchUser = async () => {
+  const { data } = await axios.get("/api/me");
+  return data;
+};
 
 export function useUser() {
-  const { data, error, isLoading } = useSWR("/api/me", fetcher);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+    retry: false, // Don't retry on 401/403 ideally, but let's keep it simple for now
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+  });
 
   return {
     user: data,

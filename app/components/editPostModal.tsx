@@ -13,28 +13,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Loader2, UploadCloud } from "lucide-react";
 
-type PostType = {
-  id: number;
-  body: string;
-  author: number;
-  author_username: string;
-  author_full_name: string;
-  author_image: string;
-  media?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  isAffirmation?: boolean;
-  liked_by_user?: boolean;
-  likes_count?: number;
-  comments_count?: number;
-  shares?: number;
-  timestamp?: string;
-  is_retweet?: boolean;
-  is_qoute_retweet?: boolean;
-  quote_text?: string;
-  scheduled_at?: string;
-};
+import { PostType } from "@/app/types/post";
 
 interface EditPostModalProps {
   open: boolean;

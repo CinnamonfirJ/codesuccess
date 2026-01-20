@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Heart,
   MessageSquare,
   MoreHorizontal,
-  Play,
-  Pause,
   Bookmark,
   Loader2,
   Trash2,
@@ -26,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import moment from "moment";
 import {
@@ -39,49 +37,15 @@ import {
 import EditPostModal from "./editPostModal";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-
-type OriginalPostType = {
-  id: number;
-  author_full_name: string;
-  author_image: string;
-  body: string;
-  media?: string;
-  retweet_count?: number;
-};
-
-type PostType = {
-  id: number;
-  body: string;
-  author: number;
-  author_username: string;
-  author_full_name: string;
-  author_image: string;
-  media?: string;
-  media_type?: string;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  isAffirmation?: boolean;
-  liked_by_user?: boolean;
-  retweeted_by_user?: boolean;
-  likes_count?: number;
-  comments_count?: number;
-  shares?: number;
-  timestamp?: string;
-  is_retweet?: boolean;
-  is_qoute_retweet?: boolean;
-  quote_text?: string;
-  retweet_count?: string;
-  parent_post_data?: OriginalPostType;
-  postType?: string;
-};
+import { PostType } from "@/app/types/post";
+import { AudioAffirmation } from "./post/AudioAffirmation";
+import axios from "axios";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 interface PostCardProps {
   post: PostType;
-  liked_by_user: boolean;
-  retweeted_by_user: boolean;
-  toggleLike: (postId: number) => Promise<void>;
-  currentUserId: string | null;
+  // Core actions passed from parent (Feed/PostDetails) or handled internally
+  // If undefined, component will try to handle logic itself or disable features
 }
 
 // Post type color configurations
@@ -126,74 +90,38 @@ const POST_TYPE_STYLES: Record<
   },
 };
 
-const AudioAffirmation = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
+export default function PostCard({ post }: PostCardProps) {
+  const { user } = useUser();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  return (
-    <motion.div
-      className='flex items-center bg-gradient-to-r from-emerald-50 to-blue-50 my-4 p-4 border border-emerald-200 rounded-xl'
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Button
-        variant='outline'
-        size='icon'
-        className='bg-gradient-to-r from-emerald-500 hover:from-emerald-600 to-blue-500 hover:to-blue-600 shadow-lg mr-4 border-0 rounded-full w-12 h-12 text-white'
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsPlaying(!isPlaying);
-        }}
-      >
-        {isPlaying ? (
-          <Pause className='w-5 h-5' />
-        ) : (
-          <Play className='w-5 h-5' />
-        )}
-      </Button>
-      <div className='flex-1'>
-        <div className='bg-gray-200 mb-2 rounded-full h-2'>
-          <motion.div
-            className='bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full h-2'
-            initial={{ width: "0%" }}
-            animate={{ width: isPlaying ? "33%" : "33%" }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-        <div className='flex justify-between text-gray-600 text-xs'>
-          <span>0:45</span>
-          <span className='font-medium'>Daily Affirmation</span>
-          <span>2:30</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-export default function PostCard({
-  post,
-  liked_by_user,
-  retweeted_by_user,
-  toggleLike,
-  currentUserId,
-}: PostCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isRetweeting, setIsRetweeting] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRetweetOptions, setShowRetweetOptions] = useState(false);
   const [showQuoteRetweetDialog, setShowQuoteRetweetDialog] = useState(false);
   const [quoteRetweetText, setQuoteRetweetText] = useState("");
   const optionsMenuRef = useRef<HTMLDivElement>(null);
-  const { user } = useUser();
-  const router = useRouter();
 
+  const currentUserId = user ? `${user.first_name} ${user.last_name}` : null; // simplified check
   const isAuthor =
     currentUserId !== null && post?.author_full_name === currentUserId;
 
-  // Get post type styling
+  // Optimistic UI state
+  const [isLiked, setIsLiked] = useState(post.liked_by_user);
+  const [likesCount, setLikesCount] = useState(post.likes_count || 0);
+  const [isRetweeted, setIsRetweeted] = useState(post.is_retweet); // This might be retweeted_by_user
+  const [retweetCount, setRetweetCount] = useState(
+    parseInt(post.retweet_count || "0")
+  );
+
+  useEffect(() => {
+      setIsLiked(post.liked_by_user);
+      setLikesCount(post.likes_count || 0);
+  }, [post.liked_by_user, post.likes_count]);
+
   const postTypeStyle = post.postType ? POST_TYPE_STYLES[post.postType] : null;
 
+  // Handle outside click for options menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -203,105 +131,72 @@ export default function PostCard({
         setShowOptionsMenu(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [optionsMenuRef]);
+  }, []);
 
-  const handleDeletePost = async () => {
-    setShowOptionsMenu(false);
-    toast.promise(
-      new Promise(async (resolve, reject) => {
-        setIsDeleting(true);
-        try {
-          const res = await fetch(`/api/posts/${post.id}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
+  // --- Mutations ---
 
-          if (!res.ok) {
-            const errorData = await res.json();
-            console.error(
-              `Failed to delete post: Status ${res.status}`,
-              errorData
-            );
-            reject(new Error(errorData.detail || "Failed to delete post."));
-            return;
-          }
-
-          resolve("Post deleted successfully!");
-        } catch (error: any) {
-          console.error("Error deleting post:", error);
-          reject(
-            new Error(
-              error.message || "Could not delete post due to a network error."
-            )
-          );
-        } finally {
-          setIsDeleting(false);
-        }
-      }),
-      {
-        loading: "Deleting post...",
-        success: "Post deleted!",
-        error: (err) => err.message,
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      // Toggle
+      const endpoint = isLiked
+        ? `/api/posts/${post.id}/unlike`
+        : `/api/posts/${post.id}/like`;
+      await axios.post(endpoint);
+    },
+    onMutate: async () => {
+      // Optimistic update
+      const previousLiked = isLiked;
+      const previousCount = likesCount;
+      setIsLiked(!isLiked);
+      setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+      return { previousLiked, previousCount };
+    },
+    onError: (err, newTodo, context) => {
+      // Rollback
+      if (context) {
+        setIsLiked(context.previousLiked);
+        setLikesCount(context.previousCount);
       }
-    );
-  };
+      toast.error("Failed to update like.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", post.id] });
+    },
+  });
 
-  const handleRetweet = async (
-    postId: number,
-    isQuote: boolean = false,
-    quoteText: string = ""
-  ) => {
-    setIsRetweeting(true);
-    setShowRetweetOptions(false);
-    setShowQuoteRetweetDialog(false);
-
-    try {
-      const payload: {
-        parent_post: number;
-        is_retweet: boolean;
-        body?: string;
-        is_qoute_retweet?: boolean;
-        quote_text?: string;
-      } = {
-        parent_post: postId,
-        is_retweet: !isQuote,
-      };
-
-      if (isQuote) {
-        payload.is_qoute_retweet = true;
-        payload.quote_text = quoteText;
-      }
-
-      const res = await fetch(`/api/posts/${postId}/retweet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Failed to retweet:", errorData);
-        toast.error(errorData.detail || "Failed to retweet.");
-        return;
-      }
-
-      toast.success("Post retweeted successfully!");
-    } catch (error) {
-      console.error("Error retweeting:", error);
-      toast.error("An unexpected error occurred while retweeting.");
-    } finally {
-      setIsRetweeting(false);
-      setQuoteRetweetText("");
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+        await axios.delete(`/api/posts/${post.id}`);
+    },
+    onSuccess: () => {
+        toast.success("Post deleted!");
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (err: any) => {
+        toast.error(err.message || "Failed to delete post");
     }
-  };
+  });
+
+  const retweetMutation = useMutation({
+      mutationFn: async (payload: { is_retweet: boolean, is_qoute_retweet?: boolean, quote_text?: string, parent_post: number }) => {
+          await axios.post(`/api/posts/${post.id}/retweet`, payload);
+      },
+      onSuccess: () => {
+          toast.success("Retweeted!");
+          setShowRetweetOptions(false);
+          setShowQuoteRetweetDialog(false);
+          setQuoteRetweetText("");
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+      },
+      onError: (err: any) => {
+          toast.error(err.message || "Failed to retweet");
+      }
+  })
 
   return (
     <Card className='bg-white shadow-lg hover:shadow-xl border-0 overflow-hidden transition-shadow duration-300'>
@@ -371,55 +266,58 @@ export default function PostCard({
             >
               <MoreHorizontal className='w-5 h-5' />
             </Button>
-            {showOptionsMenu && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.15 }}
-                className='right-0 z-10 absolute bg-white shadow-lg mt-2 border border-gray-200 rounded-md w-40 overflow-hidden'
-              >
-                <Button
-                  variant='ghost'
-                  className='justify-start hover:bg-gray-100 px-4 py-2 w-full text-gray-700 text-sm'
-                  onClick={(e) => e.stopPropagation()}
+            <AnimatePresence>
+                {showOptionsMenu && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.15 }}
+                    className='right-0 z-10 absolute bg-white shadow-lg mt-2 border border-gray-200 rounded-md w-40 overflow-hidden'
                 >
-                  <Bookmark className='mr-2 w-4 h-4' />
-                  Bookmark
-                </Button>
-                {isAuthor && (
-                  <>
                     <Button
-                      variant='ghost'
-                      className='justify-start hover:bg-blue-50 px-4 py-2 w-full text-blue-600 text-sm'
-                      onClick={() => {
-                        setShowOptionsMenu(false);
-                        setShowEditDialog(true);
-                      }}
+                    variant='ghost'
+                    className='justify-start hover:bg-gray-100 px-4 py-2 w-full text-gray-700 text-sm'
+                    onClick={(e) => e.stopPropagation()}
                     >
-                      <Edit className='mr-2 w-4 h-4' />
-                      Edit Post
+                    <Bookmark className='mr-2 w-4 h-4' />
+                    Bookmark
                     </Button>
-                    <Button
-                      variant='ghost'
-                      className='justify-start hover:bg-red-50 px-4 py-2 w-full text-red-600 text-sm'
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePost();
-                      }}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? (
-                        <Loader2 className='mr-2 w-4 h-4 animate-spin' />
-                      ) : (
-                        <Trash2 className='mr-2 w-4 h-4' />
-                      )}
-                      Delete Post
-                    </Button>
-                  </>
+                    {isAuthor && (
+                    <>
+                        <Button
+                        variant='ghost'
+                        className='justify-start hover:bg-blue-50 px-4 py-2 w-full text-blue-600 text-sm'
+                        onClick={() => {
+                            setShowOptionsMenu(false);
+                            setShowEditDialog(true);
+                        }}
+                        >
+                        <Edit className='mr-2 w-4 h-4' />
+                        Edit Post
+                        </Button>
+                        <Button
+                        variant='ghost'
+                        className='justify-start hover:bg-red-50 px-4 py-2 w-full text-red-600 text-sm'
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            deleteMutation.mutate();
+                            setShowOptionsMenu(false);
+                        }}
+                        disabled={deleteMutation.isPending}
+                        >
+                        {deleteMutation.isPending ? (
+                            <Loader2 className='mr-2 w-4 h-4 animate-spin' />
+                        ) : (
+                            <Trash2 className='mr-2 w-4 h-4' />
+                        )}
+                        Delete Post
+                        </Button>
+                    </>
+                    )}
+                </motion.div>
                 )}
-              </motion.div>
-            )}
+            </AnimatePresence>
           </div>
         </div>
       </CardHeader>
@@ -463,6 +361,7 @@ export default function PostCard({
             className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
+            onClick={(e) => e.stopPropagation()} // don't navigate when clicking media
           >
             {post.media_type?.startsWith("image") && (
               <Image
@@ -490,74 +389,74 @@ export default function PostCard({
           </motion.div>
         )}
 
+        {/* Parent Post (Quoted or Retweeted content context) */}
         {post.parent_post_data && (
-          <>
-            <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
-              <div className='flex items-center gap-3'>
+          <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
+            <div className='flex items-center gap-3'>
+              <Link
+                href={`/profile/${post?.parent_post_data?.author}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Avatar className='border-2 border-gray-200'>
+                  <AvatarImage
+                    src={
+                      post?.parent_post_data.author_image ||
+                      "/placeholder.svg"
+                    }
+                    alt={post?.parent_post_data?.author_full_name}
+                  />
+                  <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
+                    {post?.parent_post_data?.author_full_name
+                      ? post?.parent_post_data?.author_full_name
+                          .charAt(0)
+                          .toUpperCase()
+                      : "L"}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              <div>
                 <Link
                   href={`/profile/${post?.parent_post_data?.author}`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Avatar className='border-2 border-gray-200'>
-                    <AvatarImage
-                      src={
-                        post?.parent_post_data.author_image ||
-                        "/placeholder.svg"
-                      }
-                      alt={post?.parent_post_data?.author_full_name}
-                    />
-                    <AvatarFallback className='bg-gradient-to-r from-emerald-100 to-blue-100 font-bold text-emerald-800'>
-                      {post?.parent_post_data?.author_full_name
-                        ? post?.parent_post_data?.author_full_name
-                            .charAt(0)
-                            .toUpperCase()
-                        : "L"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className='flex items-center gap-2'>
+                    <p className='font-semibold text-gray-900'>
+                      {post?.parent_post_data?.author_full_name}
+                    </p>
+                    {post?.parent_post_data?.author_full_name && (
+                      <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
+                        <span className='text-white text-xs'>✓</span>
+                      </div>
+                    )}
+                  </div>
                 </Link>
-                <div>
-                  <Link
-                    href={`/profile/${post?.parent_post_data?.author}`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className='flex items-center gap-2'>
-                      <p className='font-semibold text-gray-900'>
-                        {post?.parent_post_data?.author_full_name}
-                      </p>
-                      {post?.parent_post_data?.author_full_name && (
-                        <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full w-5 h-5'>
-                          <span className='text-white text-xs'>✓</span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                  <p className='text-gray-500 text-sm'>
-                    {moment(post.created_at).fromNow()}
-                  </p>
-                </div>
+                <p className='text-gray-500 text-sm'>
+                  {moment(post.created_at).fromNow()}
+                </p>
               </div>
-
-              <p className='text-gray-700 italic whitespace-pre-wrap'>
-                &#34;{post.parent_post_data.body}&#34;
-              </p>
-
-              {post?.parent_post_data?.media && (
-                <motion.div
-                  className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Image
-                    src={post?.parent_post_data.media || "/placeholder.svg"}
-                    alt='Post content'
-                    className='w-full h-auto object-cover'
-                    width={600}
-                    height={400}
-                  />
-                </motion.div>
-              )}
             </div>
-          </>
+
+            <p className='text-gray-700 italic whitespace-pre-wrap'>
+              &#34;{post.parent_post_data.body}&#34;
+            </p>
+
+            {post?.parent_post_data?.media && (
+              <motion.div
+                className='mt-4 border border-gray-200 rounded-xl overflow-hidden'
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={post?.parent_post_data.media || "/placeholder.svg"}
+                  alt='Post content'
+                  className='w-full h-auto object-cover'
+                  width={600}
+                  height={400}
+                />
+              </motion.div>
+            )}
+          </div>
         )}
       </CardContent>
 
@@ -569,19 +468,20 @@ export default function PostCard({
               variant='ghost'
               size='sm'
               className={`flex-1 gap-2 transition-colors ${
-                liked_by_user
+                isLiked
                   ? "text-red-500 hover:text-red-600 hover:bg-red-50"
                   : "text-gray-600 hover:text-red-500 hover:bg-red-50"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                toggleLike(post.id);
+                likeMutation.mutate();
               }}
+              disabled={likeMutation.isPending}
             >
               <div className='flex items-center gap-1'>
-                {post?.likes_count || "0"}
+                {likesCount}
                 <Heart
-                  className={`w-4 h-4 ${liked_by_user ? "fill-current" : ""}`}
+                  className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
                 />
               </div>
             </Button>
@@ -591,7 +491,7 @@ export default function PostCard({
               className='flex-1 gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-500'
               onClick={(e) => {
                 e.stopPropagation();
-                window.location.href = `/posts/${post.id}`;
+                router.push(`/posts/${post.id}`);
               }}
             >
               <div className='flex items-center gap-1'>
@@ -603,7 +503,7 @@ export default function PostCard({
               variant='ghost'
               size='sm'
               className={`flex-1 gap-2 transition-colors ${
-                retweeted_by_user
+                post.is_retweet // Note: server naming might need unifying, using prop for now
                   ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
                   : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
               }`}
@@ -611,15 +511,15 @@ export default function PostCard({
                 e.stopPropagation();
                 setShowRetweetOptions(true);
               }}
-              disabled={isRetweeting}
+              disabled={retweetMutation.isPending}
             >
-              {isRetweeting ? (
+              {retweetMutation.isPending ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
               ) : (
                 <div className='flex items-center gap-1'>
                   {post?.retweet_count || "0"}
                   <Repeat
-                    className={`w-4 h-4 ${retweeted_by_user ? "fill-current text-emerald-500" : ""} `}
+                    className={`w-4 h-4 ${post.is_retweet ? "fill-current text-emerald-500" : ""} `}
                   />
                 </div>
               )}
@@ -631,7 +531,12 @@ export default function PostCard({
       {post && (
         <EditPostModal
           open={showEditDialog}
-          onOpenChange={setShowEditDialog}
+          onOpenChange={(open) => {
+              setShowEditDialog(open);
+              if(!open) {
+                queryClient.invalidateQueries({ queryKey: ["posts"] });
+              }
+          }}
           postId={post.id}
           initialBody={post.body}
           initialMediaUrl={post.media}
@@ -647,12 +552,12 @@ export default function PostCard({
               className='justify-start gap-2 p-6 rounded-xl w-full text-lg'
               onClick={(e) => {
                 e.stopPropagation();
-                handleRetweet(post.id);
+                retweetMutation.mutate({ is_retweet: true, parent_post: post.id });
               }}
-              disabled={isRetweeting}
+              disabled={retweetMutation.isPending}
             >
               <Repeat className='w-5 h-5' />
-              {isRetweeting ? (
+              {retweetMutation.isPending ? (
                 <Loader2 className='mr-2 w-4 h-4 animate-spin' />
               ) : (
                 "Retweet"
@@ -699,11 +604,16 @@ export default function PostCard({
               className='px-6 rounded-full font-bold'
               onClick={(e) => {
                 e.stopPropagation();
-                handleRetweet(post.id, true, quoteRetweetText);
+                retweetMutation.mutate({ 
+                    parent_post: post.id,
+                    is_retweet: false, 
+                    is_qoute_retweet: true,
+                    quote_text: quoteRetweetText 
+                });
               }}
-              disabled={isRetweeting || !quoteRetweetText.trim()}
+              disabled={retweetMutation.isPending || !quoteRetweetText.trim()}
             >
-              {isRetweeting ? (
+              {retweetMutation.isPending ? (
                 <Loader2 className='mr-2 w-4 h-4 animate-spin' />
               ) : (
                 "Post"
@@ -717,7 +627,7 @@ export default function PostCard({
                   src={user?.profile?.profile_image || "/placeholder.svg"}
                 />
                 <AvatarFallback>
-                  {user && `${user.first_name[0]}${user.last_name[0]}`}
+                  {user && `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`}
                 </AvatarFallback>
               </Avatar>
               <textarea

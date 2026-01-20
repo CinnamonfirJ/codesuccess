@@ -1,13 +1,13 @@
 // lib/axios.ts
 import axios from "axios";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers"; // Removed static import
 import toast from "react-hot-toast";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
 // ===== Create axios instance =====
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -45,6 +45,7 @@ api.interceptors.request.use(
     // Server: read cookies directly (no in-memory token available here)
     if (typeof window === "undefined") {
       try {
+        const { cookies } = await import("next/headers"); // Dynamic import
         const cookieStore = await cookies();
         const token = cookieStore.get("access")?.value;
         if (token) {
