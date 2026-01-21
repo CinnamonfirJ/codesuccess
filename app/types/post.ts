@@ -46,4 +46,5 @@ export type PostType = {
   scheduled_at?: string;
   retweet_count?: string;
   parent_post_data?: OriginalPostType;
+  postType?: string;
 };

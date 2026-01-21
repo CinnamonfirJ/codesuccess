@@ -1,8 +1,8 @@
-// app/api/accounts/profiles/[id]/follow/route.ts
+// app/api/accounts/profile/[id]/unfollow/route.ts
 import { NextResponse, type NextRequest } from "next/server";
 import api from "@/lib/axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_2!;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
 
     // api will handle access token + refresh automatically
     const res = await api.post(
-      `${API_BASE_URL}/accounts/profile/${encodeURIComponent(String(id))}/follow/`,
+      `${API_BASE_URL}/accounts/profile/${encodeURIComponent(String(id))}/unfollow/`,
       body
     );
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
     const message =
       error?.response?.data?.error ||
       error?.response?.data ||
-      "Failed to follow/unfollow profile";
+      "Failed to unfollow profile";
 
     return NextResponse.json({ error: message }, { status });
   }

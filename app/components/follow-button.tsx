@@ -36,7 +36,7 @@ export function FollowButton({
     try {
       const endpoint = next ? "follow" : "unfollow";
       const res = await fetch(
-        `/api/accounts/profiles/${encodeURIComponent(String(targetId))}/${endpoint}`,
+        `/api/accounts/profile/${encodeURIComponent(String(targetId))}/${endpoint}`,
         {
           method: "POST",
           credentials: "include",

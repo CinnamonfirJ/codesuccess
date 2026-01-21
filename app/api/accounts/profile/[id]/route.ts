@@ -1,10 +1,10 @@
-// app/api/accounts/profiles/[id]/route.ts
+// app/api/accounts/profile/[id]/route.ts
 
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import api from "@/lib/axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_2!;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export async function GET(_req: Request, ctx: { params: { id: string } }) {
   const cookieStore = await cookies();

@@ -102,7 +102,7 @@ export default function ProfilePage() {
         }
 
         const res = await fetch(
-          `/api/accounts/profiles/${encodeURIComponent(String(id))}`,
+          `/api/accounts/profile/${encodeURIComponent(String(id))}`,
           { credentials: "include", cache: "no-store" }
         );
         if (!res.ok) throw new Error("Failed to fetch profile");
