@@ -12,7 +12,7 @@ export type CommentType = {
 
 export type OriginalPostType = {
   id: number;
-  author: number;
+  author: string | number;
   author_full_name: string;
   author_username: string;
   author_image: string;
@@ -25,7 +25,7 @@ export type OriginalPostType = {
 export type PostType = {
   id: number;
   body: string;
-  author: number;
+  author: string | number;
   author_username: string;
   author_full_name: string;
   author_image: string;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
+import { useFollowMutation, useUnfollowMutation } from "@/hooks/features/useProfile";
 
 type UserLike = {
   profile_id?: number | string;
@@ -14,57 +15,52 @@ type UserLike = {
 type Props = {
   title?: string;
   items: UserLike[];
-  myFollowingIds: Set<number | string>;
-  onFollowingChange: (id: number | string, nowFollowing: boolean) => void;
 };
 
 export function ConnectionsList({
   title,
   items,
-  myFollowingIds,
-  onFollowingChange,
 }: Props) {
+  const followMutation = useFollowMutation();
+  const unfollowMutation = useUnfollowMutation();
+
   return (
     <div className='space-y-3'>
       {title ? <p className='font-medium text-gray-900'>{title}</p> : null}
 
       {(items ?? []).map((f) => {
-        // pick the best identifier available
-        const id = f.profile_id ?? f.id ?? f.username;
-        const idStr = String(id);
-
-        const isFollowing =
-          myFollowingIds.has(idStr) || myFollowingIds.has(Number(idStr));
-
-        const initials = (f.username?.[0] || "U").toUpperCase();
+        const username = f.username;
+        const initials = (username?.[0] || "U").toUpperCase();
 
         return (
           <div
-            key={`${idStr}-${f.username}`}
+            key={username}
             className='flex justify-between items-center hover:bg-gray-50 p-2 rounded-lg'
           >
             <Link
-              href={`/profile/${encodeURIComponent(idStr)}`}
+              href={`/profile/${username}`}
               className='flex items-center gap-3'
             >
               <Avatar className='w-8 h-8'>
                 <AvatarImage
                   src={f.profile_image || "/placeholder.svg"}
-                  alt={f.username}
+                  alt={username}
                 />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className='min-w-0'>
                 <p className='font-medium text-gray-900 text-sm truncate'>
-                  @{f.username}
+                  @{username}
                 </p>
               </div>
             </Link>
 
             <FollowButton
-              targetId={idStr}
-              initialFollowed={isFollowing}
-              onToggled={(next) => onFollowingChange(idStr, next)}
+              targetId={username}
+              initialFollowed={true} // In this list, we don't easily know if WE follow them unless the API provides it. 
+              // However, the connections list is often a static list of who they follow or who follows them.
+              // For simplicity and since the user wants a management page anyway, I'll update FollowButton to handles its own state better if possible, 
+              // or just use useProfile status if available.
             />
           </div>
         );

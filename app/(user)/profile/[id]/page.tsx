@@ -45,190 +45,57 @@ type UserLike = {
   username: string;
 };
 
-type RemoteProfile = {
-  id: number | string;
-  profile_image: string | null;
-  user_email: string;
-  username: string;
-  first_name: string;
-  last_name: string;
-  bio: string | null;
-  followers: UserLike[];
-  following: UserLike[];
-};
+import { useProfile } from "@/hooks/features/useProfile";
 
 export default function ProfilePage() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
   const { user: currentUser } = useUser();
-  const [profile, setProfile] = useState<RemoteProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const username = id === "me" ? currentUser?.username : id;
+  
+  const { data: profile, isLoading: loading } = useProfile(username || null);
+  
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingOpen, setFollowingOpen] = useState(false);
 
-  const [myFollowingIds, setMyFollowingIds] = useState<Set<number | string>>(
-    new Set()
-  );
-
   const isOwnProfile = useMemo(() => {
-    if (!currentUser?.profile?.id) return id === "me";
-    return id === "me" || String(currentUser.profile.id) === String(id);
+    if (!currentUser?.username) return id === "me";
+    return id === "me" || currentUser.username === id;
   }, [id, currentUser]);
 
-  // --- Load viewed profile ---
-  useEffect(() => {
-    async function loadProfile() {
-      try {
-        setLoading(true);
-        if (!id || id === "me") {
-          if (currentUser) {
-            setProfile({
-              id: String(currentUser.profile.id),
-              profile_image: currentUser?.profile?.profile_image || null,
-              user_email:
-                currentUser?.email || currentUser?.profile?.user_email || "",
-              username: currentUser?.username || "",
-              first_name: currentUser?.first_name || "",
-              last_name: currentUser?.last_name || "",
-              bio: currentUser?.profile?.bio || null,
-              followers: [],
-              following: [],
-            });
-          } else {
-            setProfile(null);
-          }
-          return;
-        }
-
-        const res = await fetch(
-          `/api/accounts/profile/${encodeURIComponent(String(id))}`,
-          { credentials: "include", cache: "no-store" }
-        );
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data: RemoteProfile = await res.json();
-        setProfile(data);
-      } catch (err) {
-        console.error("Error loading profile:", err);
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProfile();
-  }, [id, currentUser]);
-
-  // --- Load my following set ---
-  useEffect(() => {
-    let active = true;
-    async function loadMyFollowing() {
-      try {
-        const res = await fetch("/api/accounts/me/following", {
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!res.ok) throw new Error();
-        const arr = (await res.json()) as UserLike[];
-        if (active) {
-          const set = new Set<number | string>();
-          for (const m of arr) {
-            const pid = m.profile_id ?? m.id;
-            if (pid) {
-              set.add(String(pid));
-              set.add(Number(pid));
-            }
-          }
-          setMyFollowingIds(set);
-        }
-      } catch {
-        if (active) setMyFollowingIds(new Set());
-      }
-    }
-    loadMyFollowing();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  // --- Am I following this profile? ---
+  // Derived state for am I following this profile?
   const followedByMe = useMemo(() => {
-    if (!profile) return false;
-    return (
-      myFollowingIds.has(String(profile.id)) ||
-      myFollowingIds.has(Number(profile.id))
-    );
-  }, [profile, myFollowingIds]);
+    if (!profile || !currentUser) return false;
+    return profile.followers.some(f => f.username === currentUser.username);
+  }, [profile, currentUser]);
 
-  // --- When follow/unfollow main profile ---
-  function onToggleViewed(next: boolean) {
-    if (!profile) return;
-    setMyFollowingIds((prev) => {
-      const copy = new Set(prev);
-      if (next) {
-        copy.add(String(profile.id));
-        copy.add(Number(profile.id));
-      } else {
-        copy.delete(String(profile.id));
-        copy.delete(Number(profile.id));
-      }
-      return copy;
-    });
-
-    // update followers list
-    if (currentUser?.profile?.id) {
-      const myIdStr = String(currentUser.profile.id);
-      const meEntry: UserLike = {
-        profile_id: myIdStr,
-        username: currentUser.username || currentUser.first_name || "me",
-      };
-      setProfile((p) => {
-        if (!p) return p;
-        const exists = p.followers.some(
-          (f) => String(f.profile_id ?? f.id) === myIdStr
-        );
-        if (next && !exists)
-          return { ...p, followers: [...(p.followers || []), meEntry] };
-        if (!next && exists)
-          return {
-            ...p,
-            followers: p.followers.filter(
-              (f) => String(f.profile_id ?? f.id) !== myIdStr
-            ),
-          };
-        return p;
-      });
-    }
-  }
-
-  // --- When follow/unfollow from list ---
-  function onFollowingChange(targetId: number | string, nowFollowing: boolean) {
-    setMyFollowingIds((prev) => {
-      const copy = new Set(prev);
-      if (nowFollowing) {
-        copy.add(String(targetId));
-        copy.add(Number(targetId));
-      } else {
-        copy.delete(String(targetId));
-        copy.delete(Number(targetId));
-      }
-      return copy;
-    });
-    if (isOwnProfile && profile && !nowFollowing) {
-      setProfile({
-        ...profile,
-        following: (profile.following || []).filter(
-          (f) => String(f.profile_id ?? f.id) !== String(targetId)
-        ),
-      });
-    }
-  }
-
-  if (loading || !profile) {
+  if (loading || (!profile && id !== "me" && !currentUser)) {
     return (
       <div className='flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
         <div className='text-gray-500'>Loading...</div>
       </div>
     );
+  }
+
+  const displayProfile = id === "me" && currentUser ? {
+    ...profile,
+    profile_image: currentUser?.profile?.profile_image || null,
+    user_email: currentUser?.email || currentUser?.profile?.user_email || "",
+    username: currentUser?.username || "",
+    first_name: currentUser?.first_name || "",
+    last_name: currentUser?.last_name || "",
+    bio: currentUser?.profile?.bio || null,
+    followers: profile?.followers || [],
+    following: profile?.following || [],
+  } : profile;
+
+  if (!displayProfile) {
+      return (
+        <div className='flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen'>
+          <div className='text-gray-500'>Profile not found</div>
+        </div>
+      );
   }
 
   return (
@@ -252,16 +119,15 @@ export default function ProfilePage() {
               <h1 className='font-bold text-gray-900 text-3xl'>
                 {isOwnProfile
                   ? "My Profile"
-                  : `${profile.first_name} ${profile.last_name}`}
+                  : `${displayProfile.first_name} ${displayProfile.last_name}`}
               </h1>
             </div>
 
             {!isOwnProfile && (
               <FollowButton
-                targetId={profile.username}
-                targetImage={profile.profile_image}
+                targetId={displayProfile.username}
+                targetImage={displayProfile.profile_image}
                 initialFollowed={followedByMe}
-                onToggled={onToggleViewed}
                 className={
                   followedByMe
                     ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
@@ -287,28 +153,28 @@ export default function ProfilePage() {
                   <Avatar className='mx-auto mb-4 border-4 border-white/20 w-24 h-24'>
                     <AvatarImage
                       src={
-                        profile?.profile_image ||
+                        displayProfile?.profile_image ||
                         "/placeholder.svg?height=96&width=96&query=profile%20avatar"
                       }
-                      alt={`${profile?.first_name} ${profile?.last_name}`}
+                      alt={`${displayProfile?.first_name} ${displayProfile?.last_name}`}
                     />
                     <AvatarFallback className='bg-white/20 font-bold text-white text-2xl'>
-                      {(profile?.first_name?.[0] || "").toUpperCase()}
-                      {(profile?.last_name?.[0] || "").toUpperCase()}
+                      {(displayProfile?.first_name?.[0] || "").toUpperCase()}
+                      {(displayProfile?.last_name?.[0] || "").toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <h2 className='mb-2 font-bold text-2xl'>
-                    {profile?.first_name} {profile?.last_name}
+                    {displayProfile?.first_name} {displayProfile?.last_name}
                   </h2>
                   <p className='text-emerald-100 text-sm leading-relaxed'>
-                    {profile?.bio || ""}
+                    {displayProfile?.bio || ""}
                   </p>
                 </CardHeader>
                 <CardContent className='p-6'>
                   <div className='space-y-4'>
                     <div className='flex items-center gap-3 text-gray-600'>
                       <Mail className='w-4 h-4' />
-                      <span className='text-sm'>{profile?.user_email}</span>
+                      <span className='text-sm'>{displayProfile?.user_email}</span>
                     </div>
                     {isOwnProfile && currentUser?.profile?.joined_at && (
                       <div className='flex items-center gap-3 text-gray-600'>
@@ -377,7 +243,7 @@ export default function ProfilePage() {
                         onClick={() => setFollowersOpen(true)}
                       >
                         <Users className='w-4 h-4' />
-                        Followers ({profile.followers?.length ?? 0})
+                        Followers ({displayProfile.followers?.length ?? 0})
                       </Button>
                       <Button
                         variant='outline'
@@ -385,7 +251,7 @@ export default function ProfilePage() {
                         onClick={() => setFollowingOpen(true)}
                       >
                         <UserCircle2 className='w-4 h-4' />
-                        Following ({profile.following?.length ?? 0})
+                        Following ({displayProfile.following?.length ?? 0})
                       </Button>
                     </div>
                   </div>
@@ -393,16 +259,12 @@ export default function ProfilePage() {
                 <CardContent className='space-y-6'>
                   <ConnectionsList
                     title='Followers'
-                    items={profile.followers ?? []}
-                    myFollowingIds={myFollowingIds}
-                    onFollowingChange={onFollowingChange}
+                    items={displayProfile.followers ?? []}
                   />
                   <Separator />
                   <ConnectionsList
                     title='Following'
-                    items={profile.following ?? []}
-                    myFollowingIds={myFollowingIds}
-                    onFollowingChange={onFollowingChange}
+                    items={displayProfile.following ?? []}
                   />
                 </CardContent>
               </Card>
@@ -415,13 +277,11 @@ export default function ProfilePage() {
           <DialogContent className='sm:max-w-[520px]'>
             <DialogHeader>
               <DialogTitle>
-                Followers ({profile.followers?.length ?? 0})
+                Followers ({displayProfile.followers?.length ?? 0})
               </DialogTitle>
             </DialogHeader>
             <ConnectionsList
-              items={profile.followers ?? []}
-              myFollowingIds={myFollowingIds}
-              onFollowingChange={onFollowingChange}
+              items={displayProfile.followers ?? []}
             />
           </DialogContent>
         </Dialog>
@@ -431,13 +291,11 @@ export default function ProfilePage() {
           <DialogContent className='sm:max-w-[520px]'>
             <DialogHeader>
               <DialogTitle>
-                Following ({profile.following?.length ?? 0})
+                Following ({displayProfile.following?.length ?? 0})
               </DialogTitle>
             </DialogHeader>
             <ConnectionsList
-              items={profile.following ?? []}
-              myFollowingIds={myFollowingIds}
-              onFollowingChange={onFollowingChange}
+              items={displayProfile.following ?? []}
             />
           </DialogContent>
         </Dialog>

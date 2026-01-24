@@ -4,9 +4,14 @@ import api from "@/lib/axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-export async function POST(req: NextRequest, ctx: { params: { id: string } }) {
+export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = ctx.params;
+    const { id } = await ctx.params;
+
+    if (!id || id === "null") {
+        return NextResponse.json({ error: "Invalid profile ID" }, { status: 400 });
+    }
+
     const body = await req.json().catch(() => ({}));
 
     // api will handle access token + refresh automatically

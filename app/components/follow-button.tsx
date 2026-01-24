@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserMinus, UserPlus } from "lucide-react";
+import { UserMinus, UserPlus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useFollowMutation, useUnfollowMutation } from "@/hooks/features/useProfile";
 // import { useToast } from "@/hooks/use-toast"
 
 type FollowButtonProps = {
@@ -22,63 +23,29 @@ export function FollowButton({
   className,
 }: FollowButtonProps) {
   const [following, setFollowing] = useState<boolean>(!!initialFollowed);
-  const [busy, setBusy] = useState(false);
-  const router = useRouter();
-  // const { toast } = useToast()
+  const followMutation = useFollowMutation();
+  const unfollowMutation = useUnfollowMutation();
+
+  const busy = followMutation.isPending || unfollowMutation.isPending;
 
   async function toggle() {
     if (targetId === undefined || targetId === null || targetId === "") {
       console.error("FollowButton: missing targetId");
       return;
     }
-    setBusy(true);
-    const next = !following;
+    
+    const username = String(targetId);
+    
     try {
-      const endpoint = next ? "follow" : "unfollow";
-      const res = await fetch(
-        `/api/accounts/profile/${encodeURIComponent(String(targetId))}/${endpoint}`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          // Ensure a valid absolute URL is always sent
-          body: JSON.stringify({
-            profile_image:
-              typeof targetImage === "string" && targetImage.startsWith("http")
-                ? targetImage
-                : "https://placehold.co/96x96/png",
-          }),
-        }
-      );
-      const text = await res.text();
-      let data: any = null;
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        // leave data as null if non-JSON
+      if (following) {
+        await unfollowMutation.mutateAsync({ username, profile_image: targetImage });
+      } else {
+        await followMutation.mutateAsync({ username, profile_image: targetImage });
       }
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push("/login");
-          return;
-        }
-        const detail = data?.detail || text || "Unable to update follow state";
-        throw new Error(detail);
-      }
-      setFollowing(next);
-      onToggled?.(next);
-      // toast({
-      //   title: next ? "Followed" : "Unfollowed",
-      //   description: data?.username ? `@${data.username}` : undefined,
-      // })
-    } catch {
-      // toast({
-      //   variant: "destructive",
-      //   title: "Action failed",
-      //   description: e?.message || "Please try again",
-      // })
-    } finally {
-      setBusy(false);
+      setFollowing(!following);
+      onToggled?.(!following);
+    } catch (error) {
+       console.error("Follow action failed:", error);
     }
   }
 
@@ -94,7 +61,7 @@ export function FollowButton({
       }
     >
       {busy ? (
-        <span>...</span>
+        <Loader2 className="w-4 h-4 animate-spin" />
       ) : following ? (
         <>
           <UserMinus className='mr-2 w-4 h-4' /> Unfollow

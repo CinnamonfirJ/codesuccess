@@ -5,6 +5,7 @@ import {
   BookOpen,
   Heart,
   GraduationCap,
+  Users,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -259,6 +260,19 @@ export default function LeftSidebar({ courses, onNavigate }: LeftSidebarProps) {
                 </a>
               </div>
             </ExpandableSection>
+
+            {/* Find People */}
+            <Link
+              href='/follows'
+              className='group flex items-center gap-3 hover:bg-emerald-50 p-4 transition-colors'
+            >
+              <div className='flex justify-center items-center bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg w-8 h-8'>
+                <Users className='w-4 h-4 text-white' />
+              </div>
+              <span className='font-medium text-gray-700 group-hover:text-emerald-600'>
+                Find People
+              </span>
+            </Link>
 
             {/* Reading Lists */}
             <ExpandableSection

@@ -6,7 +6,13 @@ import api from "@/lib/axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-export async function GET(_req: Request, ctx: { params: { id: string } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+
+  if (!id || id === "null") {
+    return NextResponse.json({ error: "Invalid profile ID" }, { status: 400 });
+  }
+
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
   const refresh = cookieStore.get("refresh")?.value;
@@ -16,7 +22,7 @@ export async function GET(_req: Request, ctx: { params: { id: string } }) {
   }
 
   async function fetchProfile(token: string) {
-    return api.get(`${API_BASE_URL}/accounts/profile/${ctx.params.id}/`, {
+    return api.get(`${API_BASE_URL}/accounts/profile/${encodeURIComponent(id)}/`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

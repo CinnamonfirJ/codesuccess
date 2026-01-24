@@ -218,7 +218,7 @@ export default function PostCard({ post }: PostCardProps) {
         <div className='flex justify-between items-center'>
           <div className='flex items-center gap-3'>
             <Link
-              href={`/profile/${post.author}`}
+              href={`/profile/${post.author_username || post.author}`}
               onClick={(e) => e.stopPropagation()}
             >
               <Avatar className='border-2 border-gray-200'>
@@ -235,7 +235,7 @@ export default function PostCard({ post }: PostCardProps) {
             </Link>
             <div>
               <Link
-                href={`/profile/${post.author}`}
+                href={`/profile/${post.author_username || post.author}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className='flex items-center gap-2'>
@@ -394,7 +394,7 @@ export default function PostCard({ post }: PostCardProps) {
           <div className='bg-gray-50 my-2 py-2 pl-4 border-gray-200 border-l-4 rounded-md'>
             <div className='flex items-center gap-3'>
               <Link
-                href={`/profile/${post?.parent_post_data?.author}`}
+                href={`/profile/${post?.parent_post_data?.author_username || post?.parent_post_data?.author}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Avatar className='border-2 border-gray-200'>
@@ -416,7 +416,7 @@ export default function PostCard({ post }: PostCardProps) {
               </Link>
               <div>
                 <Link
-                  href={`/profile/${post?.parent_post_data?.author}`}
+                  href={`/profile/${post?.parent_post_data?.author_username || post?.parent_post_data?.author}`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className='flex items-center gap-2'>
