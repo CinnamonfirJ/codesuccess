@@ -41,6 +41,7 @@ export type PostType = {
   shares?: number;
   timestamp?: string;
   is_retweet?: boolean;
+  retweeted_by_user?: boolean;
   is_qoute_retweet?: boolean;
   quote_text?: string;
   scheduled_at?: string;

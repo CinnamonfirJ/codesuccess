@@ -109,7 +109,7 @@ export default function PostCard({ post }: PostCardProps) {
   // Optimistic UI state
   const [isLiked, setIsLiked] = useState(post.liked_by_user);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
-  const [isRetweeted, setIsRetweeted] = useState(post.is_retweet); // This might be retweeted_by_user
+  const [isRetweeted, setIsRetweeted] = useState(post.retweeted_by_user); // This might be retweeted_by_user
   const [retweetCount, setRetweetCount] = useState(
     parseInt(post.retweet_count || "0")
   );
@@ -503,7 +503,7 @@ export default function PostCard({ post }: PostCardProps) {
               variant='ghost'
               size='sm'
               className={`flex-1 gap-2 transition-colors ${
-                post.is_retweet // Note: server naming might need unifying, using prop for now
+                post.retweeted_by_user 
                   ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
                   : "text-gray-600 hover:text-emerald-500 hover:bg-emerald-50"
               }`}
@@ -519,7 +519,7 @@ export default function PostCard({ post }: PostCardProps) {
                 <div className='flex items-center gap-1'>
                   {post?.retweet_count || "0"}
                   <Repeat
-                    className={`w-4 h-4 ${post.is_retweet ? "fill-current text-emerald-500" : ""} `}
+                    className={`w-4 h-4 ${post.retweeted_by_user ? "fill-current text-emerald-500" : ""} `}
                   />
                 </div>
               )}
