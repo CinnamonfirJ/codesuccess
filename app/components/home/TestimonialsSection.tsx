@@ -89,7 +89,7 @@ export const TestimonialsSection = () => {
                   </p>
                   <div className='flex items-center'>
                     <div className='flex justify-center items-center bg-gradient-to-r from-emerald-400 to-blue-400 mr-4 rounded-full w-12 h-12 font-bold text-white text-lg'>
-                      {testimonial.name.charAt(0)}
+                      {testimonial.name?.charAt(0) || "?"}
                     </div>
                     <div>
                       <h4 className='font-semibold text-gray-900'>

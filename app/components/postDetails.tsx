@@ -211,9 +211,7 @@ export default function PostDetailsPage() {
                       alt={post.author_full_name}
                     />
                     <AvatarFallback className='bg-gradient-to-br from-emerald-50 to-emerald-100 font-bold text-emerald-700 text-lg'>
-                      {post.author_full_name
-                        ? post.author_full_name.charAt(0).toUpperCase()
-                        : "L"}
+                      {post.author_full_name?.charAt(0).toUpperCase() || "L"}
                     </AvatarFallback>
                   </Avatar>
                 </Link>
@@ -638,7 +636,7 @@ export default function PostDetailsPage() {
                 <Avatar className='w-6 h-6'>
                   <AvatarImage src={post.author_image || "/placeholder.svg"} />
                   <AvatarFallback>
-                    {post.author_full_name.charAt(0).toUpperCase()}
+                    {post.author_full_name?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className='flex items-center'>

@@ -644,7 +644,7 @@ export default function PostCard({ post }: PostCardProps) {
                 <Avatar className='w-6 h-6'>
                   <AvatarImage src={post.author_image || "/placeholder.svg"} />
                   <AvatarFallback>
-                    {post.author_full_name.charAt(0).toUpperCase()}
+                    {post.author_full_name?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className='flex items-center'>

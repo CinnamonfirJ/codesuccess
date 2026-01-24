@@ -224,7 +224,7 @@ export default function SettingsPage() {
                           src={
                             avatarUrl ||
                             user?.profile?.profile_image ||
-                            `https://placehold.co/96x96/E0F2F7/000?text=${firstName.charAt(0)}${lastName.charAt(0)}`
+                            `https://placehold.co/96x96/E0F2F7/000?text=${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`
                           }
                           alt='Avatar'
                           width={96}

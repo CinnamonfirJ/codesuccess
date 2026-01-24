@@ -71,7 +71,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           alt={comment.author_username}
         />
         <AvatarFallback className='bg-blue-50 text-blue-700 text-xs'>
-          {comment.author_username.charAt(0).toUpperCase()}
+          {comment.author_username?.charAt(0).toUpperCase() || "U"}
         </AvatarFallback>
       </Avatar>
       <div className='flex-1 bg-gray-50 p-3 border border-gray-100 rounded-lg'>
