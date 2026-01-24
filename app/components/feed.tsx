@@ -73,7 +73,7 @@ export default function Feed() {
   }, [handleObserver]);
 
   // Flatten the pages into a single array of posts
-  const posts = data?.pages.flatMap((page) => page) || [];
+  const posts = data?.pages.flatMap((page) => page.results) || [];
 
   return (
     <div className='space-y-8 mx-auto py-8 max-w-2xl'>

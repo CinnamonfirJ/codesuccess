@@ -4,12 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import api from "@/lib/axios";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const cursor = searchParams.get("cursor");
+  
   const cookieStore = await cookies();
   const access = cookieStore.get("access")?.value;
 
   try {
     const res = await api.get("/posts/", {
+      params: {
+        cursor: cursor || undefined,
+      },
       headers: {
         Authorization: `Bearer ${access}`,
       },
